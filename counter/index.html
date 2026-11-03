@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>코수 세기 | 도트뜨개</title>
+<meta name="description" content="사슬코와 한 단의 코수를 버튼 하나로 세는 무료 코수 카운터. 목표 코수까지 남은 코를 막대로 보여주고, 숫자는 자동으로 저장돼요.">
+<link rel="canonical" href="https://crochetalpha.com/counter/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="도트뜨개 (Crochet Alpha)">
+<meta property="og:title" content="코수 세기 | 도트뜨개">
+<meta property="og:description" content="사슬코와 한 단의 코수를 버튼 하나로 세는 무료 코수 카운터. 목표 코수까지 남은 코를 막대로 보여주고, 숫자는 자동으로 저장돼요.">
+<meta property="og:url" content="https://crochetalpha.com/counter/">
+<meta property="og:image" content="https://crochetalpha.com/assets/og.png">
+<meta name="theme-color" content="#1F5C52">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/site.css">
+<script>
+  // 저장된 화면 모드(밝게/어둡게)를 그리기 전에 적용 (도구 페이지와 같은 설정을 공유)
+  try{ var tp = localStorage.getItem('crochet-ui-theme'); if(tp === 'dark' || tp === 'light') document.documentElement.setAttribute('data-theme', tp); }catch(e){}
+</script>
+<style>
+  .ct{ max-width:520px; margin:0 auto; }
+  .ct-card{ padding:24px 18px 22px; text-align:center; }
+  .ct-label{ border:none; background:transparent; text-align:center; font:inherit; font-size:15px; font-weight:700;
+             color:var(--ink-soft); width:100%; padding:4px; border-radius:8px; }
+  .ct-label:focus{ outline:2px solid var(--teal); background:var(--paper); }
+  .ct-num{ font-family:var(--mono); font-weight:700; font-size:clamp(84px, 26vw, 132px); line-height:1.05;
+           letter-spacing:-0.04em; font-variant-numeric:tabular-nums; transition:transform 110ms ease; }
+  .ct-num.bump{ transform:scale(1.05); }
+  .ct-unit{ color:var(--ink-soft); font-weight:600; margin-top:-4px; }
+  .ct-prog{ max-width:320px; margin:16px auto 0; display:none; }
+  .ct-prog.show{ display:block; }
+  .ct-bar{ height:8px; background:var(--paper-2); border-radius:99px; overflow:hidden; }
+  .ct-bar i{ display:block; height:100%; width:0; background:var(--teal); border-radius:99px; transition:width 160ms ease; }
+  .ct-prog.hit .ct-bar i{ background:var(--mustard); }
+  .ct-prog-text{ display:flex; justify-content:space-between; font-family:var(--mono); font-size:13px; color:var(--ink-soft); margin-top:6px; }
+  .ct-pill{ background:var(--teal); color:var(--paper); border-radius:99px; padding:1px 10px; font-family:var(--sans); font-weight:700; font-size:12.5px; }
+  .ct-plus{ display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+  .ct-plus button{ min-height:100px; border:none; border-radius:20px; background:var(--ink); color:var(--paper);
+                   font-size:30px; font-weight:800; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center;
+                   touch-action:manipulation; transition:transform 80ms ease; }
+  .ct-plus button small{ font-size:13px; font-weight:600; opacity:0.8; }
+  .ct-plus button:active{ transform:scale(0.97); }
+  .ct-plus .big10{ background:var(--teal); }
+  .ct-minus{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:10px; }
+  .ct-minus button{ height:50px; border-radius:14px; border:1px solid var(--line-strong); background:var(--card); color:var(--ink);
+                    font-family:var(--mono); font-size:16px; font-weight:700; cursor:pointer; touch-action:manipulation; }
+  .ct-minus button:active{ background:var(--paper-2); }
+  .ct-minus .reset{ font-family:var(--sans); color:var(--berry); border-color:rgba(156,56,72,0.35); }
+  .ct-set{ margin-top:16px; padding:4px 18px; }
+  .ct-row{ display:flex; align-items:center; gap:10px; min-height:54px; }
+  .ct-row + .ct-row{ border-top:1px solid var(--line); }
+  .ct-row label{ flex:1; font-weight:700; font-size:14.5px; }
+  .ct-row input{ width:72px; height:38px; text-align:center; border:1px solid var(--line-strong); border-radius:10px;
+                 background:var(--paper); color:var(--ink); font-family:var(--mono); font-size:16px; font-weight:700; }
+  .ct-keys{ text-align:center; margin-top:12px; }
+  .ct-dialog{ position:fixed; inset:0; background:rgba(0,0,0,0.42); display:none; align-items:center; justify-content:center; padding:16px; z-index:50; }
+  .ct-dialog.show{ display:flex; }
+  .ct-dialog .box{ background:var(--card); border-radius:16px; padding:20px; max-width:320px; width:100%; box-shadow:var(--shadow); }
+  .ct-dialog .box p{ margin:0 0 16px; font-weight:700; }
+  .ct-dialog .row{ display:flex; gap:8px; }
+  .ct-dialog .row .btn{ flex:1; justify-content:center; }
+  .ct-dialog .danger{ background:var(--berry); }
+</style>
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap head-row">
+    <a class="logo" href="../"><span class="logo-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span><span class="logo-text">도트뜨개<small>Crochet Alpha</small></span></a>
+    <nav class="nav" aria-label="주 메뉴"><a href="../">홈</a><a href="../pattern/">도안 만들기</a><a href="../counter/" aria-current="page">코수 세기</a><a href="../examples/">예시 도안</a><a href="../guides/">가이드</a></nav>
+    <details class="nav-mobile">
+      <summary aria-label="메뉴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+      <div class="nav-drop"><a href="../">홈</a><a href="../pattern/">도안 만들기</a><a href="../counter/" aria-current="page">코수 세기</a><a href="../examples/">예시 도안</a><a href="../guides/">가이드</a></div>
+    </details>
+  </div>
+</header>
+<main class="site-main">
+<div class="wrap">
+  <div class="ct">
+    <h1 style="text-align:center;font-size:26px;">코수 세기</h1>
+    <p class="lead" style="text-align:center;font-size:15px;">사슬코나 한 단의 코를 셀 때 버튼만 누르면 돼요. 숫자는 이 기기에 자동으로 저장돼요.</p>
+
+    <div class="card ct-card">
+      <input class="ct-label" id="ctLabel" value="사슬코" maxlength="20" aria-label="세는 것 이름 (눌러서 바꾸기)" title="눌러서 이름을 바꿀 수 있어요">
+      <div class="ct-num" id="ctNum" aria-live="polite">0</div>
+      <div class="ct-unit">코</div>
+      <div class="ct-prog" id="ctProg">
+        <div class="ct-bar"><i id="ctBar"></i></div>
+        <div class="ct-prog-text"><span id="ctLeft"></span><span class="ct-pill" id="ctHit" hidden>목표 달성!</span></div>
+      </div>
+    </div>
+
+    <div class="ct-plus">
+      <button id="ctPlus1"><span id="ctPlus1Label">+1</span><small>코</small></button>
+      <button id="ctPlus2" class="big10"><span id="ctPlus2Label">+10</span><small>코</small></button>
+    </div>
+    <div class="ct-minus">
+      <button id="ctMinus1">−1</button>
+      <button id="ctMinus2">−10</button>
+      <button id="ctReset" class="reset">처음부터</button>
+    </div>
+
+    <div class="card ct-set">
+      <div class="ct-row"><label for="ctTarget">목표 코수</label><input id="ctTarget" type="number" min="0" inputmode="numeric" placeholder="—"><span>코</span></div>
+      <div class="ct-row"><label for="ctStep1">버튼 단위</label><input id="ctStep1" type="number" min="1" value="1" inputmode="numeric"><span>/</span><input id="ctStep2" type="number" min="1" value="10" inputmode="numeric"></div>
+    </div>
+    <p class="muted ct-keys">키보드: 스페이스·↑ 더하기 · ↓ 빼기</p>
+  </div>
+
+  <div class="narrow" style="margin:48px auto 0;">
+    <h2>코수 세기, 이렇게 쓰면 편해요</h2>
+    <p>사슬뜨기로 시작코를 만들 때는 손이 바빠서 숫자를 놓치기 쉬워요. 한 코를 뜰 때마다 큰 <b>+1</b> 버튼을 누르고, 10코씩 끊어 셀 때는 <b>+10</b>을 쓰면 돼요. 목표 코수를 적어두면 남은 코수가 막대로 보이고, 다 채우면 알려줘요.</p>
+    <h3>그래프 도안과 함께 쓰기</h3>
+    <p>배색 도안은 칸 하나가 한 코라서, 도안의 가로 칸 수가 곧 시작코 수예요. 예를 들어 <a href="../pattern/">도안 만들기</a>에서 40코 × 30단 도안을 만들었다면 목표 코수에 40을 적고 사슬코를 시작하면 돼요. 도안 읽는 법은 <a href="../guides/reading-charts/">그래프 도안 읽는 법</a>에 정리해두었어요.</p>
+    <h3>버튼 단위 바꾸기</h3>
+    <p>무늬 반복이 6코마다 돌아온다면 버튼 단위를 1과 6으로 바꿔보세요. 큰 버튼 하나로 무늬 한 번씩 셀 수 있어요.</p>
+  </div>
+</div>
+
+<div class="ct-dialog" id="ctDialog" role="dialog" aria-modal="true">
+  <div class="box"><p>코수를 0으로 되돌릴까요?</p>
+    <div class="row"><button class="btn ghost" id="ctNo">취소</button><button class="btn danger" id="ctYes">처음부터</button></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const KEY = 'crochet-counter-v1';
+  const $ = id => document.getElementById(id);
+  let s = { count: 0, label: '사슬코', target: '', step1: 1, step2: 10 };
+  try{ Object.assign(s, JSON.parse(localStorage.getItem(KEY) || '{}')); }catch(e){}
+  const save = () => { try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} };
+  const num = (v, d) => { const n = parseInt(v, 10); return isNaN(n) || n < 1 ? d : Math.min(n, 9999); };
+
+  $('ctLabel').value = s.label; $('ctTarget').value = s.target; $('ctStep1').value = s.step1; $('ctStep2').value = s.step2;
+
+  function render(bump){
+    $('ctNum').textContent = s.count;
+    if(bump){ const n = $('ctNum'); n.classList.add('bump'); setTimeout(() => n.classList.remove('bump'), 110); }
+    $('ctPlus1Label').textContent = '+' + s.step1; $('ctPlus2Label').textContent = '+' + s.step2;
+    $('ctMinus1').textContent = '−' + s.step1;  $('ctMinus2').textContent = '−' + s.step2;
+    const tg = parseInt(s.target, 10), pr = $('ctProg');
+    if(tg > 0){
+      const hit = s.count >= tg;
+      pr.classList.add('show'); pr.classList.toggle('hit', hit);
+      $('ctBar').style.width = Math.min(100, s.count / tg * 100) + '%';
+      $('ctLeft').textContent = hit ? `${s.count} / ${tg}코` : `${s.count} / ${tg}코 · ${tg - s.count}코 남음`;
+      $('ctHit').hidden = !hit;
+    } else pr.classList.remove('show');
+    save();
+  }
+  const add = d => { s.count = Math.max(0, s.count + d); render(true); };
+  $('ctPlus1').onclick = () => add(s.step1);
+  $('ctPlus2').onclick = () => add(s.step2);
+  $('ctMinus1').onclick = () => add(-s.step1);
+  $('ctMinus2').onclick = () => add(-s.step2);
+  $('ctReset').onclick = () => { if(s.count) $('ctDialog').classList.add('show'); };
+  $('ctNo').onclick = () => $('ctDialog').classList.remove('show');
+  $('ctYes').onclick = () => { s.count = 0; $('ctDialog').classList.remove('show'); render(true); };
+  $('ctDialog').onclick = e => { if(e.target === $('ctDialog')) $('ctDialog').classList.remove('show'); };
+  $('ctLabel').oninput = e => { s.label = e.target.value; save(); };
+  $('ctTarget').oninput = e => { s.target = e.target.value; render(); };
+  $('ctStep1').oninput = e => { s.step1 = num(e.target.value, 1); render(); };
+  $('ctStep2').oninput = e => { s.step2 = num(e.target.value, 10); render(); };
+  document.addEventListener('keydown', e => {
+    const tg = e.target.tagName;
+    if(tg === 'INPUT' || tg === 'TEXTAREA') return;
+    if(e.code === 'Space' || e.code === 'ArrowUp'){ e.preventDefault(); add(s.step1); }
+    else if(e.code === 'ArrowDown'){ e.preventDefault(); add(-s.step1); }
+  });
+  render();
+})();
+</script>
+</main>
+<footer class="site-foot">
+  <div class="wrap foot-row">
+    <div class="foot-brand"><span class="logo-mark sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span>도트뜨개 · Crochet Alpha<span class="foot-tag">코바늘 배색 도안을 무료로 만드는 도구</span></div>
+    <nav class="foot-links"><a href="../about/">소개 · 문의</a><a href="../privacy/">개인정보처리방침</a><a href="../credits/">폰트 출처</a></nav>
+  </div>
+  <div class="wrap foot-copy">© 2026 도트뜨개. 도안은 만든 사람의 것이에요.</div>
+</footer>
+</body>
+</html>
