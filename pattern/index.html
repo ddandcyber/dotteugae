@@ -1427,9 +1427,17 @@
     updateUndoButtons();
   }
   function pushUndo(){ recordUndo({ rows, cols, data: gridData.slice() }); }
+  // 배경색까지 바꾸는 작업(도안 열기)의 기록에만 bg가 들어 있음.
+  // 그 기록을 되돌리거나 다시할 때는 반대쪽 기록에도 지금 배경색을 담아 둠.
+  function currentSnap(like){
+    const s = { rows, cols, data: gridData.slice() };
+    if(like && like.bg) s.bg = bgColor;
+    return s;
+  }
   function restoreSnap(snap){
     rows = snap.rows; cols = snap.cols; gridData = snap.data;
     rowsInput.value = rows; colsInput.value = cols;
+    if(snap.bg && snap.bg !== bgColor){ bgColor = snap.bg; buildPalette(); }
     sizeCanvas();
     drawGrid();
     saveState();
@@ -1437,15 +1445,17 @@
   function undo(){
     if(stamp){ cancelStamp(); updateUndoButtons(); return; } // 옮기던 글자가 있으면 먼저 취소
     if(undoStack.length === 0) return;
-    redoStack.push({ rows, cols, data: gridData.slice() });
-    restoreSnap(undoStack.pop());
+    const snap = undoStack.pop();
+    redoStack.push(currentSnap(snap));
+    restoreSnap(snap);
     updateUndoButtons();
   }
   function redo(){
     if(stamp || redoStack.length === 0) return;
-    undoStack.push({ rows, cols, data: gridData.slice() });
+    const snap = redoStack.pop();
+    undoStack.push(currentSnap(snap));
     if(undoStack.length > MAX_UNDO) undoStack.shift();
-    restoreSnap(redoStack.pop());
+    restoreSnap(snap);
     updateUndoButtons();
   }
   function updateUndoButtons(){
@@ -3402,7 +3412,7 @@
   }
   function applyPattern(p, msg){
     if(stamp) cancelStamp();
-    pushUndo(); // 열기 전 상태로 되돌릴 수 있게
+    recordUndo({ rows, cols, data: gridData.slice(), bg: bgColor }); // 열기 전 상태(배경색 포함)로 되돌릴 수 있게
     rows = p.rows; cols = p.cols; gridData = p.data;
     rowsInput.value = rows; colsInput.value = cols;
     if(p.palette && p.palette.length){
