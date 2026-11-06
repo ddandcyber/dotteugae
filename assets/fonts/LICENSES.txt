@@ -11,9 +11,14 @@ The fonts in this folder belong to the copyright holders below and are distribut
 - Mulmaru.woff2 — Copyright (c) 2025 Mushsooni, Reserved Font Name "물마루", "Mulmaru"
 - Mona12.woff2, Mona10x12.woff2 — Copyright (c) 2025 Monad ABXY, Reserved Font Name "Mona"
 - DepartureMono.woff2 — Copyright (c) 2022-2024 Helena Zhang
+- NanumPen.woff2 (나눔손글씨 펜 / Nanum Pen) — Copyright (c) 2010, NHN Corporation (http://www.nhncorp.com), with Reserved Font Name Nanum, Naver Nanum, NanumGothic, Naver NanumGothic, NanumMyeongjo, Naver NanumMyeongjo, NanumBrush, Naver NanumBrush, NanumPen, Naver NanumPen.
+  원본 NanumPenScript-Regular.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
 
 [MIT License]
-- DosGothic, DosMyungjo, DosPilgi, DosIyagi, DOSSaemmul (.woff2) — Copyright (c) 2016-2022 Damheo Lee
+- DosGothic, DosMyungjo, DosPilgi, DosIyagi, DOSSaemmul (.woff2) — Copyright (c) 2016-2022 Damheo Lee (이담허) (leedheo@gmail.com), with Reserved Font Name DOSMyungjo, DOSGothic, DOSSaemmul, Sam3KRFont, MiraeroNormal, and DOSIyagi, its OTF and BDF suffix name. (e.g. DOSMyungjo OTF)
+- Miraero.woff2 (미래로글꼴 / MiraeroNormal, leedheo 제작) — Copyright (c) 2016-2022 Damheo Lee (이담허) (leedheo@gmail.com), with Reserved Font Name DOSMyungjo, DOSGothic, DOSSaemmul, Sam3KRFont, MiraeroNormal, and DOSIyagi, its OTF and BDF suffix name. (e.g. DOSMyungjo OTF)
+  원본 MiraeroNormal.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
+  원출처 / Source: https://github.com/hurss/fonts
 
 [Public Domain]
 - DungGeunMo.woff2 (둥근모꼴) — 김중태 원작, 길형진 변환
@@ -107,10 +112,13 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 
 -----------------------------------------------------------
-MIT License (DosGothic, DosMyungjo, DosPilgi, DosIyagi, DOSSaemmul)
+MIT License (DosGothic, DosMyungjo, DosPilgi, DosIyagi, DOSSaemmul, MiraeroNormal)
 -----------------------------------------------------------
 
-Copyright (c) 2016-2022 Damheo Lee
+The MIT License (MIT)
+Copyright (c) 2016-2022 Damheo Lee (이담허) (leedheo@gmail.com),
+with Reserved Font Name DOSMyungjo, DOSGothic, DOSSaemmul, Sam3KRFont, MiraeroNormal, and DOSIyagi,
+its OTF and BDF suffix name. (e.g. DOSMyungjo OTF)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
