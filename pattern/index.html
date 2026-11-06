@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-<title>도안 만들기 | 도트뜨개</title>
-<meta name="description" content="격자에 칸을 칠하거나 문구를 넣어 코바늘 배색(태피스트리) 도안을 무료로 만들어요. 도트 폰트 17종, 장식, 글자 흐름, 그림자, 도안 파일 저장까지.">
+<title>도안 만들기 (Crochet Pattern Maker) | 도트뜨개 Crochet Alpha</title>
+<meta name="description" content="격자에 칸을 칠하거나 문구를 넣어 코바늘 배색(태피스트리) 도안을 무료로 만들어요. 도트 폰트 17종, 장식, 글자 흐름, 그림자, 도안 파일 저장까지. Free crochet pattern maker by Crochet Alpha.">
 <link rel="canonical" href="https://crochetalpha.com/pattern/">
-<meta property="og:title" content="도안 만들기 | 도트뜨개">
-<meta property="og:description" content="격자에 칸을 칠하거나 문구를 넣어 코바늘 배색 도안을 무료로 만들어요.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="도트뜨개 (Crochet Alpha)">
+<meta property="og:title" content="도안 만들기 (Crochet Pattern Maker) | 도트뜨개 Crochet Alpha">
+<meta property="og:description" content="격자에 칸을 칠하거나 문구를 넣어 코바늘 배색(태피스트리) 도안을 무료로 만들어요. 도트 폰트 17종, 장식, 글자 흐름, 그림자, 도안 파일 저장까지. Free crochet pattern maker by Crochet Alpha.">
+<meta property="og:url" content="https://crochetalpha.com/pattern/">
 <meta property="og:image" content="https://crochetalpha.com/assets/og.png">
 <meta name="theme-color" content="#1F5C52">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
@@ -1254,7 +1257,8 @@
       el.innerHTML = LANG === 'en' && en ? en : el.dataset.koHtml;
     });
     document.documentElement.lang = LANG;
-    document.title = t('도안 만들기') + ' | ' + t('도트뜨개');
+    // 탭 제목은 <head>의 <title>과 같게 (검색엔진이 스크립트 실행 뒤의 제목을 읽을 수도 있음)
+    document.title = LANG === 'en' ? 'Crochet Pattern Maker | Crochet Alpha' : '도안 만들기 (Crochet Pattern Maker) | 도트뜨개 Crochet Alpha';
   }
 
   /* ===== 화면 모드 (시스템 / 밝게 / 어둡게) ===== */
