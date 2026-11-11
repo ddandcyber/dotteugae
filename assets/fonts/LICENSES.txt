@@ -15,6 +15,9 @@ The fonts in this folder belong to the copyright holders below and are distribut
 - DepartureMono.woff2 — Copyright (c) 2022-2024 Helena Zhang
 - NanumPen.woff2 (나눔손글씨 펜 / Nanum Pen) — Copyright (c) 2010, NHN Corporation (http://www.nhncorp.com), with Reserved Font Name Nanum, Naver Nanum, NanumGothic, Naver NanumGothic, NanumMyeongjo, Naver NanumMyeongjo, NanumBrush, Naver NanumBrush, NanumPen, Naver NanumPen.
   원본 NanumPenScript-Regular.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
+- NotoSerifKRSemiBold.woff2, NotoSerifKRBold.woff2 (본명조 / Noto Serif KR, 도안 만들기 일반 글꼴) — © 2017-2024 Adobe (http://www.adobe.com/). 예약된 글꼴 이름(Reserved Font Name) 없음 / No Reserved Font Name.
+  원본 SubsetOTF/KR 버전 2.003 OTF에서 한글 2,350자, 한문교육용 기초한자, 영문·숫자·부호, 가나만 남기고 woff2로 바꿨어요(글자 모양은 그대로). / Subset of the original v2.003 OTF (KS X 1001 Hangul 2,350, Korean basic Hanja, Latin, digits, punctuation, Kana) and converted to WOFF2; glyph outlines unchanged.
+  원출처 / Source: https://github.com/notofonts/noto-cjk
 
 [MIT License]
 - DosGothic, DosMyungjo, DosPilgi, DosIyagi, DOSSaemmul (.woff2) — Copyright (c) 2016-2022 Damheo Lee (이담허) (leedheo@gmail.com), with Reserved Font Name DOSMyungjo, DOSGothic, DOSSaemmul, Sam3KRFont, MiraeroNormal, and DOSIyagi, its OTF and BDF suffix name. (e.g. DOSMyungjo OTF)
