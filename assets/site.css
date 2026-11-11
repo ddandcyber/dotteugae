@@ -1,11 +1,12 @@
 /* 코바늘 패턴 도구 — 사이트 공통 스타일 (도구 페이지와 같은 색) */
+/* 글꼴: 본고딕(Noto Sans KR)을 직접 올려 씀. 각 페이지가 fonts/noto-sans-kr.css를 이 파일보다 먼저 불러옴 */
 :root{
   --paper:#F3EFE4; --paper-2:#EAE3D2; --card:#FBF8F1;
   --ink:#24261F; --ink-soft:#4E5045; --ink-faint:#7A7B6E;
   --teal:#1F5C52; --teal-dark:#164941; --mustard:#DFA53C; --berry:#9C3848;
   --line:rgba(36,38,31,0.14); --line-strong:rgba(36,38,31,0.24);
   --shadow:0 1px 2px rgba(36,38,31,0.05), 0 6px 18px rgba(36,38,31,0.06);
-  --sans:'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+  --sans:'Noto Sans KR', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --mono:ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   color-scheme:light;
 }

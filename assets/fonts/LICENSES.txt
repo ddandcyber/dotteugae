@@ -6,6 +6,8 @@ The fonts in this folder belong to the copyright holders below and are distribut
 
 [SIL Open Font License 1.1]
 - NeoDunggeunmo.woff2 — Copyright (c) 2017-2024 Eunbin Jeong (Dalgona.)
+- noto-sans-kr/NotoSansKR-000~123.woff2 (본고딕 / Noto Sans KR, 사이트 본문 글꼴) — Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'
+  Google Fonts가 글자 묶음별로 나눠 둔 파일을 그대로 받아 이름만 번호로 붙였어요(글자 추가·삭제 없음). / Unmodified Google Fonts unicode-range slices, renamed with numbers only.
 - DenkiChipHangul.woff2 (x10y12pxDenkiChipHangul) — Copyright (c) 2026 Lee Minseo, x8y12pxDenkiChip Project Authors
 - Galmuri14/11/11Bold/9/7.woff2 — Copyright (c) 2019-2025 Lee Minseo (quiple@quiple.dev), Reserved Font Name "Galmuri"
 - Mulmaru.woff2 — Copyright (c) 2025 Mushsooni, Reserved Font Name "물마루", "Mulmaru"
