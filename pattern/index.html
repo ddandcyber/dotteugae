@@ -3197,6 +3197,9 @@
   const paneText = document.getElementById('pane-text');
   ['input', 'change'].forEach(ev => paneText.addEventListener(ev, e => {
     if(e.target.id === 'liveToggle') return;
+    // 글자칸·숫자칸은 칠 때마다 'input'이 이미 미리보기를 갱신함. 커서가 빠질 때 오는 'change'까지 받으면
+    // "이대로 도안에 넣기"를 누르는 순간 확정된 글자가 곧바로 다시 떠오름 (change는 확정보다 먼저, 미리보기 예약은 확정보다 뒤에 실행됨)
+    if(ev === 'change' && (e.target.tagName === 'TEXTAREA' || e.target.type === 'number' || e.target.type === 'text')) return;
     schedulePreview();
   }));
   paneText.addEventListener('click', e => {
