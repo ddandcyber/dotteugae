@@ -18,6 +18,31 @@ The fonts in this folder belong to the copyright holders below and are distribut
 - NotoSerifKRSemiBold.woff2, NotoSerifKRBold.woff2 (본명조 / Noto Serif KR, 도안 만들기 일반 글꼴) — © 2017-2024 Adobe (http://www.adobe.com/). 예약된 글꼴 이름(Reserved Font Name) 없음 / No Reserved Font Name.
   원본 SubsetOTF/KR 버전 2.003 OTF에서 한글 2,350자, 한문교육용 기초한자, 영문·숫자·부호, 가나만 남기고 woff2로 바꿨어요(글자 모양은 그대로). / Subset of the original v2.003 OTF (KS X 1001 Hangul 2,350, Korean basic Hanja, Latin, digits, punctuation, Kana) and converted to WOFF2; glyph outlines unchanged.
   원출처 / Source: https://github.com/notofonts/noto-cjk
+- DongleBold.woff2 (동글 굵게 / Dongle Bold) — Copyright 2021 The Dongle Project Authors (https://github.com/yangheeryu/Dongle)
+  원본 Dongle-Bold.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
+  원출처 / Source: https://github.com/google/fonts/tree/main/ofl/dongle
+- SingleDay.woff2 (싱글데이 / Single Day) — Copyright 2015 DXKorea Inc. All rights reserved.
+  원본 SingleDay-Regular.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
+  원출처 / Source: https://github.com/google/fonts/tree/main/ofl/singleday
+- EastSeaDokdo.woff2 (동해독도 / East Sea Dokdo) — Copyright (c) YoonDesign Inc. All Rights Reserved.
+  원본 EastSeaDokdo-Regular.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
+  원출처 / Source: https://github.com/google/fonts/tree/main/ofl/eastseadokdo
+- LeckerliOne.woff2 (Leckerli One) — Copyright (c) 2011 Gesine Todt (www.gesine-todt.de), with Reserved Font Names "Leckerli" and "Leckerli One".
+  원본 LeckerliOne-Regular.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
+  원출처 / Source: https://github.com/google/fonts/tree/main/ofl/leckerlione
+- PirataOne.woff2 (Pirata One) — Copyright (c) 2012, Rodrigo Fuenzalida, Nicolas Massi (www.taip.com.ar / abc.taip.com.ar), with Reserved Font Name 'Pirata'
+  원본 PirataOne-Regular.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
+  원출처 / Source: https://github.com/google/fonts/tree/main/ofl/pirataone
+- AbrilFatface.woff2 (Abril Fatface) — Copyright (c) 2011, TypeTogether (www.type-together.com), with Reserved Font Names "Abril" and "Abril Fatface"
+  원본 AbrilFatface-Regular.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
+  원출처 / Source: https://github.com/google/fonts/tree/main/ofl/abrilfatface
+- DancingScript.woff2 (Dancing Script) — Copyright 2016 The Dancing Script Project Authors (https://github.com/googlefonts/DancingScript), with Reserved Font Name 'Dancing Script'.
+  원본 DancingScript[wght].ttf(가변 폰트, 굵기 400~700)를 굵기별로 자르지 않고 그대로 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / The original variable TTF (wght 400-700) is kept intact and converted to WOFF2 only, no glyphs added or removed.
+  원출처 / Source: https://github.com/google/fonts/tree/main/ofl/dancingscript
+- UnifrakturMaguntia.woff2 (UnifrakturMaguntia) — Copyright (c) 2010, j. 'mach' wust, with Reserved Font Name UnifrakturMaguntia. Copyright (c) 2009, Peter Wiegel.
+  원본 UnifrakturMaguntia-Book.ttf를 woff2 형식으로만 바꿨어요(글자 추가·삭제 없음). / Converted from the original TTF to WOFF2 only, no glyphs added or removed.
+  원출처 / Source: https://github.com/google/fonts/tree/main/ofl/unifrakturmaguntia
+  ※ 위 8개 woff2는 글리프(글자 모양) 데이터는 그대로이고, 변환 과정에서 오래된 디지털 서명 표(DSIG)만 빠졌어요. / For the 8 fonts above, glyph data is unchanged; only the obsolete DSIG (digital signature) table was not carried over by the WOFF2 conversion.
 
 [MIT License]
 - DosGothic, DosMyungjo, DosPilgi, DosIyagi, DOSSaemmul (.woff2) — Copyright (c) 2016-2022 Damheo Lee (이담허) (leedheo@gmail.com), with Reserved Font Name DOSMyungjo, DOSGothic, DOSSaemmul, Sam3KRFont, MiraeroNormal, and DOSIyagi, its OTF and BDF suffix name. (e.g. DOSMyungjo OTF)
