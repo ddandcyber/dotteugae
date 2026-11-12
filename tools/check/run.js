@@ -387,8 +387,8 @@ test('작업창 접기·펼치기, 새로고침 뒤 유지', async (fail) => {
   } finally { await t.close(); }
 });
 
-test('휴대폰(390)·태블릿(1280)·PC(1440) 화면: 가로 넘침, 잘린 버튼, 오류', async (fail) => {
-  const views = [['휴대폰 390px', 390, 844, true], ['태블릿 1280px', 1280, 800, true], ['PC 1440px', 1440, 900, false]];
+test('휴대폰(320·360·390)·태블릿(1280)·PC(1440) 화면: 가로 넘침, 잘린 버튼, 오류', async (fail) => {
+  const views = [['작은 휴대폰 320px', 320, 640, true], ['휴대폰 360px', 360, 740, true], ['휴대폰 390px', 390, 844, true], ['태블릿 1280px', 1280, 800, true], ['PC 1440px', 1440, 900, false]];
   for (const [label, w, h, mobile] of views) {
     const t = await openPage('/pattern/', { width: w, height: h, mobile });
     try {
