@@ -1,0 +1,2 @@
+# 점검 도구(tools/check/)가 설치한 패키지. git과 사이트에 올리지 않음
+node_modules/

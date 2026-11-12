@@ -1,0 +1,11 @@
+{
+  "name": "dotteugae-check",
+  "private": true,
+  "description": "도트뜨개 사이트 자동 점검 (헤드리스 브라우저). 사이트 배포와는 상관없는 개발용 도구.",
+  "scripts": {
+    "test": "node run.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "22.15.0"
+  }
+}
