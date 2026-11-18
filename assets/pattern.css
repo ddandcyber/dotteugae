@@ -556,6 +556,7 @@
                background:var(--teal); color:var(--paper); font-size:13.5px; font-weight:700; white-space:nowrap; }
   .ab-primary svg{ width:17px; height:17px; }
   .ab-primary:hover{ background:var(--teal-dark); }
+  .ab-primary[hidden]{ display:none; } /* 공유 버튼: 파일 공유가 안 되는 기기에서는 숨김 */
 
   /* 리본 도구모음 */
   .ribbon{ display:flex; align-items:stretch; padding:6px 6px 4px; background:var(--card);
@@ -954,4 +955,8 @@
   /* 320~359px: 그래도 모자라서, 격자 탭 '도안 파일'에 똑같은 버튼이 있는 열기·저장(Ctrl+O / Ctrl+S도 됨)만 이 막대에서 뺌 */
   @media (max-width: 359px){
     .ab-file{ display:none; }
+  }
+  /* 360~389px: 공유 버튼이 보이는 기기(터치 + 파일 공유)에서는 버튼 하나만큼 모자라서, 같은 방식으로 열기·저장만 뺌 */
+  @media (max-width: 389px){
+    .appbar:has(#shareImgBtn:not([hidden])) .ab-file{ display:none; }
   }

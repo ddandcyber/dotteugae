@@ -533,6 +533,78 @@ test('한국어·영어 페이지 짝: hreflang, canonical, html lang', async (f
   note(`짝 ${pairs.length}개, 페이지 ${pairs.length * 2}개 확인`);
 });
 
+test('이미지 저장은 PNG 내려받기, 공유 버튼은 터치 기기에서만', async (fail, note) => {
+  // 1) PC(마우스): '이미지로 저장'을 누르면 공유 창 없이 PNG가 내려받아지고, 공유 버튼은 숨어 있어야 함
+  for (const p of ['/pattern/', '/en/pattern/']) {
+    const t = await openPage(p);
+    const dl = fs.mkdtempSync(path.join(os.tmpdir(), 'dotteugae-img-'));
+    try {
+      const { page, ctx } = t;
+      // 브라우저가 파일 공유를 지원하는 것처럼 꾸며도(Windows PC 상황) 공유 창을 열면 안 됨
+      await page.evaluate(() => {
+        window.__shareCalls = 0;
+        navigator.canShare = () => true;
+        navigator.share = async () => { window.__shareCalls++; };
+      });
+      const cdp = await page.createCDPSession();
+      try { await cdp.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: dl, browserContextId: ctx.id }); }
+      catch (e) { await cdp.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dl }); }
+      const shareShown = await page.evaluate(() => !document.getElementById('shareImgBtn').hidden && document.getElementById('shareImgBtn').offsetWidth > 0);
+      if (shareShown) fail(`${p}: 마우스를 쓰는 PC인데 공유 버튼이 보여요`);
+      await clickId(page, 'saveImgBtn');
+      let file = null;
+      for (let i = 0; i < 50 && !file; i++) { await sleep(200); file = fs.readdirSync(dl).find(f => f.endsWith('.png')); }
+      if (!file) fail(`${p}: '이미지로 저장'을 눌렀는데 PNG 파일이 내려받아지지 않았어요`);
+      else {
+        await sleep(300);
+        const buf = fs.readFileSync(path.join(dl, file));
+        if (buf.length < 100 || buf.readUInt32BE(0) !== 0x89504E47) fail(`${p}: 내려받은 파일이 PNG가 아니에요 (${file})`);
+        if (!/_\d+x\d+_\d{8}\.png$/.test(file)) fail(`${p}: 파일 이름 형식이 달라요 (${file})`);
+      }
+      if (await page.evaluate(() => window.__shareCalls)) fail(`${p}: '이미지로 저장'을 눌렀는데 공유 창을 열었어요`);
+      t.errors.forEach(e => fail(`${p}: ${e}`));
+    } finally { await t.close(); fs.rmSync(dl, { recursive: true, force: true }); }
+  }
+  // 2) 휴대폰(터치, 파일 공유 가능): 공유 버튼이 보이고, 누르면 같은 PNG를 공유 시트로 넘김. 360px에서도 맨 위 막대가 넘치지 않아야 함
+  let coarseSeen = false;
+  for (const [p, w] of [['/pattern/', 360], ['/en/pattern/', 390]]) {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    try {
+      await page.setViewport({ width: w, height: 780, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+      await page.evaluateOnNewDocument(() => {
+        try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); } catch (e) {}
+        window.__shared = null;
+        navigator.canShare = d => !!(d && d.files && d.files.length);
+        navigator.share = async d => { const f = d.files[0]; window.__shared = { n: d.files.length, type: f.type, name: f.name, size: f.size }; };
+      });
+      await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
+      const st = await page.evaluate(() => {
+        const b = document.getElementById('shareImgBtn'), r = b.getBoundingClientRect();
+        const bar = document.querySelector('.appbar');
+        const out = [...bar.querySelectorAll('button, a, summary')].filter(e => { const q = e.getBoundingClientRect(); return q.width > 0 && (q.right > window.innerWidth + 1 || q.left < -1); }).map(e => e.id || e.textContent.trim());
+        return { coarse: matchMedia('(pointer: coarse)').matches, shown: !b.hidden && r.width > 0, label: b.getAttribute('aria-label'), out, wide: document.documentElement.scrollWidth > document.documentElement.clientWidth };
+      });
+      if (!st.coarse) { note(`${p}: 이 브라우저는 터치 흉내가 안 돼서 휴대폰 확인은 건너뜀`); continue; }
+      coarseSeen = true;
+      if (!st.shown) { fail(`${p}: 터치 기기(파일 공유 가능)인데 공유 버튼이 보이지 않아요`); continue; }
+      const expectLabel = p.startsWith('/en/') ? 'Share' : '공유';
+      if (st.label !== expectLabel) fail(`${p}: 공유 버튼 이름이 "${expectLabel}"가 아니라 "${st.label}"이에요`);
+      if (st.out.length || st.wide) fail(`${p}: ${w}px 폭에서 맨 위 막대가 화면 밖으로 넘쳐요 (${st.out.join(', ') || '가로 스크롤'})`);
+      await page.click('#shareImgBtn');
+      if (!await waitFor(page, () => !!window.__shared, 5000)) fail(`${p}: 공유 버튼을 눌렀는데 공유 시트로 넘기지 않았어요`);
+      else {
+        const s = await page.evaluate(() => window.__shared);
+        if (s.n !== 1 || s.type !== 'image/png' || !/\.png$/.test(s.name) || s.size < 100) fail(`${p}: 공유한 파일이 PNG 도안 이미지가 아니에요 (${JSON.stringify(s)})`);
+      }
+      errors.forEach(e => fail(`${p}: ${e}`));
+    } finally { await ctx.close(); }
+  }
+  note(coarseSeen ? 'PC 2곳, 휴대폰 2곳 확인' : 'PC 2곳 확인');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();

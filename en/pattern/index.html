@@ -20,7 +20,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/pattern.css?v=2">
+<link rel="stylesheet" href="/assets/pattern.css?v=3">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -70,6 +70,7 @@
       <input type="file" id="openFileInput" accept=".json,application/json" hidden>
       <button class="ab-knit" id="knitStartBtn" title="다른 도구를 숨기고 도안과 작업 단만 크게 보여요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16l13-8z"/></svg><span>작업 시작하기</span></button>
       <button class="ab-primary" id="saveImgBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>이미지로 저장</span></button>
+      <button class="ab-primary" id="shareImgBtn" aria-label="공유" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg><span>공유</span></button>
     </div>
   </header>
 
@@ -493,6 +494,7 @@
             <li><b>Copy</b> and <b>Paste</b> floating text, decorations or selections as many times as you like. Keys: Ctrl+C · Ctrl+X · Ctrl+V · Delete · Esc · Enter · arrows</li>
             <li>After adding text, tap <b>Move letters</b> to pick and move each letter freely — great for fine-tuning a wave layout.</li>
             <li>While moving text, tap <b>↔ Center · ↕ Center</b> to center it on the grid.</li>
+            <li><b>Save image</b> downloads a PNG file right away. On a phone it may go to your Downloads folder instead of your photo gallery. To add it to your gallery, tap <b>Share</b> next to it and save from there.</li>
             <li>Use the arrow button at the right end of the toolbar (below it on phones) to collapse it so the pattern fills the screen. Tap the small arrow handle at the top right to bring it back. Keyboard: Ctrl+\ (Cmd+\ on Mac)</li>
           </ul>
           <div class="credits">
@@ -609,6 +611,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="/assets/pattern.js?v=2"></script>
+<script src="/assets/pattern.js?v=3"></script>
 </body>
 </html>
