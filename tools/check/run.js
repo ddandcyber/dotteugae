@@ -282,7 +282,7 @@ test('도안 파일 저장 → 모두 지우기 → 파일 열기, 예시 도안
 });
 
 test('예시 페이지·홈의 "이 도안 열어서 고쳐보기" 링크', async (fail, note) => {
-  const sources = [['examples/index.html', '/examples/', '예시 페이지'], ['index.html', '/', '홈']];
+  const sources = [['examples/index.html', '/examples/', '예시 페이지'], ['index.html', '/', '홈'], ['en/index.html', '/en/', '영어 홈']];
   let total = 0;
   for (const [file, pagePath, label] of sources) {
     const html = fs.readFileSync(path.join(ROOT, file), 'utf8');
@@ -339,21 +339,46 @@ test('글자 넣기, 영어로 바꿨다가 한국어로 돌아오기', async (f
       caps: [...document.querySelectorAll('.rgroup-cap')].map(b => b.textContent.trim()),
       convert: document.getElementById('convertBtn').textContent.trim(),
     }));
+    // 언어 버튼은 반대편 주소(/pattern/ ↔ /en/pattern/)로 가는 링크. 누르면 페이지가 바뀜
+    const switchLang = async () => {
+      await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 30000 }), page.click('#langBtn')]);
+      await sleep(300);
+      return new URL(page.url()).pathname;
+    };
     await insertText('뜨개', '한국어 글자');
     const ko = await texts();
     const g1 = await grid(page);
-    await clickId(page, 'langBtn');
+    if (ko.lang !== 'ko') fail('한국어 /pattern/이 한국어로 열리지 않았어요');
+    let p = await switchLang();
+    if (p !== '/en/pattern/') fail(`EN을 눌렀는데 /en/pattern/이 아니라 ${p}로 갔어요`);
     const en = await texts();
-    if (en.lang !== 'en' || en.tabs.join() === ko.tabs.join() || !en.tabs.includes('Text')) fail('영어로 바꿨는데 화면 글자가 영어로 바뀌지 않았어요');
-    if (diffCells((await grid(page)).data, g1.data)) fail('영어로 바꿨더니 도안이 바뀌었어요');
+    if (en.lang !== 'en' || en.tabs.join() === ko.tabs.join() || !en.tabs.includes('Text')) fail('영어 페이지인데 화면 글자가 영어가 아니에요');
+    if (diffCells((await grid(page)).data, g1.data)) fail('영어 페이지로 갔더니 도안이 바뀌었어요 (자동 저장이 이어지지 않음)');
     await insertText('Hi', '영어 화면에서 글자');
     const g2 = await grid(page);
-    await clickId(page, 'langBtn');
+    p = await switchLang();
+    if (p !== '/pattern/') fail(`한국어를 눌렀는데 /pattern/이 아니라 ${p}로 갔어요`);
     const ko2 = await texts();
     if (ko2.lang !== 'ko') fail('한국어로 다시 바꾸지 못했어요');
     if (ko2.tabs.join() !== ko.tabs.join() || ko2.caps.join() !== ko.caps.join()) fail('한국어로 돌아왔는데 일부 화면 글자가 처음과 달라요');
     if (diffCells((await grid(page)).data, g2.data)) fail('한국어로 바꿨더니 도안이 바뀌었어요');
     await insertText('가', '한국어로 돌아온 뒤 글자');
+    // 주소에 도안(#p=…)이 남아 있으면 언어를 바꿔도 같은 도안이 열려야 함
+    const exHash = (fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8').match(/#p=([A-Za-z0-9_-]+)/) || [])[1];
+    if (!exHash) fail('홈에서 도안 링크를 찾지 못했어요');
+    else {
+      const expect = decodePattern(fromHash(exHash));
+      await page.evaluate(h => history.replaceState(null, '', location.pathname + '#p=' + h), exHash);
+      p = await switchLang();
+      const g3 = await grid(page);
+      if (p !== '/en/pattern/') fail('도안 링크가 있을 때 EN을 눌렀는데 영어 페이지로 가지 않았어요');
+      else if (g3.rows !== expect.rows || g3.cols !== expect.cols || diffCells(g3.data, expect.data)) fail('도안 링크(#p=)를 이어 붙여 영어 페이지로 갔는데 같은 도안이 열리지 않았어요');
+    }
+    // 예전 설정(crochet-ui-lang = en)이 남아 있어도 한국어 페이지는 한국어로
+    await page.evaluate(() => localStorage.setItem('crochet-ui-lang', 'en'));
+    await page.goto(BASE + '/pattern/', { waitUntil: 'networkidle0' }); await sleep(300);
+    if ((await texts()).lang !== 'ko') fail('예전 언어 설정이 en이면 한국어 /pattern/이 영어로 열려요');
+    if (await page.evaluate(() => localStorage.getItem('crochet-ui-lang')) !== 'en') fail('예전 언어 설정(crochet-ui-lang)을 건드렸어요');
     t.errors.forEach(e => fail(e));
   } finally { await t.close(); }
 });
@@ -416,6 +441,7 @@ test('모든 페이지 열림, 깨진 링크·없는 이미지', async (fail, no
     ['/', '홈'], ['/pattern/', '도안 만들기'], ['/counter/', '코수 세기'], ['/examples/', '예시'],
     ['/guides/', '가이드'], ['/guides/reading-charts/', '가이드: 도안 읽기'], ['/guides/lettering-size/', '가이드: 글자 크기'],
     ['/about/', '소개'], ['/privacy/', '개인정보처리방침'], ['/credits/', '폰트 출처'],
+    ['/en/', '영어 홈'], ['/en/pattern/', '영어 도안 만들기'],
   ];
   const checked = new Map();
   let external = 0, internal = 0;
@@ -464,6 +490,47 @@ test('모든 페이지 열림, 깨진 링크·없는 이미지', async (fail, no
   const sm = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
   for (const m of sm.matchAll(/<loc>([^<]+)<\/loc>/g)) await checkUrl(m[1].trim(), '/sitemap.xml', '주소');
   note(`사이트 안 주소 ${checked.size}곳 확인, 바깥 사이트 링크 ${external}개는 확인하지 않음`);
+});
+
+test('한국어·영어 페이지 짝: hreflang, canonical, html lang', async (fail, note) => {
+  // [한국어 파일, 한국어 주소, 영어 파일, 영어 주소]
+  const SITE = 'https://crochetalpha.com';
+  const pairs = [['index.html', '/', 'en/index.html', '/en/'], ['pattern/index.html', '/pattern/', 'en/pattern/index.html', '/en/pattern/']];
+  const sitemap = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
+  const read = file => {
+    const html = fs.readFileSync(path.join(ROOT, file), 'utf8');
+    const head = (html.match(/<head>[\s\S]*?<\/head>/) || [''])[0];
+    const canon = [...head.matchAll(/<link rel="canonical" href="([^"]+)">/g)].map(m => m[1]);
+    const alt = {};
+    for (const m of head.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)">/g)) {
+      if (alt[m[1]]) fail(`${file}: hreflang="${m[1]}"이 두 번 있어요`);
+      alt[m[1]] = m[2];
+    }
+    return { lang: (html.match(/<html lang="([^"]+)"/) || [])[1], canon, alt };
+  };
+  for (const [koFile, koPath, enFile, enPath] of pairs) {
+    const koUrl = SITE + koPath, enUrl = SITE + enPath;
+    const ko = read(koFile), en = read(enFile);
+    for (const [file, pg, lang, url] of [[koFile, ko, 'ko', koUrl], [enFile, en, 'en', enUrl]]) {
+      if (pg.lang !== lang) fail(`${file}: <html lang>이 "${lang}"이어야 하는데 "${pg.lang}"이에요`);
+      if (pg.canon.length !== 1 || pg.canon[0] !== url) fail(`${file}: canonical이 자기 주소(${url})가 아니에요 (${pg.canon.join(', ') || '없음'})`);
+      if (pg.alt.ko !== koUrl) fail(`${file}: hreflang="ko"가 ${koUrl}을 가리켜야 해요 (${pg.alt.ko || '없음'})`);
+      if (pg.alt.en !== enUrl) fail(`${file}: hreflang="en"이 ${enUrl}을 가리켜야 해요 (${pg.alt.en || '없음'})`);
+      if (pg.alt['x-default'] !== koUrl) fail(`${file}: hreflang="x-default"가 한국어 주소 ${koUrl}을 가리켜야 해요 (${pg.alt['x-default'] || '없음'})`);
+      if (Object.keys(pg.alt).length !== 3) fail(`${file}: hreflang은 ko, en, x-default 세 개만 있어야 해요 (${Object.keys(pg.alt).join(', ')})`);
+      if (!sitemap.includes(`<loc>${url}</loc>`)) fail(`sitemap.xml에 ${url}이 없어요`);
+    }
+  }
+  // 브라우저에서도: 각 페이지가 열린 뒤의 html lang (스크립트가 바꾸는 경우까지)
+  for (const [p, lang] of [['/', 'ko'], ['/en/', 'en'], ['/pattern/', 'ko'], ['/en/pattern/', 'en']]) {
+    const t = await openPage(p);
+    try {
+      const got = await t.page.evaluate(() => document.documentElement.lang);
+      if (got !== lang) fail(`${p}: 페이지가 열린 뒤 html lang이 "${lang}"이 아니라 "${got}"이에요`);
+      t.errors.forEach(e => fail(`${p}: ${e}`));
+    } finally { await t.close(); }
+  }
+  note(`짝 ${pairs.length}개, 페이지 ${pairs.length * 2}개 확인`);
 });
 
 /* ---------- 실행 ---------- */
