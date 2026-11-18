@@ -141,6 +141,7 @@
     font-size:12.5px; font-weight:700; font-family:var(--sans);
     display:flex; align-items:center; justify-content:center; gap:4px;
   }
+  a.top-btn{ text-decoration:none; }
   .top-btn svg{ width:17px; height:17px; }
   .top-btn:active{ background:var(--paper-2); }
   .saved-note{ white-space:nowrap; }
@@ -908,6 +909,8 @@
   .tool-menu-drop{ position:absolute; left:0; top:42px; z-index:30; background:var(--card); border:1px solid var(--line);
                    border-radius:12px; box-shadow:0 8px 28px rgba(0,0,0,0.18); padding:6px; display:flex; flex-direction:column; min-width:170px; }
   @media (max-width: 1279px){ .tool-nav{ display:none; } .tool-menu{ display:block; } .brand .saved-note{ display:none; } }
+  /* 영어 페이지(/en/pattern/)는 메뉴 글자가 길어서 조금 더 넓은 폭부터 접힌 메뉴로 */
+  @media (max-width: 1379px){ html[lang="en"] .tool-nav{ display:none; } html[lang="en"] .tool-menu{ display:block; } html[lang="en"] .brand .saved-note{ display:none; } }
 
   /* 좁은 화면: 위아래로 쌓기 */
   @media (max-width: 899px){

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Crochet Alpha Pattern Maker – Free Alpha Pattern Creator &amp; Grid Maker</title>
+<meta name="description" content="Free alpha pattern maker for crochet. Paint a grid or type text to make an alpha grid or pixel crochet pattern, then save it as an image or pattern file. No sign-up.">
+<link rel="canonical" href="https://crochetalpha.com/en/pattern/">
+<link rel="alternate" hreflang="ko" href="https://crochetalpha.com/pattern/">
+<link rel="alternate" hreflang="en" href="https://crochetalpha.com/en/pattern/">
+<link rel="alternate" hreflang="x-default" href="https://crochetalpha.com/pattern/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="Crochet Alpha">
+<meta property="og:title" content="Crochet Alpha Pattern Maker – Free Alpha Pattern Creator &amp; Grid Maker">
+<meta property="og:description" content="Free alpha pattern maker for crochet. Paint a grid or type text to make an alpha grid or pixel crochet pattern, then save it as an image or pattern file. No sign-up.">
+<meta property="og:url" content="https://crochetalpha.com/en/pattern/">
+<meta property="og:image" content="https://crochetalpha.com/assets/og.png?v=3">
+<meta name="theme-color" content="#1F5C52">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/pattern.css?v=2">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Crochet Alpha Pattern Maker",
+  "description": "Free alpha pattern maker for crochet. Paint a grid or type text to make an alpha grid or pixel crochet pattern, then save it as an image or pattern file. No sign-up.",
+  "url": "https://crochetalpha.com/en/pattern/",
+  "applicationCategory": "DesignApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript. Works in modern browsers on phones, tablets and computers.",
+  "inLanguage": "en",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+}
+</script>
+<script>
+  // 이 페이지는 항상 영어로 (assets/pattern.js가 이 값을 먼저 봄)
+  window.FORCE_LANG = 'en';
+</script>
+</head>
+<body>
+<div class="app area-work">
+  <header class="appbar">
+    <a class="brand" href="/en/" title="Home">
+      <span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span>
+      <h1>Crochet Alpha</h1>
+      <span class="saved-note">Auto-saved</span>
+    </a>
+    <nav class="tool-nav" aria-label="Site menu">
+      <a href="/en/">Home</a><a href="/en/pattern/" aria-current="page">Pattern maker</a><a href="/counter/" hreflang="ko">Stitch counter</a><a href="/examples/" hreflang="ko">Examples</a><a href="/guides/" hreflang="ko">Guides</a>
+    </nav>
+    <details class="tool-menu">
+      <summary aria-label="Site menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+      <div class="tool-menu-drop"><a href="/en/">Home</a><a href="/en/pattern/" aria-current="page">Pattern maker</a><a href="/counter/" hreflang="ko">Stitch counter</a><a href="/examples/" hreflang="ko">Examples</a><a href="/guides/" hreflang="ko">Guides</a><a href="/pattern/" hreflang="ko" lang="ko" data-lang-switch>한국어</a></div>
+    </details>
+    <div class="appbar-mid">
+      <div class="ab-file">
+        <button class="ab-text" id="openFileBtn" title="도안 파일 열기 (Ctrl+O)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v11a1 1 0 0 0 1 1h14l3-8H7l-3 8"/></svg><span>열기</span></button>
+        <button class="ab-text" id="saveFileBtn" title="도안 파일로 저장 (Ctrl+S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M8 4v5h7V4"/><rect x="8" y="13" width="8" height="5"/></svg><span>저장</span></button>
+      </div>
+      <button class="ab-btn" id="undoBtn" aria-label="되돌리기" title="되돌리기 (Ctrl+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+      <button class="ab-btn" id="redoBtn" aria-label="다시하기" title="다시하기 (Ctrl+Shift+Z / Ctrl+Y)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+    </div>
+    <div class="appbar-right">
+      <a class="top-btn" id="langBtn" href="/pattern/" hreflang="ko" lang="ko" title="한국어로 보기" aria-label="한국어로 보기" data-lang-switch>한국어</a>
+      <button type="button" class="top-btn" id="themeBtn" aria-label="화면 모드"></button>
+      <input type="file" id="openFileInput" accept=".json,application/json" hidden>
+      <button class="ab-knit" id="knitStartBtn" title="다른 도구를 숨기고 도안과 작업 단만 크게 보여요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16l13-8z"/></svg><span>작업 시작하기</span></button>
+      <button class="ab-primary" id="saveImgBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>이미지로 저장</span></button>
+    </div>
+  </header>
+
+  <div class="ribbon" id="ribbon" role="toolbar" aria-label="도구 모음">
+    <div class="rgroup grp-tools">
+      <div class="rgroup-body">
+        <button class="rb-btn tool-btn active" id="toolPaintBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/></svg><span>칠하기</span></button>
+        <button class="rb-btn tool-btn" id="toolFillBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l6-6 7 7-6 6z"/><path d="M5 11h13"/><path d="M20 15c0 1.6 1 2.6 1 3.6a1 1 0 0 1-2 0c0-1 1-2 1-3.6z"/></svg><span>채우기</span></button>
+        <button class="rb-btn tool-btn" id="toolSelectBtn" title="격자를 끌어서 영역을 고르면 그 부분을 옮기거나 복사할 수 있어요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3"><rect x="4" y="4" width="16" height="16" rx="1"/></svg><span>선택</span></button>
+      </div>
+      <div class="rgroup-cap">도구</div>
+    </div>
+    <div class="rgroup grp-color">
+      <div class="rgroup-body"><div class="palette" id="palette" data-dyn></div></div>
+      <div class="rgroup-cap">칠할 색</div>
+    </div>
+    <div class="rgroup">
+      <div class="rgroup-body">
+        <button class="zoom-btn" id="zoomOutBtn" aria-label="축소">−</button>
+        <span class="zoom-label" id="zoomLabel">100%</span>
+        <button class="zoom-btn" id="zoomInBtn" aria-label="확대">＋</button>
+        <button class="zoom-reset" id="zoomResetBtn">맞춤</button>      </div>
+      <div class="rgroup-cap">화면 보기</div>
+    </div>
+    <div class="rgroup">
+      <div class="rgroup-body">
+        <button class="zoom-btn" id="rowMinusBtn" aria-label="아래 단">−</button>
+        <span class="zoom-label" id="rowLabel" data-dyn>1단</span>
+        <button class="zoom-btn" id="rowPlusBtn" aria-label="위 단">＋</button>
+      </div>
+      <div class="rgroup-cap">작업 단</div>
+    </div>
+    <div class="rgroup">
+      <div class="rgroup-body">
+        <button class="rb-btn" id="flipToggleBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 7 4 12l4 5z"/><path d="m16 7 4 5-4 5z"/></svg><span>좌우 뒤집기</span></button>
+        <button class="rb-btn" id="rot90Btn" aria-label="시계 방향으로 90도 회전"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg><span>90°</span></button>
+        <button class="rb-btn" id="rot270Btn" aria-label="시계 방향으로 270도 회전"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/></svg><span>270°</span></button>
+      </div>
+      <div class="rgroup-cap">변형</div>
+    </div>
+    <div class="rgroup">
+      <div class="rgroup-body">
+        <button class="rb-btn" id="copyBtn" title="떠 있는 글자·장식·선택 영역 복사 (Ctrl+C)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg><span>복사</span></button>
+        <button class="rb-btn" id="pasteBtn" title="붙여넣기 (Ctrl+V)" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2"/></svg><span>붙여넣기</span></button>
+        <button class="rb-btn danger" id="clearGridBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg><span>모두 지우기</span></button>
+      </div>
+      <div class="rgroup-cap">편집</div>
+    </div>
+    <div class="ribbon-fold-wrap">
+      <button type="button" class="ribbon-fold" id="ribbonFoldBtn" aria-controls="ribbon" aria-expanded="true" data-dyn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></button>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <main class="stage canvas-card">
+      <div class="stamp-bar" id="stampBar">
+            <div class="smode-row" id="stampModeRow">
+              <button class="smode-btn active" data-smode="whole">통째로 옮기기</button>
+              <button class="smode-btn" data-smode="letter">글자 하나씩 옮기기</button>
+            </div>
+            <div class="stamp-msg"><b id="stampTitle" data-dyn>글자 위치 옮기기</b> <span id="stampDesc" data-dyn>· 격자를 손가락으로 끌면 손을 뗀 자리에 고정돼요. 화살표로 한 칸씩 맞춘 뒤엔 완료를 눌러요. 칠할 색을 누르면 글자 색이 바뀌어요.</span></div>
+            <div class="stamp-ctrls">
+              <div class="nudge">
+                <button id="nudgeL" aria-label="왼쪽으로">←</button>
+                <button id="nudgeU" aria-label="위로">↑</button>
+                <button id="nudgeD" aria-label="아래로">↓</button>
+                <button id="nudgeR" aria-label="오른쪽으로">→</button>
+              </div>
+              <div class="nudge center-btns">
+                <button id="centerH" class="wide" aria-label="가로 가운데 정렬" title="가로 가운데 정렬">↔ 가운데</button>
+                <button id="centerV" class="wide" aria-label="세로 가운데 정렬" title="세로 가운데 정렬">↕ 가운데</button>
+              </div>
+              <div class="stamp-actions">
+                <button class="btn-stamp-cancel" id="stampResetBtn" style="display:none;">처음 배치로</button>
+                <button class="btn-stamp-cancel" id="stampSaveDecorBtn" title="지금 떠 있는 모양을 내 장식으로 저장">내 장식에 추가</button>
+                <button class="btn-stamp-cancel" id="stampCopyBtn" title="복사 (Ctrl+C)">복사</button>
+                <button class="btn-stamp-cancel danger-text" id="stampDeleteBtn" title="삭제 (Delete)">삭제</button>
+                <button class="btn-stamp-cancel" id="stampCancelBtn">취소</button>
+                <button class="btn-stamp-place" id="stampPlaceBtn">완료</button>
+              </div>
+            </div>
+          </div>
+
+      <button class="knit-unfold" id="knitUnfoldBtn" title="위쪽 막대 펼치기"><b id="knitMiniRow" data-dyn>1단</b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="knit-bar" id="knitBar">
+        <div class="knit-main">
+          <div class="knit-row">
+            <button class="knit-step" id="knitMinusBtn" aria-label="아래 단">−</button>
+            <div class="knit-row-num"><b id="knitRowNum" data-dyn>1단</b><small id="knitRowOf" data-dyn>총 20단</small></div>
+            <button class="knit-step" id="knitPlusBtn" aria-label="위 단">＋</button>
+          </div>
+          <div class="knit-seq">
+            <span class="knit-dir" id="knitDir" data-dyn></span>
+            <div class="knit-runs" id="knitRuns" data-dyn></div>
+          </div>
+          <button class="knit-fold" id="knitFoldBtn" aria-expanded="true" title="위쪽 막대 접기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg><span id="knitFoldLabel" data-dyn>접기</span></button>
+        </div>
+        <div class="knit-tools">
+        <button class="knit-exit" id="knitExitBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>도안 수정으로</span></button>
+        <label class="knit-read">
+          <span>읽는 방향</span>
+          <select id="knitDirSelect">
+            <option value="alt-r">단마다 번갈아 (1단은 오른쪽부터)</option>
+            <option value="alt-l">단마다 번갈아 (1단은 왼쪽부터)</option>
+            <option value="l">항상 왼쪽부터</option>
+            <option value="r">항상 오른쪽부터</option>
+          </select>
+        </label>
+        <div class="knit-zoom">
+          <span class="knit-zoom-cap">크기</span>
+          <button class="zoom-btn" id="knitZoomOutBtn" aria-label="축소">−</button>
+          <span class="knit-zoom-val" id="knitZoomVal" data-dyn>100%</span>
+          <button class="zoom-btn" id="knitZoomInBtn" aria-label="확대">＋</button>
+          <button class="zoom-reset" id="knitZoomFitBtn">맞춤</button>        </div>
+        </div>
+      </div>
+      <div class="canvas-area">
+        <div class="canvas-wrap">
+          <canvas id="gridCanvas"></canvas>
+        </div>
+        <!-- 작업창을 접었을 때만 보이는 펼치기 손잡이 (좁은 화면: 캔버스 오른쪽 위) -->
+        <button type="button" class="ribbon-handle handle-narrow" aria-controls="ribbon" aria-expanded="false" data-dyn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+      <div class="statusbar">
+        <span id="statusSize" data-dyn></span>
+        <span id="statusRow" data-dyn></span>
+        <span id="statusZoom" data-dyn></span>
+      </div>
+    </main>
+
+    <aside class="inspector">
+      <!-- 작업창을 접었을 때만 보이는 펼치기 손잡이 (넓은 화면: 오른쪽 패널 탭 줄 오른쪽 끝) -->
+      <button type="button" class="ribbon-handle handle-wide" aria-controls="ribbon" aria-expanded="false" data-dyn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+      <nav class="insp-tabs" role="tablist">
+        <button class="insp-tab active" data-pane="grid" role="tab">격자</button>
+        <button class="insp-tab" data-pane="text" role="tab">글자</button>
+        <button class="insp-tab" data-pane="decor" role="tab">장식</button>
+        <button class="insp-tab" data-pane="replace" role="tab">색 바꾸기</button>
+        <button class="insp-tab" data-pane="help" role="tab">도움말</button>
+      </nav>
+      <div class="insp-body">
+        <section class="pane active" id="pane-grid">
+          <div class="pane-sec">
+            <div class="pane-title">배경색 <span class="hint">칠하지 않은 칸의 색</span></div>
+            <div class="palette bg-palette" id="bgPalette" data-dyn></div>
+            <div class="hint-text" style="margin-top:8px;">나중에 바꿔도 칠한 무늬는 그대로예요.</div>
+          </div>
+          <div class="pane-sec">
+            <div class="pane-title">격자 크기</div>
+            <div class="size-row">
+              <div class="size-field">
+                <label for="rowsInput">단</label>
+                <input type="number" id="rowsInput" value="20" min="1" max="200" inputmode="numeric">
+              </div>
+              <div class="size-field">
+                <label for="colsInput">코</label>
+                <input type="number" id="colsInput" value="20" min="1" max="200" inputmode="numeric">
+              </div>
+              <button class="btn-apply" id="applyBtn">새 격자 만들기</button>
+            </div>
+          </div>
+          <div class="pane-sec">
+            <div class="pane-title">게이지 <span class="hint">실물에서 한 코·한 단의 모양</span></div>
+            <select class="margin-select gauge-preset" id="gaugePreset" aria-label="게이지 예시">
+              <option value="10x10">정사각형 칸 (보정 안 함)</option>
+              <option value="22x30">대바늘 메리야스뜨기 (약 22코 × 30단)</option>
+              <option value="18x20">코바늘 짧은뜨기 (약 18코 × 20단)</option>
+              <option value="custom">직접 입력</option>
+            </select>
+            <div class="size-row gauge-row">
+              <span class="gauge-cap">10cm 안에</span>
+              <div class="size-field">
+                <input type="number" id="gaugeStInput" value="10" min="1" max="99" step="0.5" inputmode="decimal" aria-label="10cm 안의 코 수">
+                <label for="gaugeStInput">코</label>
+              </div>
+              <span class="gauge-x">×</span>
+              <div class="size-field">
+                <input type="number" id="gaugeRowInput" value="10" min="1" max="99" step="0.5" inputmode="decimal" aria-label="10cm 안의 단 수">
+                <label for="gaugeRowInput">단</label>
+              </div>
+            </div>
+            <label class="live-row gauge-toggle">
+              <span class="live-text"><b>실제 비율로 보기</b><span class="hint-text" id="gaugeShape" data-dyn></span></span>
+              <input type="checkbox" id="ratioToggle" class="switch">
+            </label>
+            <div class="hint-text" id="gaugeSize" data-dyn></div>
+            <div class="hint-text" style="margin-top:6px;">뜨개는 보통 한 코가 한 단보다 넓어서, 정사각형 격자에 그린 모양이 실물에서는 옆으로 퍼져 보여요. 내 게이지(10cm 안의 코 수·단 수)를 넣고 켜 두면 완성작과 같은 모양으로 보면서 그릴 수 있어요.</div>
+          </div>
+          <div class="pane-sec">
+            <div class="pane-title">도안 파일 <span class="hint">다시 열어서 이어 작업할 수 있어요</span></div>
+            <div class="file-btns">
+              <button class="file-btn" id="saveFileBtn2">저장</button>
+              <button class="file-btn" id="openFileBtn2">열기</button>
+              <button class="file-btn" id="copyLinkBtn" title="도안이 담긴 링크를 복사해요">링크 복사</button>
+            </div>
+            <div class="hint-text" style="margin-top:8px;">저장하면 격자 크기, 칠한 칸, 배경색, 내 팔레트가 .json 파일 하나에 담겨요. 파일을 캔버스에 끌어다 놓아도 열려요.</div>
+          </div>
+          <div class="pane-sec">
+            <div class="pane-title">여백 <span class="hint">그린 도안은 그대로 두고 빈 칸만 더하거나 빼요</span></div>
+            <div class="size-row">
+              <select class="margin-select" id="marginDirSelect">
+                <option value="all" selected>사방 모두</option>
+                <option value="top">위</option>
+                <option value="bottom">아래</option>
+                <option value="left">왼쪽</option>
+                <option value="right">오른쪽</option>
+              </select>
+              <button class="btn-apply btn-margin" id="addMarginBtn">여백 늘리기</button>
+              <button class="btn-apply btn-margin" id="trimMarginBtn">여백 줄이기</button>
+            </div>
+          </div>
+        </section>
+        <section class="pane" id="pane-text">
+          <label class="live-row">
+            <span class="live-text"><b>실시간 미리보기</b></span>
+            <input type="checkbox" id="liveToggle" class="switch" checked>
+          </label>
+          <div class="preview-note" id="previewNote" data-dyn style="display:none;"></div>
+          <div class="glyph-note" id="glyphNote" data-dyn style="display:none;"></div>
+
+          <textarea id="textInput" class="text-area" placeholder="예: 뜨개" rows="2"></textarea>
+
+          <div class="props">
+            <div class="prop">
+              <span class="prop-label">폰트</span>
+              <select class="font-select" id="fontSelect" aria-label="폰트">
+              <optgroup label="도트 폰트">
+              <option value="DungGeunMo|16" selected>둥근모꼴</option>
+              <option value="NeoDunggeunmo|16">Neo둥근모</option>
+              <option value="DenkiChipHangul|12">전기칩 한글</option>
+              <option value="DosGothic|16">도스고딕</option>
+              <option value="DosMyungjo|16">도스명조</option>
+              <option value="DosPilgi|16">도스필기</option>
+              <option value="DosIyagi|16">이야기 굵은체</option>
+              <option value="Galmuri14|15">갈무리14</option>
+              <option value="Galmuri11|12">갈무리11</option>
+              <option value="Galmuri11Bold|12">갈무리11 굵게</option>
+              <option value="Galmuri9|10">갈무리9</option>
+              <option value="Galmuri7|8">갈무리7 (가장 작음)</option>
+              <option value="DOSSaemmul|16">도스샘물</option>
+              <option value="Miraero|24">미래로글꼴</option>
+              <option value="Mulmaru|12">물마루</option>
+              <option value="Mona12|12">모나12</option>
+              <option value="Mona10x12|12">모나10x12</option>
+              <option value="DepartureMono|11">Departure Mono (영문 전용)</option>
+              </optgroup>
+              <optgroup label="일반 글꼴">
+              <option value="NanumPen|v">나눔손글씨 펜</option>
+              <option value="DongleBold|v">동글 굵게</option>
+              <option value="SingleDay|v">싱글데이</option>
+              <option value="EastSeaDokdo|v">동해독도</option>
+              <option value="NotoSerifKRSemiBold|v">본명조 중간 굵게</option>
+              <option value="NotoSerifKRBold|v">본명조 굵게</option>
+              <option value="LeckerliOne|v">Leckerli One (영문 전용)</option>
+              <option value="PirataOne|v">Pirata One (영문 전용)</option>
+              <option value="AbrilFatface|v">Abril Fatface (영문 전용)</option>
+              <option value="DancingScript|v">Dancing Script Bold (영문 전용)</option>
+              <option value="UnifrakturMaguntia|v">UnifrakturMaguntia (영문 전용)</option>
+              </optgroup>
+
+            </select>
+            </div>
+            <div class="prop">
+              <span class="prop-label">크기</span>
+              <div class="stepper">
+                <button class="step-btn" id="scaleDownBtn" aria-label="글자 작게">−</button>
+                <span class="step-val"><b id="scaleBig" data-dyn>기본</b><small id="scaleSub" data-dyn>글자 높이 약 16칸</small></span>
+                <button class="step-btn" id="scaleUpBtn" aria-label="글자 크게">＋</button>
+                <button class="link-btn" id="scaleResetBtn">기본으로</button>
+              </div>
+            </div>
+            <div class="scale-warn" id="scaleWarn"></div>
+            <div class="prop-gaps">
+              <div class="gap-col" title="글자 사이 칸 수"><span class="gap-cap">글자 간격</span><div class="num-step"><button class="step-btn" data-step="-1" data-for="letterGapInput" aria-label="줄이기">−</button><input type="number" id="letterGapInput" value="1" min="0" max="20" inputmode="numeric"><button class="step-btn" data-step="1" data-for="letterGapInput" aria-label="늘리기">＋</button></div></div>
+              <div class="gap-col" title="띄어쓰기 칸 수"><span class="gap-cap">띄어쓰기</span><div class="num-step"><button class="step-btn" data-step="-1" data-for="spaceGapInput" aria-label="줄이기">−</button><input type="number" id="spaceGapInput" value="8" min="0" max="100" inputmode="numeric"><button class="step-btn" data-step="1" data-for="spaceGapInput" aria-label="늘리기">＋</button></div></div>
+              <div class="gap-col" title="줄 사이 칸 수 (음수면 줄이 겹쳐요)"><span class="gap-cap">줄 간격</span><div class="num-step"><button class="step-btn" data-step="-1" data-for="lineGapInput" aria-label="줄이기">−</button><input type="number" id="lineGapInput" value="1" min="-40" max="40" inputmode="numeric"><button class="step-btn" data-step="1" data-for="lineGapInput" aria-label="늘리기">＋</button></div></div>
+            </div>
+            <div class="hint-text" id="gapHint"></div>
+
+            <div class="prop">
+              <span class="prop-label">정렬</span>
+              <div class="segc" id="alignRow">
+                <button class="dir-btn align-btn active" data-align="left">왼쪽</button>
+                <button class="dir-btn align-btn" data-align="center">가운데</button>
+                <button class="dir-btn align-btn" data-align="right">오른쪽</button>
+              </div>
+            </div>
+            <div class="prop">
+              <span class="prop-label">흐름</span>
+              <div class="segc" id="flowRow">
+                <button class="dir-btn none active" data-flow="none">없음</button>
+                <button class="dir-btn" data-flow="wave">물결</button>
+                <button class="dir-btn" data-flow="bounce">통통</button>
+                <button class="dir-btn" data-flow="up">오르막</button>
+                <button class="dir-btn" data-flow="down">내리막</button>
+              </div>
+            </div>
+            <div class="flow-opts" id="flowOpts">
+              <div class="prop sub">
+                <span class="prop-label" id="flowAmtCap" data-dyn>높낮이</span>
+                <div class="stepper">
+                  <button class="step-btn" id="flowDown" aria-label="흐름 약하게">−</button>
+                  <span class="step-val"><b id="flowLabel" data-dyn>2칸</b></span>
+                  <button class="step-btn" id="flowUp" aria-label="흐름 강하게">＋</button>
+                </div>
+              </div>
+              <div class="hint-text" id="flowHint" data-dyn></div>
+            </div>
+
+            <div class="prop">
+              <span class="prop-label">테두리</span>
+              <div class="segc" id="outlineRow">
+                <button class="dir-btn none active" data-ol="0">없음</button>
+                <button class="dir-btn" data-ol="1" data-dyn>1칸</button>
+                <button class="dir-btn" data-ol="2" data-dyn>2칸</button>
+              </div>
+            </div>
+            <div class="shadow-opts" id="outlineOpts">
+              <div class="prop sub">
+                <span class="prop-label">색</span>
+                <div class="palette mini" id="outlinePalette" data-dyn></div>
+              </div>
+            </div>
+
+            <div class="prop">
+              <span class="prop-label">그림자</span>
+              <div class="segc" id="shadowDirRow">
+                <button class="dir-btn none active" data-dir="none">없음</button>
+                <button class="dir-btn" data-dir="dr" aria-label="오른쪽 아래">↘</button>
+                <button class="dir-btn" data-dir="d" aria-label="아래">↓</button>
+                <button class="dir-btn" data-dir="dl" aria-label="왼쪽 아래">↙</button>
+                <button class="dir-btn" data-dir="r" aria-label="오른쪽">→</button>
+                <button class="dir-btn" data-dir="l" aria-label="왼쪽">←</button>
+              </div>
+            </div>
+            <div class="shadow-opts" id="shadowOpts">
+              <div class="prop sub">
+                <span class="prop-label">종류</span>
+                <div class="segc" id="shadowModeRow">
+                  <button class="dir-btn active" data-smode="one">한 색</button>
+                  <button class="dir-btn" data-smode="glitch">지직 (두 색)</button>
+                </div>
+              </div>
+              <div class="prop sub">
+                <span class="prop-label">거리</span>
+                <div class="stepper">
+                  <button class="step-btn" id="shadowDistDown" aria-label="그림자 가깝게">−</button>
+                  <span class="step-val"><b id="shadowDistLabel" data-dyn>1칸</b></span>
+                  <button class="step-btn" id="shadowDistUp" aria-label="그림자 멀게">＋</button>
+                </div>
+              </div>
+              <div class="prop sub">
+                <span class="prop-label" id="shadowColorLabel" data-dyn>색</span>
+                <div class="palette mini" id="shadowPalette" data-dyn></div>
+              </div>
+              <div class="prop sub" id="shadowColor2Row" style="display:none;">
+                <span class="prop-label" id="shadowColor2Label" data-dyn>색 2</span>
+                <div class="palette mini" id="shadowPalette2" data-dyn></div>
+              </div>
+              <div class="hint-text" id="shadowHint" data-dyn></div>
+            </div>
+
+            <div class="prop">
+              <span class="prop-label">격자</span>
+              <div class="segc" id="fitModeRow">
+                <button class="dir-btn fit-btn active" data-fit="keep">지금 도안에 얹기</button>
+                <button class="dir-btn fit-btn" data-fit="fit">글자에 맞추기</button>
+              </div>
+            </div>
+            <div class="fit-opts" id="fitOpts">
+              <div class="prop sub">
+                <span class="prop-label">여백</span>
+                <div class="stepper"><div class="num-step"><button class="step-btn" data-step="-1" data-for="fitMarginInput" aria-label="줄이기">−</button><input type="number" id="fitMarginInput" value="2" min="0" max="20" inputmode="numeric"><button class="step-btn" data-step="1" data-for="fitMarginInput" aria-label="늘리기">＋</button></div><span class="unit">칸</span>
+                  <span class="fit-preview" id="fitPreview" data-dyn></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-convert" id="convertBtn" data-dyn>도안에 글자 넣기</button>
+          <div class="hint-text convert-hint" id="convertHint" data-dyn></div>
+        </section>
+        <section class="pane" id="pane-decor">
+          <div class="pane-title">내 장식 <span class="hint">직접 만든 장식</span></div>
+          <div class="decor-grid" id="userDecorGrid" data-dyn></div>
+          <button class="file-btn new-decor-btn" id="newDecorBtn">＋ 새 장식 그리기</button>
+          <div class="hint-text" style="margin-top:8px;">캔버스에 그린 그림도 <b>선택</b> 도구로 감싼 뒤 옮기기 막대의 <b>내 장식에 추가</b>를 누르면 저장돼요.</div>
+          <div class="pane-title" style="margin-top:20px;">기본 장식</div>
+
+            <div class="decor-row" id="decorRow" data-dyn></div>
+            <div class="hint-text" style="margin-top:12px;">'칠할 색'으로 찍혀요. 이미 넣은 장식이나 글자는 도구의 <b>선택</b>으로 감싸면 다시 옮기거나 복사할 수 있어요.</div>
+
+        </section>
+        <section class="pane" id="pane-replace">
+          <div class="pane-title">색 한번에 바꾸기 <span class="hint">도안 전체</span></div>
+
+            <div class="sub-title">바꿀 색 <span class="hint">도안에 쓰인 색</span></div>
+            <div class="palette mini" id="replaceFrom" data-dyn></div>
+            <div class="replace-arrow">↓</div>
+            <div class="sub-title">새 색</div>
+            <div class="palette mini" id="replaceTo" data-dyn></div>
+            <button class="btn-convert" id="replaceBtn" data-dyn disabled>바꿀 색과 새 색을 골라주세요</button>
+
+        </section>
+        <section class="pane help" id="pane-help">
+
+          <div class="pane-title">Free alpha pattern maker for crochet</div>
+          <p class="hint-text" style="margin:4px 0 12px;">Crochet Alpha turns a grid into a crochet chart. Paint cells by hand, or type a word, pick one of 18 pixel fonts and get an alpha pattern in seconds. Each cell is one stitch and each line of cells is one row, so it works for tapestry crochet, single crochet colorwork and other pixel crochet projects. Save your chart as an image or a pattern file — free, no sign-up.</p>
+          <ul data-i18n-html="help">
+            <li><b>Paint</b>: tap or drag over cells. <b>Fill</b>: colors a whole connected area of the same color at once.</li>
+            <li>Tap the selected paint color again (or right-click a color) to change or remove that palette slot. Cells you've already painted keep their color.</li>
+            <li><b>Current row</b> counts from the bottom as row 1 and is outlined on the grid.</li>
+            <li>The background is the color of unpainted cells, so changing it later keeps your pattern intact.</li>
+            <li>In Text to pattern, choose a <b>Shadow</b> direction to lay a shadow color behind the letters. Set the style to <b>Glitch (two colors)</b> to shift two colors in opposite directions. <b>Outline</b> wraps the letters by one or two cells, corners included.</li>
+            <li>Drag the text and let go to lock it in place. Placed it wrong? Tap <b>Undo</b>.</li>
+            <li><b>Rotate</b> turns the whole pattern 90° or 270° clockwise — handy when working rows vertically.</li>
+            <li>Add words one at a time and move each to stagger lines.</li>
+            <li><b>Text flow</b> makes letters wave, bounce, or climb up and down diagonally.</li>
+            <li>Make your own decorations with <b>Draw new decoration</b> in the Decor tab, or select something on the canvas and tap <b>Add to my decorations</b>.</li>
+            <li>Use the <b>Select</b> tool to drag a box around placed text or decorations to move them again — each connected blob can be moved on its own.</li>
+            <li><b>Copy</b> and <b>Paste</b> floating text, decorations or selections as many times as you like. Keys: Ctrl+C · Ctrl+X · Ctrl+V · Delete · Esc · Enter · arrows</li>
+            <li>After adding text, tap <b>Move letters</b> to pick and move each letter freely — great for fine-tuning a wave layout.</li>
+            <li>While moving text, tap <b>↔ Center · ↕ Center</b> to center it on the grid.</li>
+            <li>Use the arrow button at the right end of the toolbar (below it on phones) to collapse it so the pattern fills the screen. Tap the small arrow handle at the top right to bring it back. Keyboard: Ctrl+\ (Cmd+\ on Mac)</li>
+          </ul>
+          <div class="credits">
+            <div class="credits-title">사용한 폰트 · 라이선스</div>
+            <ul data-i18n-html="credits">
+              <li><b>DungGeunMo</b> — original by Kim Jung-tae, conversion by Kil Hyung-jin · Public domain</li>
+              <li><b>NeoDunggeunmo</b> — © 2017–2024 Eunbin Jeong (Dalgona.) · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/neodgm/neodgm" target="_blank" rel="noopener">github.com/neodgm</a></li>
+              <li><b>DenkiChip Hangul</b> (x10y12pxDenkiChipHangul) — © 2026 Lee Minseo, x8y12pxDenkiChip Project Authors · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a></li>
+              <li><b>Galmuri</b> — © 2019–2025 Lee Minseo, Reserved Font Name "Galmuri" · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/quiple/galmuri" target="_blank" rel="noopener">github.com/quiple/galmuri</a></li>
+              <li><b>DOS Gothic · DOS Myungjo · DOS Pilgi · DOS Iyagi Bold</b> — © 2016–2022 Damheo Lee (leedheo) · MIT License · <a href="https://github.com/hurss/fonts" target="_blank" rel="noopener">github.com/hurss/fonts</a></li>
+              <li><b>DOS Saemmul</b> — © 2016 Damheo Lee (leedheo) · MIT License · <a href="https://github.com/hurss/fonts" target="_blank" rel="noopener">github.com/hurss/fonts</a></li>
+              <li><b>Miraero</b> (by leedheo) — © 2016–2022 Damheo Lee (leedheo), Reserved Font Name "MiraeroNormal" · MIT License · <a href="https://github.com/hurss/fonts" target="_blank" rel="noopener">github.com/hurss/fonts</a></li>
+              <li><b>Nanum Pen</b> — © 2010 NHN Corporation (now NAVER), Reserved Font Names "Nanum", "NanumPen" and others · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://hangeul.naver.com/font" target="_blank" rel="noopener">hangeul.naver.com</a></li>
+              <li><b>Mulmaru</b> — © 2025 Mushsooni, Reserved Font Name "물마루", "Mulmaru" · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/mushsooni/mulmaru" target="_blank" rel="noopener">github.com/mushsooni/mulmaru</a></li>
+              <li><b>Mona12 · Mona10x12</b> — © 2025 Monad ABXY, Reserved Font Name "Mona" · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://monadabxy.com/fonts/mona/" target="_blank" rel="noopener">monadabxy.com</a></li>
+
+              <li><b>Departure Mono</b> — © 2022–2024 Helena Zhang · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://departuremono.com" target="_blank" rel="noopener">departuremono.com</a></li>
+              <li><b>Noto Serif KR</b> — © 2017–2024 Adobe · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/notofonts/noto-cjk" target="_blank" rel="noopener">github.com/notofonts/noto-cjk</a></li>
+              <li><b>Dongle Bold</b> — Copyright 2021 The Dongle Project Authors (https://github.com/yangheeryu/Dongle) · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/google/fonts/tree/main/ofl/dongle" target="_blank" rel="noopener">github.com/google/fonts</a></li>
+              <li><b>Single Day</b> — Copyright 2015 DXKorea Inc. All rights reserved. · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/google/fonts/tree/main/ofl/singleday" target="_blank" rel="noopener">github.com/google/fonts</a></li>
+              <li><b>East Sea Dokdo</b> — Copyright (c) YoonDesign Inc. All Rights Reserved. · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/google/fonts/tree/main/ofl/eastseadokdo" target="_blank" rel="noopener">github.com/google/fonts</a></li>
+              <li><b>Leckerli One</b> — Copyright (c) 2011 Gesine Todt (www.gesine-todt.de), with Reserved Font Names "Leckerli" and "Leckerli One". · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/google/fonts/tree/main/ofl/leckerlione" target="_blank" rel="noopener">github.com/google/fonts</a></li>
+              <li><b>Pirata One</b> — Copyright (c) 2012, Rodrigo Fuenzalida, Nicolas Massi (www.taip.com.ar / abc.taip.com.ar), with Reserved Font Name 'Pirata' · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/google/fonts/tree/main/ofl/pirataone" target="_blank" rel="noopener">github.com/google/fonts</a></li>
+              <li><b>Abril Fatface</b> — Copyright (c) 2011, TypeTogether (www.type-together.com), with Reserved Font Names "Abril" and "Abril Fatface" · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/google/fonts/tree/main/ofl/abrilfatface" target="_blank" rel="noopener">github.com/google/fonts</a></li>
+              <li><b>Dancing Script</b> — Copyright 2016 The Dancing Script Project Authors (https://github.com/googlefonts/DancingScript), with Reserved Font Name 'Dancing Script'. · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/google/fonts/tree/main/ofl/dancingscript" target="_blank" rel="noopener">github.com/google/fonts</a></li>
+              <li><b>UnifrakturMaguntia</b> — Copyright (c) 2010, j. 'mach' wust, with Reserved Font Name UnifrakturMaguntia. Copyright (c) 2009, Peter Wiegel. · <a href="https://openfontlicense.org" target="_blank" rel="noopener">SIL OFL 1.1</a> · <a href="https://github.com/google/fonts/tree/main/ofl/unifrakturmaguntia" target="_blank" rel="noopener">github.com/google/fonts</a></li>
+            </ul>
+            <p style="font-size:12.5px;margin:8px 0;"><a href="/credits/" hreflang="ko">All font credits (in Korean)</a> · <a href="/assets/fonts/LICENSES.txt">Full license texts</a></p>
+            <details class="mit">
+              <summary>MIT License 전문 (도스 계열 폰트)</summary>
+              <p>Copyright (c) 2016–2022 Damheo Lee</p>
+              <p>Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:</p>
+              <p>The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.</p>
+              <p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</p>
+            </details>
+          </div>
+        
+        </section>
+      </div>
+    </aside>
+  </div>
+</div>
+
+  <div class="hex-modal" id="hexModal" role="dialog" aria-modal="true" aria-labelledby="hexTitle">
+    <div class="hex-box">
+      <div class="hex-title" id="hexTitle" data-dyn>색 추가</div>
+      <div class="hex-row">
+        <label class="hex-preview" id="hexPreview" title="눌러서 색상표로 고르기">
+          <input type="color" id="hexNative">
+        </label>
+        <input class="hex-text" id="hexText" type="text" maxlength="7" spellcheck="false" autocomplete="off" autocapitalize="characters" placeholder="#RRGGBB">
+      </div>
+      <div class="hex-help">헥스코드를 입력하거나, 왼쪽 네모를 눌러 색상표에서 골라요.</div>
+      <div class="hex-err" id="hexErr" data-dyn></div>
+      <div class="hex-btns">
+        <button type="button" class="hex-cancel" id="hexCancel">취소</button>
+        <button type="button" class="hex-ok" id="hexOk">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hex-modal" id="decorModal" role="dialog" aria-modal="true" aria-labelledby="decorModalTitle">
+    <div class="hex-box decor-box">
+      <div class="hex-title" id="decorModalTitle" data-dyn>새 장식 그리기</div>
+      <input class="de-name" id="deName" type="text" maxlength="20" placeholder="장식 이름 (예: 우리 고양이)">
+      <div class="de-size">
+        <div class="stepper"><span class="prop-label">가로</span>
+          <button class="step-btn" id="deWDown" aria-label="가로 줄이기">−</button><span class="step-val"><b id="deWLabel" data-dyn>9</b></span><button class="step-btn" id="deWUp" aria-label="가로 늘리기">＋</button></div>
+        <div class="stepper"><span class="prop-label">세로</span>
+          <button class="step-btn" id="deHDown" aria-label="세로 줄이기">−</button><span class="step-val"><b id="deHLabel" data-dyn>9</b></span><button class="step-btn" id="deHUp" aria-label="세로 늘리기">＋</button></div>
+      </div>
+      <div class="de-canvas-wrap"><canvas id="deCanvas"></canvas></div>
+      <div class="de-tools">
+        <div class="segc" id="deModeRow">
+          <button class="dir-btn active" data-de="draw">그리기</button>
+          <button class="dir-btn" data-de="erase">지우기</button>
+        </div>
+        <button class="link-btn" id="deClearBtn">모두 지우기</button>
+      </div>
+      <div class="hex-help">칸을 누르거나 끌어서 그려요. 넣을 때는 '칠할 색'으로 칠해져요.</div>
+      <div class="hex-btns">
+        <button type="button" class="hex-cancel" id="deCancel">취소</button>
+        <button type="button" class="hex-ok" id="deSave">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hex-modal" id="askModal" role="dialog" aria-modal="true" aria-labelledby="askTitle">
+    <div class="hex-box">
+      <div class="hex-title" id="askTitle" data-dyn></div>
+      <div class="ask-msg" id="askMsg" data-dyn></div>
+      <input class="de-name" id="askInput" type="text" maxlength="200" spellcheck="false">
+      <div class="hex-btns">
+        <button type="button" class="hex-cancel" id="askCancel">취소</button>
+        <button type="button" class="hex-ok" id="askOk">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="hex-modal" id="swatchModal" role="dialog" aria-modal="true" aria-labelledby="swatchTitle">
+    <div class="hex-box">
+      <div class="sw-head"><span class="sw-chip" id="swatchChip"></span><div class="hex-title" id="swatchTitle" data-dyn></div></div>
+      <div class="sw-actions">
+        <button type="button" class="sw-act" id="swatchChange">이 칸 색 바꾸기</button>
+        <button type="button" class="sw-act danger-text" id="swatchDelete">이 칸 지우기</button>
+      </div>
+      <div class="hex-help" id="swatchNote" data-dyn></div>
+      <div class="hex-btns">
+        <button type="button" class="hex-cancel" id="swatchCancel">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" data-dyn></div>
+  <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
+
+<script src="/assets/pattern.js?v=2"></script>
+</body>
+</html>

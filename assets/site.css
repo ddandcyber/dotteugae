@@ -62,6 +62,8 @@ img{ max-width:100%; height:auto; }
 .nav-drop{ position:absolute; right:0; top:46px; background:var(--card); border:1px solid var(--line); border-radius:12px;
            box-shadow:var(--shadow); padding:6px; display:flex; flex-direction:column; min-width:180px; }
 @media (max-width: 760px){ .nav{ display:none; } .nav-mobile{ display:block; } }
+/* 영어 페이지는 메뉴 글자가 길어서 조금 더 넓은 폭부터 휴대폰 메뉴로 바꿈 */
+@media (max-width: 860px){ html[lang="en"] .nav{ display:none; } html[lang="en"] .nav-mobile{ display:block; } }
 
 /* 본문 공통 */
 .site-main{ padding:36px 0 64px; min-height:60vh; }
