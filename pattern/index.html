@@ -19,7 +19,7 @@
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/pattern.css?v=5">
+<link rel="stylesheet" href="../assets/pattern.css?v=6">
 </head>
 <body>
 <div class="app area-work">
@@ -212,6 +212,7 @@
           <button type="button" class="link-btn filet-guide-open" id="filetGuideOpen" hidden>보는 법</button>
           <p class="filet-note" id="filetColorNote" hidden>필레는 보통 한 가지 실로 떠서 색 구분은 사라져요.</p>
           <div class="filet-start" id="filetStart" data-dyn></div>
+          <div class="filet-pair">
           <div class="filet-fig">
             <div class="filet-fig-title">막힌 칸·빈 칸 미리보기 <span class="filet-fig-sub">검정 = 막힌 칸, 흰색 = 빈 칸</span></div>
             <div class="filet-scrollbox"><canvas id="filetPreview"></canvas></div>
@@ -220,6 +221,7 @@
             <div class="filet-fig-title">기호도</div>
             <div class="filet-legend" id="filetLegend" data-dyn></div>
             <div class="filet-scrollbox" id="filetChart" data-dyn></div>
+          </div>
           </div>
           <div class="filet-fig">
             <div class="filet-fig-title">줄별 설명</div>
@@ -643,6 +645,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="../assets/pattern.js?v=7"></script>
+<script src="../assets/pattern.js?v=8"></script>
 </body>
 </html>

@@ -612,6 +612,11 @@ function filetLi() {
   set(2, 11, [2, 3]); set(2, 3, [4, 5, 6]); set(2, 8, [8, 9]); set(10, 11, [8, 9]);
   return { cols: n, rows: R, solid };
 }
+const filetLayout = () => {
+  const pv = document.getElementById('filetPreview').getBoundingClientRect(), ch = document.getElementById('filetChart').getBoundingClientRect();
+  const note = getComputedStyle(document.getElementById('filetColorNote')).color, soft = getComputedStyle(document.querySelector('.filet-guide ul')).color;
+  return { side: ch.left >= pv.right - 1 && Math.abs(ch.top - pv.top) < 80, stacked: ch.top >= pv.bottom - 1, noteSoft: note === soft };
+};
 test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막힘, 360px·어두운 화면, 영어, 도안 데이터 그대로', async (fail, note) => {
   const LI = filetLi();
   // 1) 계산 함수 (화면과 따로)
@@ -692,7 +697,7 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       });
       if (ui.colors !== 2) fail(`색 체크박스가 2개(빨강·파랑)여야 하는데 ${ui.colors}개예요`);
       if (!ui.note) fail('색이 2개인데 "필레는 보통 한 가지 실로…" 안내가 보이지 않아요');
-      const wantGuide = ['검정 = 막힌 칸(한길긴뜨기 3코), 흰색 = 빈 칸(사슬 2코 + 한길긴뜨기 1코)', '홀수 단은 ←, 짝수 단은 →', '단 바꿀 때 세우는 사슬: 다음 첫 칸이 막힌 칸 3코, 빈 칸 3+2코'];
+      const wantGuide = ['검정 = 막힌 칸(한길긴뜨기 3코), 흰색 = 빈 칸(사슬 2코 + 한길긴뜨기 1코)', '홀수 단은 ←, 짝수 단은 →', '단 바꿀 때 세우는 사슬: 다음 첫 칸이 막힌 칸 3코, 빈 칸 5코'];
       if (JSON.stringify(ui.guide) !== JSON.stringify(wantGuide)) fail(`보는 법 카드가 짧은 3줄이 아니에요 (${JSON.stringify(ui.guide)})`);
       if (ui.startLines !== 2) fail(`시작 안내가 두 줄이어야 하는데 ${ui.startLines}줄이에요`);
       if (ui.rowLines !== 12) fail(`줄별 설명이 한 단에 한 줄(12줄)이어야 하는데 ${ui.rowLines}줄이에요`);
@@ -702,6 +707,9 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       if (!ui.editOff) fail('필레 탭인데 칠하기·되돌리기 같은 편집 도구나 오른쪽 패널이 아직 보여요');
       if (!ui.canvasOff) fail('필레 탭인데 도안 캔버스가 가려지지 않았어요');
       if (ui.tabs !== 'false,true') fail(`탭 선택 표시가 달라요 (${ui.tabs})`);
+      const lay = await page.evaluate(filetLayout);
+      if (!lay.side) fail('넓은 화면(1440px)인데 미리보기 격자(왼쪽)와 기호도(오른쪽)가 나란히 놓이지 않았어요');
+      if (!lay.noteSoft) fail('"필레는 보통 한 가지 실로…" 문구가 기존 보조 글씨 색이 아니에요');
       // 편집 막힘: 캔버스가 있던 자리를 눌러도, 단축키(Ctrl+Z, Delete)를 눌러도 도안이 안 바뀜
       const pt = await cellPoint(page, 5, 5);
       await page.mouse.click(pt.x, pt.y); await sleep(150);
@@ -790,6 +798,9 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       });
       const label = `${p} ${w}px${dark ? ' 어두운 화면' : ''}`;
       if (!r.open) { fail(`${label}: 필레 탭이 열리지 않아요`); continue; }
+      const lay = await page.evaluate(filetLayout);
+      if (!lay.stacked) fail(`${label}: 좁은 화면인데 미리보기 격자와 기호도가 위아래로 놓이지 않았어요`);
+      if (!lay.noteSoft) fail(`${label}: "필레는 보통 한 가지 실로…" 문구가 기존 보조 글씨 색이 아니에요`);
       if (!r.ribbon) fail(`${label}: 필레 탭인데 작업창의 버전 선택이 보이지 않아요 (작업창이 접혀 있어도 보여야 해요)`);
       if (r.out.length || r.wide > 1) fail(`${label}: 필레 탭이 화면 밖으로 넘쳐요 (${r.out.join(', ') || r.wide + 'px'})`);
       if (p.startsWith('/en/')) {
@@ -807,7 +818,7 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
         if ((e.legend.match(/\(US terms\)/g) || []).length !== 1) fail(`${label}: 기호 설명에 "(US terms)"가 한 번 있어야 해요 (${e.legend.replace(/\n/g, ' / ')})`);
         if (!e.legend.includes('counts as first dc')) fail(`${label}: 한길긴뜨기 버전 기호 설명에 "counts as first dc"가 없어요`);
         if (!e.start.includes('35 ch = turning chain (3 ch) on the right + 2 ch for the first space + 30 ch along the bottom')) fail(`${label}: 시작 사슬 설명이 새 문구가 아니에요 (${e.start.split('\n')[1]})`);
-        if (e.guide.length !== 3 || e.guide[0] !== 'Black = block (3 dc), white = space (ch 2 + 1 dc)' || e.guide[1] !== 'Odd rows ←, even rows →' || e.guide[2] !== 'Turning chain: 3 if the next row starts with a block, 3+2 if with a space') fail(`${label}: 보는 법 영어가 달라요 (${JSON.stringify(e.guide)})`);
+        if (e.guide.length !== 3 || e.guide[0] !== 'Black = block (3 dc), white = space (ch 2 + 1 dc)' || e.guide[1] !== 'Odd rows ←, even rows →' || e.guide[2] !== 'Turning chain: 3 if the next row starts with a block, 5 if with a space') fail(`${label}: 보는 법 영어가 달라요 (${JSON.stringify(e.guide)})`);
         if (e.row9 !== 'Row 9 ← sp 7 · bl 2 · sp 1 (turn ch 5)') fail(`${label}: 줄별 설명 영어가 달라요 (${e.row9})`);
         if (/\bposts?\b|upright/i.test(e.all)) fail(`${label}: 필레 탭 영어에 "post"나 "upright"가 남아 있어요`);
         await page.select('#filetVerSel', 'c'); await sleep(200);
