@@ -2872,8 +2872,11 @@
         P.push({ t:'line', x1:x-4, y1:ym+3, x2:x+4, y2:ym-3 });
       }
     };
-    const chainH = (cx, cy, rx, tag) => P.push({ t:'ell', cx, cy, rx, ry:Math.min(3.4, rx*0.8), tag });
-    const chainV = (cx, cy, ry, tag) => P.push({ t:'ell', cx, cy, rx:3.6, ry, tag });
+    // 사슬 모양: p = 코 한 칸의 가로 간격. 가로 사슬은 납작한 타원(가로 반지름 0.45p, 세로 반지름 0.17p)이라 옆 사슬과 거의 닿아 한 줄로 이어져 보임.
+    // 세우는 사슬은 그것을 세운 모양(가로 반지름 0.17p, 세로 반지름 = 사슬 하나 높이의 0.45배)
+    const p = CW / (k+1), chRX = 0.45*p, chRY = 0.17*p;
+    const chainH = (cx, cy, tag) => P.push({ t:'ell', cx, cy, rx:chRX, ry:chRY, tag });
+    const chainV = (cx, cy, ry, tag) => P.push({ t:'ell', cx, cy, rx:chRY, ry, tag });
     plan.rowList.forEach(row => {
       const r = row.row, rtl = row.dir === 'rtl';
       const yb = TOP + (R - r + 1)*RH, yt = TOP + (R - r)*RH + 5;
@@ -2883,17 +2886,18 @@
         const x0 = xOf(rtl ? n-1-q : q);
         if(solid){ for(let s = 1; s <= k; s++) stem(x0 + CW*s/(k+1), yb, yt); }
         else {
-          const w = CW / k, tag = (r === 1 && q === 0) ? 'fc-first' : '';
-          for(let s = 0; s < k; s++) chainH(x0 + w*(s+0.5), yt + 3, w/2 - 1.4, tag); // 빈 칸 사슬은 기둥 위쪽 높이
+          const tag = (r === 1 && q === 0) ? 'fc-first' : '';
+          // 빈 칸 사슬은 막힌 칸의 기둥 자리(코 간격 p)에, 기둥 위 막대보다 살짝 아래 높이로
+          for(let s = 1; s <= k; s++) chainH(x0 + p*s, yt + chRY + 3.4, tag);
         }
       });
       const cnt = r === 1 ? plan.h : plan.turnSolid, seg = (yb - yt) / cnt;
-      for(let s = 0; s < cnt; s++) chainV(xOf(startEdge), yb - seg*(s+0.5), seg/2 - 0.8, r === 1 ? 'fc-up' : '');
+      for(let s = 0; s < cnt; s++) chainV(xOf(startEdge), yb - seg*(s+0.5), seg*0.45, r === 1 ? 'fc-up' : '');
       P.push({ t:'text', x: rtl ? W - LM/2 : LM/2, y:(yt + yb)/2, s: rtl ? '← ' + r : r + ' →' });
     });
     // 맨 아래 시작 사슬: 가로 타원 (k+1)×n개
-    const fw = CW / (k+1), fy = TOP + R*RH + 11;
-    for(let s = 0; s < (k+1)*n; s++) chainH(LM + fw*(s+0.5), fy, fw/2 - 1, 'fc-base');
+    const fy = TOP + R*RH + 11;
+    for(let s = 0; s < (k+1)*n; s++) chainH(LM + p*(s+0.5), fy, 'fc-base');
     return { W, H, P };
   }
   const filetF = v => Math.round(v*10)/10;
@@ -2996,8 +3000,8 @@
   function filetLegendHtml(plan){
     const slashes = plan.stitch === 'tr' ? '<path d="M9 19l8-6"/><path d="M9 25l8-6"/>' : '<path d="M9 21l8-6"/>';
     const stemSvg = `<svg viewBox="0 0 26 34" aria-hidden="true"><g fill="none" stroke="#222" stroke-width="1.6" stroke-linecap="round"><path d="M13 30V5M8 5h10"/>${slashes}</g></svg>`;
-    const chSvg = '<svg viewBox="0 0 26 34" aria-hidden="true"><ellipse cx="13" cy="17" rx="8" ry="4" fill="none" stroke="#222" stroke-width="1.6"/></svg>';
-    const upSvg = '<svg viewBox="0 0 26 34" aria-hidden="true"><g fill="none" stroke="#222" stroke-width="1.5"><ellipse cx="13" cy="7" rx="3.6" ry="4"/><ellipse cx="13" cy="16.5" rx="3.6" ry="4"/><ellipse cx="13" cy="26" rx="3.6" ry="4"/></g></svg>';
+    const chSvg = '<svg viewBox="0 0 26 34" aria-hidden="true"><ellipse cx="13" cy="17" rx="10.5" ry="4" fill="none" stroke="#222" stroke-width="1.4"/></svg>';
+    const upSvg = '<svg viewBox="0 0 26 34" aria-hidden="true"><g fill="none" stroke="#222" stroke-width="1.4"><ellipse cx="13" cy="7" rx="1.8" ry="4.5"/><ellipse cx="13" cy="17" rx="1.8" ry="4.5"/><ellipse cx="13" cy="27" rx="1.8" ry="4.5"/></g></svg>';
     // 영어는 기둥 이름 뒤에 한 번만 (US terms)를 붙임 (사전의 "{st}" 항목, 한국어는 이름 그대로)
     return `<span>${stemSvg}${t('{st}', { st:filetStName(plan) })}</span><span>${chSvg}${t('사슬')}</span><span>${upSvg}${t('세우는 사슬 3코 - 첫 기둥 1코로 셈', { ab:filetAbbr(plan) })}</span>`;
   }
