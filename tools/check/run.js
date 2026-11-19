@@ -666,13 +666,14 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       const state = () => page.evaluate(() => {
         const p = filetCurrentPlan;
         const drawn = document.querySelectorAll('#filetChart .fc-up, #filetChart .fc-first, #filetChart .fc-base').length;
-        return { start: p && p.startChain, at: p && p.firstStitchAt, drawn, text: document.getElementById('filetStart').innerText };
+        return { start: p && p.startChain, at: p && p.firstStitchAt, drawn, text: document.getElementById('filetStart').innerText, label: [...document.querySelectorAll('#filetChart text')].map(x => x.textContent).filter(x => /시작 사슬/.test(x)) };
       });
       const expect = async (start, what) => {
         const s = await state();
         if (!await mode()) { fail(`${what}: 필레 탭이 아니에요`); return; }
         if (s.start !== start) fail(`${what}: 시작 사슬이 ${start}코여야 하는데 ${s.start}코예요`);
         if (s.drawn !== s.start) fail(`${what}: 기호도에 그린 사슬(세로 + 첫 빈 칸 + 가로)이 ${s.drawn}개인데 시작 사슬은 ${s.start}코예요`);
+        if (s.label.length !== 1 || s.label[0] !== `시작 사슬 ${s.start}코`) fail(`${what}: 기호도 맨 아래에 "시작 사슬 ${s.start}코" 글자가 한 번 있어야 해요 (${JSON.stringify(s.label)})`);
         if (!s.text.includes(`사슬 ${s.start}코`) || !s.text.includes(`${s.at}번째`)) fail(`${what}: 시작 안내 글이 계산과 달라요 (${s.text.split('\n')[0]})`);
       };
       if (await mode()) fail('처음부터 필레 탭이에요');
@@ -708,6 +709,7 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       if (!ui.canvasOff) fail('필레 탭인데 도안 캔버스가 가려지지 않았어요');
       if (ui.tabs !== 'false,true') fail(`탭 선택 표시가 달라요 (${ui.tabs})`);
       const lay = await page.evaluate(filetLayout);
+      if (!(await page.evaluate(() => document.getElementById('filetGuide').getBoundingClientRect().top >= document.querySelector('.filet-pair').getBoundingClientRect().bottom - 1))) fail('보는 법 카드가 도안(미리보기·기호도) 아래에 있지 않아요');
       if (!lay.side) fail('넓은 화면(1440px)인데 미리보기 격자(왼쪽)와 기호도(오른쪽)가 나란히 놓이지 않았어요');
       if (!lay.noteSoft) fail('"필레는 보통 한 가지 실로…" 문구가 기존 보조 글씨 색이 아니에요');
       // 편집 막힘: 캔버스가 있던 자리를 눌러도, 단축키(Ctrl+Z, Delete)를 눌러도 도안이 안 바뀜
@@ -716,6 +718,27 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       await page.keyboard.down('Control'); await page.keyboard.press('KeyZ'); await page.keyboard.up('Control'); await sleep(150);
       await page.keyboard.press('Delete'); await sleep(100);
       if ((await page.evaluate(() => JSON.stringify(gridData))) !== before.data) fail('필레 탭에서 누르기·Ctrl+Z·Delete로 도안 칸이 바뀌었어요');
+      // 기호도 확대·축소·맞춤·전체 화면 (보는 방식만 바뀌고 사슬 수와 도안은 그대로)
+      const zoomInfo = () => page.evaluate(() => { const s = document.querySelector('#filetChart svg'); return { w: s.getBoundingClientRect().width, label: document.getElementById('filetZoomVal').textContent, chains: document.querySelectorAll('#filetChart ellipse').length }; });
+      const z1 = await zoomInfo();
+      await clickId(page, 'filetZoomIn');
+      const z2 = await zoomInfo();
+      if (!(z2.w > z1.w * 1.2) || z2.label !== '125%') fail(`확대 버튼을 눌렀는데 기호도가 커지지 않았어요 (${z1.w} → ${z2.w}, ${z2.label})`);
+      await clickId(page, 'filetZoomOut'); await clickId(page, 'filetZoomOut');
+      const z3 = await zoomInfo();
+      if (!(z3.w < z1.w * 0.9)) fail(`축소 버튼을 눌렀는데 기호도가 작아지지 않았어요 (${z3.w})`);
+      await clickId(page, 'filetZoomFit');
+      const z4 = await page.evaluate(() => ({ boxW: document.getElementById('filetChart').clientWidth, svgW: document.querySelector('#filetChart svg').getBoundingClientRect().width, over: document.getElementById('filetChart').scrollWidth - document.getElementById('filetChart').clientWidth }));
+      if (z4.over > 2) fail(`맞춤을 눌렀는데 기호도가 상자보다 넓어서 가로로 밀려요 (${z4.over}px)`);
+      await clickId(page, 'filetFullBtn');
+      const fs1 = await page.evaluate(() => { const f = document.getElementById('filetChartFig'), r = f.getBoundingClientRect(); return { cls: f.classList.contains('filet-full'), covers: r.width >= innerWidth - 1 && r.height >= innerHeight - 1, chains: document.querySelectorAll('#filetChart ellipse').length }; });
+      if (!fs1.cls || !fs1.covers) fail('전체 화면 버튼을 눌렀는데 기호도가 화면을 가득 채우지 않았어요');
+      if (fs1.chains !== z1.chains) fail('전체 화면으로 바꾸자 기호도의 사슬 수가 달라졌어요');
+      await page.keyboard.press('Escape'); await sleep(300);
+      const fs2 = await page.evaluate(() => ({ full: document.getElementById('filetChartFig').classList.contains('filet-full'), mode: document.querySelector('.app').classList.contains('filet-mode') }));
+      if (fs2.full) fail('Esc를 눌러도 전체 화면이 닫히지 않아요');
+      if (!fs2.mode) fail('전체 화면에서 Esc를 눌렀더니 필레 탭까지 닫혔어요 (전체 화면만 닫혀야 해요)');
+      await clickId(page, 'filetZoomFit'); await page.evaluate(() => document.getElementById('filetZoomIn').click()); await page.evaluate(() => document.getElementById('filetZoomOut').click());
       // 줄별 설명은 접었다 펼 수 있음
       await page.click('#filetRowsFold > summary'); await sleep(100);
       if (await page.evaluate(() => document.getElementById('filetRowsFold').open)) fail('줄별 설명 제목을 눌러도 접히지 않아요');
@@ -820,6 +843,7 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
           row9: (document.querySelector('#filetRows li:nth-child(9)') || {}).textContent,
           all: document.getElementById('filetView').innerText + '\n' + [...document.querySelectorAll('.grp-filet')].map(e => e.innerText).join('\n') }));
         let e = await en();
+        if (!/Foundation chain 35/.test(await page.evaluate(() => document.getElementById('filetChart').textContent))) fail(`${label}: 기호도 맨 아래에 "Foundation chain 35" 글자가 없어요`);
         if ((e.legend.match(/\(US terms\)/g) || []).length !== 1) fail(`${label}: 기호 설명에 "(US terms)"가 한 번 있어야 해요 (${e.legend.replace(/\n/g, ' / ')})`);
         if (!e.legend.includes('counts as first dc')) fail(`${label}: 한길긴뜨기 버전 기호 설명에 "counts as first dc"가 없어요`);
         if (!e.start.includes('35 ch = turning chain (3 ch) on the right + 2 ch for the first space + 30 ch along the bottom')) fail(`${label}: 시작 사슬 설명이 새 문구가 아니에요 (${e.start.split('\n')[1]})`);

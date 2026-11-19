@@ -19,7 +19,7 @@
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/pattern.css?v=7">
+<link rel="stylesheet" href="../assets/pattern.css?v=8">
 </head>
 <body>
 <div class="app area-work">
@@ -201,7 +201,29 @@
           <canvas id="gridCanvas"></canvas>
         </div>
         <div class="filet-view" id="filetView" tabindex="-1">
-          <section class="filet-guide" id="filetGuide">
+          <p class="filet-note" id="filetColorNote" hidden>필레는 보통 한 가지 실로 떠서 색 구분은 사라져요.</p>
+          <div class="filet-start" id="filetStart" data-dyn></div>
+          <div class="filet-pair">
+          <div class="filet-fig">
+            <div class="filet-fig-title">막힌 칸·빈 칸 미리보기 <span class="filet-fig-sub">검정 = 막힌 칸, 흰색 = 빈 칸</span></div>
+            <div class="filet-scrollbox"><canvas id="filetPreview"></canvas></div>
+          </div>
+          <div class="filet-fig" id="filetChartFig">
+            <div class="filet-fig-head">
+              <div class="filet-fig-title">기호도</div>
+              <div class="filet-zoom">
+                <button type="button" class="zoom-btn" id="filetZoomOut" aria-label="축소">−</button>
+                <span class="zoom-label" id="filetZoomVal" data-dyn>100%</span>
+                <button type="button" class="zoom-btn" id="filetZoomIn" aria-label="확대">＋</button>
+                <button type="button" class="zoom-reset" id="filetZoomFit">맞춤</button>
+                <button type="button" class="zoom-btn" id="filetFullBtn" aria-label="전체 화면" title="전체 화면"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5"/><path d="M20 9V4h-5"/><path d="M4 15v5h5"/><path d="M20 15v5h-5"/></svg></button>
+              </div>
+            </div>
+            <div class="filet-legend" id="filetLegend" data-dyn></div>
+            <div class="filet-scrollbox" id="filetChart" data-dyn></div>
+          </div>
+          </div>
+          <section class="filet-guide filet-guide-low" id="filetGuide">
             <div class="filet-guide-title">필레 도안 보는 법</div>
             <ul id="filetGuideList" data-dyn></ul>
             <div class="filet-guide-btns">
@@ -210,19 +232,6 @@
             </div>
           </section>
           <button type="button" class="link-btn filet-guide-open" id="filetGuideOpen" hidden>보는 법</button>
-          <p class="filet-note" id="filetColorNote" hidden>필레는 보통 한 가지 실로 떠서 색 구분은 사라져요.</p>
-          <div class="filet-start" id="filetStart" data-dyn></div>
-          <div class="filet-pair">
-          <div class="filet-fig">
-            <div class="filet-fig-title">막힌 칸·빈 칸 미리보기 <span class="filet-fig-sub">검정 = 막힌 칸, 흰색 = 빈 칸</span></div>
-            <div class="filet-scrollbox"><canvas id="filetPreview"></canvas></div>
-          </div>
-          <div class="filet-fig">
-            <div class="filet-fig-title">기호도</div>
-            <div class="filet-legend" id="filetLegend" data-dyn></div>
-            <div class="filet-scrollbox" id="filetChart" data-dyn></div>
-          </div>
-          </div>
           <details class="filet-fig filet-fold" id="filetRowsFold" open>
             <summary class="filet-fig-title">줄별 설명</summary>
             <ol class="filet-rows" id="filetRows" data-dyn></ol>
@@ -645,6 +654,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="../assets/pattern.js?v=8"></script>
+<script src="../assets/pattern.js?v=10"></script>
 </body>
 </html>
