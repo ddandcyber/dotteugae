@@ -820,9 +820,9 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
         const verSel = document.getElementById('filetVerSel');
         return { open: area.classList.contains('filet-mode'), out: [...new Set(out)].slice(0, 6), wide: document.documentElement.scrollWidth - vw,
           ribbon: !!verSel.getClientRects().length,
-          tabs: document.querySelector('.view-tabs').innerText.replace(/\s+/g, ' '),
+          tabs: document.querySelector('.view-tab-list').innerText.replace(/\s+/g, ' '),
           start: document.getElementById('filetStart').innerText,
-          text: document.getElementById('filetView').innerText + '\n' + [...document.querySelectorAll('.grp-filet, .view-tabs')].map(e => e.innerText).join('\n') };
+          text: document.getElementById('filetView').innerText + '\n' + [...document.querySelectorAll('.view-tabs')].map(e => e.innerText).join('\n') };
       });
       const label = `${p} ${w}px${dark ? ' 어두운 화면' : ''}`;
       if (!r.open) { fail(`${label}: 필레 탭이 열리지 않아요`); continue; }
@@ -841,7 +841,7 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
           legend: document.getElementById('filetLegend').innerText, start: document.getElementById('filetStart').innerText,
           guide: [...document.querySelectorAll('#filetGuideList li')].map(l => l.textContent),
           row9: (document.querySelector('#filetRows li:nth-child(9)') || {}).textContent,
-          all: document.getElementById('filetView').innerText + '\n' + [...document.querySelectorAll('.grp-filet')].map(e => e.innerText).join('\n') }));
+          all: document.getElementById('filetView').innerText + '\n' + [...document.querySelectorAll('.filet-tools')].map(e => e.innerText).join('\n') }));
         let e = await en();
         if (!/Foundation chain 35/.test(await page.evaluate(() => document.getElementById('filetChart').textContent))) fail(`${label}: 기호도 맨 아래에 "Foundation chain 35" 글자가 없어요`);
         if ((e.legend.match(/\(US terms\)/g) || []).length !== 1) fail(`${label}: 기호 설명에 "(US terms)"가 한 번 있어야 해요 (${e.legend.replace(/\n/g, ' / ')})`);

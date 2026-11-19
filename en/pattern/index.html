@@ -20,7 +20,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/pattern.css?v=8">
+<link rel="stylesheet" href="/assets/pattern.css?v=9">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -120,30 +120,6 @@
       </div>
       <div class="rgroup-cap">편집</div>
     </div>
-    <div class="rgroup grp-filet">
-      <div class="rgroup-body">
-        <select class="filet-select" id="filetVerSel" aria-label="버전">
-          <option value="a">사슬 1 + 한길긴뜨기</option>
-          <option value="b" selected>사슬 2 + 한길긴뜨기</option>
-          <option value="c">사슬 2 + 두길긴뜨기</option>
-        </select>
-      </div>
-      <div class="rgroup-cap">버전</div>
-    </div>
-    <div class="rgroup grp-filet">
-      <div class="rgroup-body">
-        <div class="filet-colors" id="filetColors" data-dyn></div>
-        <button class="rb-btn" id="filetInvertBtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg><span>전체 뒤집기</span></button>
-      </div>
-      <div class="rgroup-cap">막힌 칸으로 볼 색</div>
-    </div>
-    <div class="rgroup grp-filet">
-      <div class="rgroup-body">
-        <button class="rb-btn" id="filetSaveImgBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>필레 이미지 저장</span></button>
-        <button class="rb-btn" id="filetShareBtn" aria-label="공유" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg><span>공유</span></button>
-      </div>
-      <div class="rgroup-cap">저장</div>
-    </div>
     <div class="ribbon-fold-wrap">
       <button type="button" class="ribbon-fold" id="ribbonFoldBtn" aria-controls="ribbon" aria-expanded="true" data-dyn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></button>
     </div>
@@ -151,9 +127,24 @@
 
   <div class="workspace">
     <main class="stage canvas-card">
-      <div class="view-tabs" role="tablist" aria-label="보기">
-        <button type="button" class="view-tab" role="tab" id="tabDesign" aria-selected="true">도안</button>
-        <button type="button" class="view-tab" role="tab" id="tabFilet" aria-selected="false" tabindex="-1">필레</button>
+      <div class="view-tabs">
+        <div class="view-tab-list" role="tablist" aria-label="보기">
+          <button type="button" class="view-tab" role="tab" id="tabDesign" aria-selected="true">도안</button>
+          <button type="button" class="view-tab" role="tab" id="tabFilet" aria-selected="false" tabindex="-1">필레</button>
+        </div>
+        <div class="filet-tools">
+          <select class="filet-select" id="filetVerSel" aria-label="버전" title="버전">
+            <option value="a">사슬 1 + 한길긴뜨기</option>
+            <option value="b" selected>사슬 2 + 한길긴뜨기</option>
+            <option value="c">사슬 2 + 두길긴뜨기</option>
+          </select>
+          <span class="ft-sep"></span>
+          <div class="filet-colorbox"><span class="ft-label">막힌 칸:</span><div class="filet-colors" id="filetColors" data-dyn></div></div>
+          <button type="button" class="ft-btn" id="filetInvertBtn" aria-pressed="false" aria-label="전체 뒤집기" title="전체 뒤집기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg><span>전체 뒤집기</span></button>
+          <span class="ft-sep"></span>
+          <button type="button" class="ft-btn" id="filetSaveImgBtn" aria-label="필레 이미지 저장" title="필레 이미지 저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>필레 이미지 저장</span></button>
+          <button type="button" class="ft-btn" id="filetShareBtn" aria-label="공유" title="공유" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg><span>공유</span></button>
+        </div>
       </div>
       <div class="stamp-bar" id="stampBar">
             <div class="smode-row" id="stampModeRow">
@@ -677,6 +668,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="/assets/pattern.js?v=10"></script>
+<script src="/assets/pattern.js?v=11"></script>
 </body>
 </html>
