@@ -880,6 +880,11 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
       if (!cards.every(Boolean)) fail(`시작 화면의 카드 세 개가 다 보이지 않아요 (${cards.join(',')})`);
       if (await vis(page, '.ribbon') || await vis(page, '#gridCanvas')) fail('시작 화면인데 작업창이나 격자가 함께 보여요');
       if (!await vis(page, '#langBtn') || !await vis(page, '#themeBtn') || !(await vis(page, '.tool-nav') || await vis(page, '.tool-menu'))) fail('시작 화면에서 맨 위 메뉴·EN·화면 모드 버튼이 안 보여요');
+      const HIDE = ['saveFileBtn', 'undoBtn', 'redoBtn', 'saveImgBtn', 'shareImgBtn'];
+      const shown = ids => Promise.all(ids.map(id => vis(page, '#' + id)));
+      const sh = await shown(HIDE);
+      if (sh.some(Boolean)) fail(`시작 화면인데 맨 위 막대에 저장·되돌리기·다시하기·이미지 저장·공유가 보여요 (${HIDE.filter((id, i) => sh[i]).join(', ')})`);
+      if (!await vis(page, '#openFileBtn')) fail('시작 화면에서 열기 버튼이 안 보여요');
       if ((await page.evaluate(() => localStorage.getItem('crochet-tool-v1'))) !== null) fail('시작 화면이 뜨면서 자동 저장(crochet-tool-v1)에 무언가를 썼어요');
       const th0 = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
       await clickId(page, 'themeBtn');
@@ -888,6 +893,8 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
       await clickId(page, 'startBlank');
       if (await isStart(page)) fail('"빈 격자로 시작"을 눌러도 시작 화면이 닫히지 않아요');
       const g = await page.evaluate(() => ({ w: document.getElementById('gridCanvas').getBoundingClientRect().width, empty: !gridData.some(Boolean), rows, cols, ribbon: document.querySelector('.ribbon').getClientRects().length > 0 }));
+      const back = await shown(['saveFileBtn', 'undoBtn', 'redoBtn', 'saveImgBtn']);
+      if (!back.every(Boolean)) fail(`시작 화면을 닫았는데 저장·되돌리기·다시하기·이미지 저장이 다시 보이지 않아요 (${back.join(',')})`);
       if (!(g.w > 100) || !g.ribbon) fail('"빈 격자로 시작" 뒤에 격자나 작업창이 보이지 않아요');
       if (!g.empty || g.rows !== 20 || g.cols !== 20) fail(`"빈 격자로 시작" 뒤의 격자가 지금 격자(20×20 빈 격자)가 아니에요 (${g.cols}×${g.rows})`);
       await clickCell(page, 0, 0);
@@ -963,12 +970,17 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
     try {
       const r = await t.page.evaluate(() => {
         const rs = ['startBlank', 'startText', 'startExample'].map(id => document.getElementById(id).getBoundingClientRect());
-        return { stacked: rs[1].top >= rs[0].bottom - 1 && rs[2].top >= rs[1].bottom - 1 && Math.abs(rs[0].left - rs[2].left) < 2, over: document.documentElement.scrollWidth - document.documentElement.clientWidth, lang: document.getElementById('langBtn').getClientRects().length > 0 };
+        const v = id => { const e = document.getElementById(id); return !!e && e.getClientRects().length > 0; };
+        return { hid: ['saveFileBtn', 'undoBtn', 'redoBtn', 'saveImgBtn', 'shareImgBtn'].filter(v), open: v('openFileBtn'), theme: v('themeBtn'), stacked: rs[1].top >= rs[0].bottom - 1 && rs[2].top >= rs[1].bottom - 1 && Math.abs(rs[0].left - rs[2].left) < 2, over: document.documentElement.scrollWidth - document.documentElement.clientWidth, lang: document.getElementById('langBtn').getClientRects().length > 0 };
       });
       if (!await isStart(t.page)) fail('360px: 빈 도안인데 시작 화면이 보이지 않아요');
       if (!r.stacked) fail('360px: 시작 화면 카드가 세로로 쌓이지 않았어요');
       if (r.over > 1) fail(`360px: 시작 화면이 옆으로 ${r.over}px 넘쳐요`);
       if (!r.lang) fail('360px: 시작 화면에서 EN 버튼이 안 보여요');
+      if (r.hid.length) fail(`360px: 시작 화면인데 맨 위 막대에 ${r.hid.join(', ')}가 보여요`);
+      if (!r.open || !r.theme) fail('360px: 시작 화면에서 열기나 화면 모드 버튼이 안 보여요');
+      await clickId(t.page, 'startBlank');
+      if (!(await t.page.evaluate(() => document.getElementById('saveImgBtn').getClientRects().length > 0))) fail('360px: 시작 화면을 닫았는데 이미지 저장(내려받기) 버튼이 다시 보이지 않아요');
       t.errors.forEach(e => fail(`360px: ${e}`));
     } finally { await t.close(); }
   }
