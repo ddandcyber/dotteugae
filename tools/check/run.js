@@ -716,6 +716,11 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       await page.keyboard.down('Control'); await page.keyboard.press('KeyZ'); await page.keyboard.up('Control'); await sleep(150);
       await page.keyboard.press('Delete'); await sleep(100);
       if ((await page.evaluate(() => JSON.stringify(gridData))) !== before.data) fail('필레 탭에서 누르기·Ctrl+Z·Delete로 도안 칸이 바뀌었어요');
+      // 줄별 설명은 접었다 펼 수 있음
+      await page.click('#filetRowsFold > summary'); await sleep(100);
+      if (await page.evaluate(() => document.getElementById('filetRowsFold').open)) fail('줄별 설명 제목을 눌러도 접히지 않아요');
+      await page.click('#filetRowsFold > summary'); await sleep(100);
+      if (!await page.evaluate(() => document.getElementById('filetRowsFold').open)) fail('줄별 설명 제목을 다시 눌러도 펼쳐지지 않아요');
       // 설정 바꾸기
       await page.evaluate(c => { document.querySelector(`#filetColors input[data-color="${c}"]`).click(); }, BLUE); await sleep(150);
       await expect(35, '파랑 체크를 끈 뒤');

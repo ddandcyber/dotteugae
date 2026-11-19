@@ -19,7 +19,7 @@
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/pattern.css?v=6">
+<link rel="stylesheet" href="../assets/pattern.css?v=7">
 </head>
 <body>
 <div class="app area-work">
@@ -223,10 +223,10 @@
             <div class="filet-scrollbox" id="filetChart" data-dyn></div>
           </div>
           </div>
-          <div class="filet-fig">
-            <div class="filet-fig-title">줄별 설명</div>
+          <details class="filet-fig filet-fold" id="filetRowsFold" open>
+            <summary class="filet-fig-title">줄별 설명</summary>
             <ol class="filet-rows" id="filetRows" data-dyn></ol>
-          </div>
+          </details>
         </div>
         <!-- 작업창을 접었을 때만 보이는 펼치기 손잡이 (좁은 화면: 캔버스 오른쪽 위) -->
         <button type="button" class="ribbon-handle handle-narrow" aria-controls="ribbon" aria-expanded="false" data-dyn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
