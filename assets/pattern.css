@@ -513,7 +513,7 @@
   .sw-act:active{ background:var(--paper-2); }
   .sw-act:disabled{ opacity:0.4; cursor:default; }
 
-  /* 필레로 보기: 캔버스 위 "도안 | 필레" 탭. 필레 탭이면 캔버스 자리에 필레 보기가 겹쳐 나옴 (읽기 전용) */
+  /* 방안뜨기로 보기: 캔버스 위 "도안 | 방안뜨기" 탭. 방안뜨기 탭이면 캔버스 자리에 방안뜨기 보기가 겹쳐 나옴 (읽기 전용) */
   .view-tabs{ display:flex; flex-wrap:wrap; align-items:center; column-gap:10px; padding:0 10px; flex-shrink:0; background:var(--card); border-bottom:1px solid var(--line); }
   .view-tab-list{ display:flex; gap:2px; }
   .view-tab{ height:36px; padding:0 18px; border:none; background:transparent; color:var(--ink-soft);
@@ -527,13 +527,13 @@
                padding:14px 16px 20px; outline:none; }
   .filet-mode .filet-view{ display:block; }
   .filet-mode .canvas-wrap{ visibility:hidden; }
-  /* 필레 탭: 작업창(리본)은 통째로 숨기고, 탭 줄 오른쪽에 얇은 필레 도구가 나옴. 편집 도구·오른쪽 패널·열기/저장·되돌리기도 숨김 */
+  /* 방안뜨기 탭: 작업창(리본)은 통째로 숨기고, 탭 줄 오른쪽에 얇은 방안뜨기 도구가 나옴. 편집 도구·오른쪽 패널·열기/저장·되돌리기도 숨김 */
   .filet-mode .ribbon, .filet-mode .ribbon-fold-wrap, .filet-mode .ribbon-handle{ display:none !important; }
   .filet-mode .inspector, .filet-mode .appbar-mid, .filet-mode #knitStartBtn, .filet-mode #saveImgBtn, .filet-mode #shareImgBtn,
   .filet-mode .stamp-bar{ display:none !important; }
   .filet-mode .workspace{ grid-template-columns:minmax(0,1fr); }
   .filet-tools [hidden], .filet-view [hidden]{ display:none !important; }
-  /* 필레 도구 막대 (탭 줄 오른쪽, 필레 탭일 때만): 버전 · 막힌 칸 색 · 전체 뒤집기 · 이미지 저장 · 공유 */
+  /* 방안뜨기 도구 막대 (탭 줄 오른쪽, 방안뜨기 탭일 때만): 버전 · 막힌 칸 색 · 전체 뒤집기 · 이미지 저장 · 공유 */
   .filet-tools{ display:none; align-items:center; gap:8px; margin-left:auto; min-width:0; padding:0 0 0 4px; }
   .filet-mode .filet-tools{ display:flex; }
   .ft-sep{ width:1px; height:22px; background:var(--line-strong); flex-shrink:0; }
@@ -592,7 +592,7 @@
     .filet-tools{ flex:1 0 100%; margin-left:0; padding:0 0 8px; }
     .filet-mode .view-tab{ height:40px; }
   }
-  /* 휴대폰: 필레 도구를 탭 줄에 풀어 놓아서 두 줄로 — 윗줄 = 탭 + 버전, 아랫줄 = 막힌 칸 색 + 아이콘 버튼 (글자는 숨기고 title·aria-label은 그대로) */
+  /* 휴대폰: 방안뜨기 도구를 탭 줄에 풀어 놓아서 두 줄로 — 윗줄 = 탭 + 버전, 아랫줄 = 막힌 칸 색 + 아이콘 버튼 (글자는 숨기고 title·aria-label은 그대로) */
   @media (max-width: 599px){
     .filet-mode .filet-tools{ display:contents; }
     .filet-mode .view-tabs{ column-gap:6px; padding-bottom:0; }

@@ -713,7 +713,7 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
       if (!ui.canvasOff) fail('방안뜨기 탭인데 도안 캔버스가 가려지지 않았어요');
       if (ui.tabs !== 'false,true') fail(`탭 선택 표시가 달라요 (${ui.tabs})`);
       const names = await page.evaluate(() => ({ tab: document.getElementById('tabFilet').textContent.trim(), btn: document.querySelector('#filetBtn span').textContent.trim(), guide: document.querySelector('.filet-guide-title').textContent.trim(), save: document.querySelector('#filetSaveImgBtn span').textContent.trim() }));
-      const wantNames = { tab: '방안뜨기', btn: '방안뜨기로 보기', guide: '방안뜨기(필레) 도안 보는 법', save: '방안뜨기 이미지 저장' };
+      const wantNames = { tab: '방안뜨기', btn: '방안뜨기로 보기', guide: '방안뜨기(filet) 도안 보는 법', save: '방안뜨기 이미지 저장' };
       if (JSON.stringify(names) !== JSON.stringify(wantNames)) fail(`한국어 이름이 방안뜨기로 바뀌지 않았어요 (${JSON.stringify(names)})`);
       const lay = await page.evaluate(filetLayout);
       if (!(await page.evaluate(() => document.getElementById('filetGuide').getBoundingClientRect().top >= document.querySelector('.filet-pair').getBoundingClientRect().bottom - 1))) fail('보는 법 카드가 도안(미리보기·기호도) 아래에 있지 않아요');
@@ -881,6 +881,8 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
       if (!await isStart(page)) fail('처음 온 사람(빈 도안)인데 시작 화면이 보이지 않아요');
       const cards = await Promise.all(['#startBlank', '#startText', '#startExample'].map(s => vis(page, s)));
       if (!cards.every(Boolean)) fail(`시작 화면의 카드 세 개가 다 보이지 않아요 (${cards.join(',')})`);
+      const textCard = await page.evaluate(() => document.querySelector('#startText .start-t span').textContent);
+      if (textCard !== '문구를 쓰면 바로 도안이 돼요. 방안뜨기로도 바꿀 수 있어요.') fail(`"글자로 시작" 카드 설명이 새 문구가 아니에요 (${textCard})`);
       if (await vis(page, '.ribbon') || await vis(page, '#gridCanvas')) fail('시작 화면인데 작업창이나 격자가 함께 보여요');
       if (!await vis(page, '#langBtn') || !await vis(page, '#themeBtn') || !(await vis(page, '.tool-nav') || await vis(page, '.tool-menu'))) fail('시작 화면에서 맨 위 메뉴·EN·화면 모드 버튼이 안 보여요');
       const HIDE = ['saveFileBtn', 'undoBtn', 'redoBtn', 'saveImgBtn', 'shareImgBtn'];
@@ -930,6 +932,7 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
       if (!await isStart(page)) { fail(`${p}: 빈 도안인데 시작 화면이 보이지 않아요`); continue; }
       if (p.startsWith('/en/')) {
         const en = await page.evaluate(() => ({ title: document.getElementById('startTitle').textContent, text: document.getElementById('startScreen').innerText }));
+        if (!en.text.includes('Type a phrase and it becomes a chart. You can switch it to filet, too.')) fail(`${p}: "Start with text" 카드 설명이 새 영어 문구가 아니에요`);
         if (en.title !== 'How would you like to start?') fail(`${p}: 시작 화면 제목이 영어가 아니에요 (${en.title})`);
         const ko = en.text.match(/[가-힣]+/g);
         if (ko) fail(`${p}: 시작 화면에 한국어가 남아 있어요 (${[...new Set(ko)].slice(0, 5).join(', ')})`);
