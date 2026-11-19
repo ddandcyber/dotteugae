@@ -621,7 +621,7 @@ const filetLayout = () => {
   const note = getComputedStyle(document.getElementById('filetColorNote')).color, soft = getComputedStyle(document.querySelector('.filet-guide ul')).color;
   return { side: ch.left >= pv.right - 1 && Math.abs(ch.top - pv.top) < 80, stacked: ch.top >= pv.bottom - 1, noteSoft: note === soft };
 };
-test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막힘, 360px·어두운 화면, 영어, 도안 데이터 그대로', async (fail, note) => {
+test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막힘, 360px·어두운 화면, 영어, 도안 데이터 그대로', async (fail, note) => {
   const LI = filetLi();
   // 1) 계산 함수 (화면과 따로)
   {
@@ -674,14 +674,14 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       });
       const expect = async (start, what) => {
         const s = await state();
-        if (!await mode()) { fail(`${what}: 필레 탭이 아니에요`); return; }
+        if (!await mode()) { fail(`${what}: 방안뜨기 탭이 아니에요`); return; }
         if (s.start !== start) fail(`${what}: 시작 사슬이 ${start}코여야 하는데 ${s.start}코예요`);
         if (s.drawn !== s.start) fail(`${what}: 기호도에 그린 사슬(세로 + 첫 빈 칸 + 가로)이 ${s.drawn}개인데 시작 사슬은 ${s.start}코예요`);
         if (s.label.length !== 1 || s.label[0] !== `시작 사슬 ${s.start}코`) fail(`${what}: 기호도 맨 아래에 "시작 사슬 ${s.start}코" 글자가 한 번 있어야 해요 (${JSON.stringify(s.label)})`);
         if (!s.text.includes(`사슬 ${s.start}코`) || !s.text.includes(`${s.at}번째`)) fail(`${what}: 시작 안내 글이 계산과 달라요 (${s.text.split('\n')[0]})`);
       };
-      if (await mode()) fail('처음부터 필레 탭이에요');
-      // 기존 "필레로 보기" 버튼 = 필레 탭으로 바로 가기
+      if (await mode()) fail('처음부터 방안뜨기 탭이에요');
+      // 기존 "방안뜨기로 보기" 버튼 = 방안뜨기 탭으로 바로 가기
       await clickId(page, 'filetBtn');
       await expect(33, '처음 열었을 때 (빨강·파랑 = 막힌 칸)');
       const ui = await page.evaluate(() => {
@@ -701,27 +701,30 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
         };
       });
       if (ui.colors !== 2) fail(`색 체크박스가 2개(빨강·파랑)여야 하는데 ${ui.colors}개예요`);
-      if (!ui.note) fail('색이 2개인데 "필레는 보통 한 가지 실로…" 안내가 보이지 않아요');
+      if (!ui.note) fail('색이 2개인데 "방안뜨기는 보통 한 가지 실로…" 안내가 보이지 않아요');
       const wantGuide = ['검정 = 막힌 칸(한길긴뜨기 3코), 흰색 = 빈 칸(사슬 2코 + 한길긴뜨기 1코)', '홀수 단은 ←, 짝수 단은 →', '단 바꿀 때 세우는 사슬: 다음 첫 칸이 막힌 칸 3코, 빈 칸 5코'];
       if (JSON.stringify(ui.guide) !== JSON.stringify(wantGuide)) fail(`보는 법 카드가 짧은 3줄이 아니에요 (${JSON.stringify(ui.guide)})`);
       if (ui.startLines !== 2) fail(`시작 안내가 두 줄이어야 하는데 ${ui.startLines}줄이에요`);
       if (ui.rowLines !== 12) fail(`줄별 설명이 한 단에 한 줄(12줄)이어야 하는데 ${ui.rowLines}줄이에요`);
       if (ui.row9 !== '9단 ← 빈 7 · 막 2 · 빈 1 (세우는 사슬 5)') fail(`줄별 설명 9단이 다르게 나와요 (${ui.row9})`);
       if (ui.row1 !== '1단 ← 막 1 · 빈 9 (시작 사슬 33코)') fail(`줄별 설명 1단이 다르게 나와요 (${ui.row1})`);
-      if (!ui.ribbonOn) fail('필레 탭인데 작업창에 버전·뒤집기·저장이 보이지 않아요');
-      if (!ui.editOff) fail('필레 탭인데 칠하기·되돌리기 같은 편집 도구나 오른쪽 패널이 아직 보여요');
-      if (!ui.canvasOff) fail('필레 탭인데 도안 캔버스가 가려지지 않았어요');
+      if (!ui.ribbonOn) fail('방안뜨기 탭인데 작업창에 버전·뒤집기·저장이 보이지 않아요');
+      if (!ui.editOff) fail('방안뜨기 탭인데 칠하기·되돌리기 같은 편집 도구나 오른쪽 패널이 아직 보여요');
+      if (!ui.canvasOff) fail('방안뜨기 탭인데 도안 캔버스가 가려지지 않았어요');
       if (ui.tabs !== 'false,true') fail(`탭 선택 표시가 달라요 (${ui.tabs})`);
+      const names = await page.evaluate(() => ({ tab: document.getElementById('tabFilet').textContent.trim(), btn: document.querySelector('#filetBtn span').textContent.trim(), guide: document.querySelector('.filet-guide-title').textContent.trim(), save: document.querySelector('#filetSaveImgBtn span').textContent.trim() }));
+      const wantNames = { tab: '방안뜨기', btn: '방안뜨기로 보기', guide: '방안뜨기(필레) 도안 보는 법', save: '방안뜨기 이미지 저장' };
+      if (JSON.stringify(names) !== JSON.stringify(wantNames)) fail(`한국어 이름이 방안뜨기로 바뀌지 않았어요 (${JSON.stringify(names)})`);
       const lay = await page.evaluate(filetLayout);
       if (!(await page.evaluate(() => document.getElementById('filetGuide').getBoundingClientRect().top >= document.querySelector('.filet-pair').getBoundingClientRect().bottom - 1))) fail('보는 법 카드가 도안(미리보기·기호도) 아래에 있지 않아요');
       if (!lay.side) fail('넓은 화면(1440px)인데 미리보기 격자(왼쪽)와 기호도(오른쪽)가 나란히 놓이지 않았어요');
-      if (!lay.noteSoft) fail('"필레는 보통 한 가지 실로…" 문구가 기존 보조 글씨 색이 아니에요');
+      if (!lay.noteSoft) fail('"방안뜨기는 보통 한 가지 실로…" 문구가 기존 보조 글씨 색이 아니에요');
       // 편집 막힘: 캔버스가 있던 자리를 눌러도, 단축키(Ctrl+Z, Delete)를 눌러도 도안이 안 바뀜
       const pt = await cellPoint(page, 5, 5);
       await page.mouse.click(pt.x, pt.y); await sleep(150);
       await page.keyboard.down('Control'); await page.keyboard.press('KeyZ'); await page.keyboard.up('Control'); await sleep(150);
       await page.keyboard.press('Delete'); await sleep(100);
-      if ((await page.evaluate(() => JSON.stringify(gridData))) !== before.data) fail('필레 탭에서 누르기·Ctrl+Z·Delete로 도안 칸이 바뀌었어요');
+      if ((await page.evaluate(() => JSON.stringify(gridData))) !== before.data) fail('방안뜨기 탭에서 누르기·Ctrl+Z·Delete로 도안 칸이 바뀌었어요');
       // 기호도 확대·축소·맞춤·전체 화면 (보는 방식만 바뀌고 사슬 수와 도안은 그대로)
       const zoomInfo = () => page.evaluate(() => { const s = document.querySelector('#filetChart svg'); return { w: s.getBoundingClientRect().width, label: document.getElementById('filetZoomVal').textContent, chains: document.querySelectorAll('#filetChart ellipse').length }; });
       const z1 = await zoomInfo();
@@ -741,7 +744,7 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       await page.keyboard.press('Escape'); await sleep(300);
       const fs2 = await page.evaluate(() => ({ full: document.getElementById('filetChartFig').classList.contains('filet-full'), mode: document.querySelector('.app').classList.contains('filet-mode') }));
       if (fs2.full) fail('Esc를 눌러도 전체 화면이 닫히지 않아요');
-      if (!fs2.mode) fail('전체 화면에서 Esc를 눌렀더니 필레 탭까지 닫혔어요 (전체 화면만 닫혀야 해요)');
+      if (!fs2.mode) fail('전체 화면에서 Esc를 눌렀더니 방안뜨기 탭까지 닫혔어요 (전체 화면만 닫혀야 해요)');
       await clickId(page, 'filetZoomFit'); await page.evaluate(() => document.getElementById('filetZoomIn').click()); await page.evaluate(() => document.getElementById('filetZoomOut').click());
       // 줄별 설명은 접었다 펼 수 있음
       await page.click('#filetRowsFold > summary'); await sleep(100);
@@ -764,21 +767,21 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       await clickId(page, 'filetSaveImgBtn');
       let file = null;
       for (let i = 0; i < 50 && !file; i++) { await sleep(200); file = fs.readdirSync(dl).find(f => f.endsWith('.png')); }
-      if (!file) fail("'필레 이미지 저장'을 눌렀는데 PNG 파일이 내려받아지지 않았어요");
+      if (!file) fail("'방안뜨기 이미지 저장'을 눌렀는데 PNG 파일이 내려받아지지 않았어요");
       else {
         await sleep(300);
         const buf = fs.readFileSync(path.join(dl, file));
-        if (buf.length < 100 || buf.readUInt32BE(0) !== 0x89504E47) fail(`내려받은 필레 도안 파일이 PNG가 아니에요 (${file})`);
-        if (!/^필레도안_10x12_\d{8}\.png$/.test(file)) fail(`필레 도안 파일 이름 형식이 달라요 (${file})`);
+        if (buf.length < 100 || buf.readUInt32BE(0) !== 0x89504E47) fail(`내려받은 방안뜨기 도안 파일이 PNG가 아니에요 (${file})`);
+        if (!/^방안뜨기도안_10x12_\d{8}\.png$/.test(file)) fail(`방안뜨기 도안 파일 이름 형식이 달라요 (${file})`);
       }
-      // 보는 법 카드: 오늘은 보지 않기 → Esc로 도안 탭 → 다시 필레 탭이면 접혀 있음 → "보는 법"으로 펼침
+      // 보는 법 카드: 오늘은 보지 않기 → Esc로 도안 탭 → 다시 방안뜨기 탭이면 접혀 있음 → "보는 법"으로 펼침
       await clickId(page, 'filetGuideToday');
       await page.keyboard.press('Escape'); await sleep(200);
       if (await mode()) fail('Esc를 눌러도 도안 탭으로 돌아가지 않아요');
       if (await page.evaluate(() => getComputedStyle(document.querySelector('.canvas-wrap')).visibility === 'hidden')) fail('도안 탭으로 돌아왔는데 캔버스가 안 보여요');
       if (await page.evaluate(() => !document.getElementById('toolPaintBtn').getClientRects().length)) fail('도안 탭으로 돌아왔는데 편집 도구가 다시 보이지 않아요');
       await clickId(page, 'tabFilet');
-      if (!await mode()) fail('필레 탭을 눌러도 필레 보기로 바뀌지 않아요');
+      if (!await mode()) fail('방안뜨기 탭을 눌러도 방안뜨기 보기로 바뀌지 않아요');
       const g = await page.evaluate(() => ({ key: localStorage.getItem('crochet-filet-guide-hide'), guide: !document.getElementById('filetGuide').hidden, link: !document.getElementById('filetGuideOpen').hidden }));
       if (!/^\d{4}-\d{2}-\d{2}$/.test(g.key || '')) fail(`'오늘은 보지 않기'가 crochet-filet-guide-hide에 날짜를 저장하지 않았어요 (${g.key})`);
       if (g.guide || !g.link) fail("'오늘은 보지 않기' 뒤에 다시 열었는데 보는 법 카드가 접혀 있지 않거나 '보는 법' 링크가 없어요");
@@ -788,11 +791,11 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       if (await mode()) fail('도안 탭을 눌러도 도안으로 돌아가지 않아요');
       await settle();
       const after = await page.evaluate(() => ({ store: localStorage.getItem('crochet-tool-v1'), data: JSON.stringify(gridData) }));
-      if (after.data !== before.data) fail('필레 탭을 보고 나온 뒤 도안 칸(gridData)이 바뀌었어요');
-      if (after.store !== before.store) fail('필레 탭을 보고 나온 뒤 자동 저장(crochet-tool-v1) 내용이 바뀌었어요');
-      // 되돌리기는 필레 탭을 보기 전과 똑같이 동작 (맨 위 왼쪽 칸 칠하기를 되돌림)
+      if (after.data !== before.data) fail('방안뜨기 탭을 보고 나온 뒤 도안 칸(gridData)이 바뀌었어요');
+      if (after.store !== before.store) fail('방안뜨기 탭을 보고 나온 뒤 자동 저장(crochet-tool-v1) 내용이 바뀌었어요');
+      // 되돌리기는 방안뜨기 탭을 보기 전과 똑같이 동작 (맨 위 왼쪽 칸 칠하기를 되돌림)
       await clickId(page, 'undoBtn');
-      if ((await page.evaluate(() => gridData[0])) !== null) fail('필레 탭을 보고 나온 뒤 되돌리기가 동작하지 않아요');
+      if ((await page.evaluate(() => gridData[0])) !== null) fail('방안뜨기 탭을 보고 나온 뒤 되돌리기가 동작하지 않아요');
       t.errors.forEach(e => fail(e));
     } finally { await t.close(); fs.rmSync(dl, { recursive: true, force: true }); }
   }
@@ -830,17 +833,17 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
           text: document.getElementById('filetView').innerText + '\n' + [...document.querySelectorAll('.view-tabs')].map(e => e.innerText).join('\n') };
       });
       const label = `${p} ${w}px${dark ? ' 어두운 화면' : ''}`;
-      if (!r.open) { fail(`${label}: 필레 탭이 열리지 않아요`); continue; }
+      if (!r.open) { fail(`${label}: 방안뜨기 탭이 열리지 않아요`); continue; }
       const lay = await page.evaluate(filetLayout);
       if (!lay.stacked) fail(`${label}: 좁은 화면인데 미리보기 격자와 기호도가 위아래로 놓이지 않았어요`);
-      if (!lay.noteSoft) fail(`${label}: "필레는 보통 한 가지 실로…" 문구가 기존 보조 글씨 색이 아니에요`);
-      if (!r.ribbon) fail(`${label}: 필레 탭인데 작업창의 버전 선택이 보이지 않아요 (작업창이 접혀 있어도 보여야 해요)`);
-      if (r.out.length || r.wide > 1) fail(`${label}: 필레 탭이 화면 밖으로 넘쳐요 (${r.out.join(', ') || r.wide + 'px'})`);
+      if (!lay.noteSoft) fail(`${label}: "방안뜨기는 보통 한 가지 실로…" 문구가 기존 보조 글씨 색이 아니에요`);
+      if (!r.ribbon) fail(`${label}: 방안뜨기 탭인데 작업창의 버전 선택이 보이지 않아요 (작업창이 접혀 있어도 보여야 해요)`);
+      if (r.out.length || r.wide > 1) fail(`${label}: 방안뜨기 탭이 화면 밖으로 넘쳐요 (${r.out.join(', ') || r.wide + 'px'})`);
       if (p.startsWith('/en/')) {
         if (r.tabs !== 'Pattern Filet') fail(`${label}: 탭 이름이 영어가 아니에요 (${r.tabs})`);
         if (!/^Row 1: Chain 35, then work the first double crochet \(dc\) in the 8th chain/.test(r.start)) fail(`${label}: 시작 안내가 영어로 나오지 않아요 (${r.start.split('\n')[0]})`);
         const ko = (r.text.match(/[가-힣]+/g) || []);
-        if (ko.length) fail(`${label}: 영어 페이지 필레 탭에 한국어가 남아 있어요 (${[...new Set(ko)].slice(0, 6).join(', ')})`);
+        if (ko.length) fail(`${label}: 영어 페이지 방안뜨기 탭에 한국어가 남아 있어요 (${[...new Set(ko)].slice(0, 6).join(', ')})`);
         // 영어 문구: 범례에 (US terms) 한 번, 세우는 사슬은 버전에 맞게 first dc / first tr, 'post'·'upright'는 쓰지 않음
         const en = () => page.evaluate(() => ({
           legend: document.getElementById('filetLegend').innerText, start: document.getElementById('filetStart').innerText,
@@ -854,7 +857,7 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
         if (!e.start.includes('35 ch = turning chain (3 ch) on the right + 2 ch for the first space + 30 ch along the bottom')) fail(`${label}: 시작 사슬 설명이 새 문구가 아니에요 (${e.start.split('\n')[1]})`);
         if (e.guide.length !== 3 || e.guide[0] !== 'Black = block (3 dc), white = space (ch 2 + 1 dc)' || e.guide[1] !== 'Odd rows ←, even rows →' || e.guide[2] !== 'Turning chain: 3 if the next row starts with a block, 5 if with a space') fail(`${label}: 보는 법 영어가 달라요 (${JSON.stringify(e.guide)})`);
         if (e.row9 !== 'Row 9 ← sp 7 · bl 2 · sp 1 (turn ch 5)') fail(`${label}: 줄별 설명 영어가 달라요 (${e.row9})`);
-        if (/\bposts?\b|upright/i.test(e.all)) fail(`${label}: 필레 탭 영어에 "post"나 "upright"가 남아 있어요`);
+        if (/\bposts?\b|upright/i.test(e.all)) fail(`${label}: 방안뜨기 탭 영어에 "post"나 "upright"가 남아 있어요`);
         await page.select('#filetVerSel', 'c'); await sleep(200);
         e = await en();
         if (!e.legend.includes('treble crochet (tr) (US terms)') || !e.legend.includes('counts as first tr')) fail(`${label}: 두길긴뜨기 버전 기호 설명이 tr에 맞지 않아요 (${e.legend.replace(/\n/g, ' / ')})`);

@@ -108,7 +108,7 @@
         <button class="rb-btn" id="flipToggleBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 7 4 12l4 5z"/><path d="m16 7 4 5-4 5z"/></svg><span>좌우 뒤집기</span></button>
         <button class="rb-btn" id="rot90Btn" aria-label="시계 방향으로 90도 회전"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg><span>90°</span></button>
         <button class="rb-btn" id="rot270Btn" aria-label="시계 방향으로 270도 회전"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/></svg><span>270°</span></button>
-        <button class="rb-btn" id="filetBtn" title="그린 도안을 필레 크로셰 도안(기호도·줄별 설명)으로 바꿔서 보여줘요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/><path d="M9 9h6v6H9z" fill="currentColor"/></svg><span>필레로 보기</span></button>
+        <button class="rb-btn" id="filetBtn" title="그린 도안을 방안뜨기 도안(기호도·줄별 설명)으로 바꿔서 보여줘요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/><path d="M9 9h6v6H9z" fill="currentColor"/></svg><span>방안뜨기로 보기</span></button>
       </div>
       <div class="rgroup-cap">변형</div>
     </div>
@@ -143,7 +143,7 @@
       <div class="view-tabs">
         <div class="view-tab-list" role="tablist" aria-label="보기">
           <button type="button" class="view-tab" role="tab" id="tabDesign" aria-selected="true">도안</button>
-          <button type="button" class="view-tab" role="tab" id="tabFilet" aria-selected="false" tabindex="-1">필레</button>
+          <button type="button" class="view-tab" role="tab" id="tabFilet" aria-selected="false" tabindex="-1">방안뜨기</button>
         </div>
         <div class="filet-tools">
           <select class="filet-select" id="filetVerSel" aria-label="버전" title="버전">
@@ -155,7 +155,7 @@
           <div class="filet-colorbox"><span class="ft-label">막힌 칸:</span><div class="filet-colors" id="filetColors" data-dyn></div></div>
           <button type="button" class="ft-btn" id="filetInvertBtn" aria-pressed="false" aria-label="전체 뒤집기" title="전체 뒤집기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg><span>전체 뒤집기</span></button>
           <span class="ft-sep"></span>
-          <button type="button" class="ft-btn" id="filetSaveImgBtn" aria-label="필레 이미지 저장" title="필레 이미지 저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>필레 이미지 저장</span></button>
+          <button type="button" class="ft-btn" id="filetSaveImgBtn" aria-label="방안뜨기 이미지 저장" title="방안뜨기 이미지 저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>방안뜨기 이미지 저장</span></button>
           <button type="button" class="ft-btn" id="filetShareBtn" aria-label="공유" title="공유" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg><span>공유</span></button>
         </div>
       </div>
@@ -225,7 +225,7 @@
           <canvas id="gridCanvas"></canvas>
         </div>
         <div class="filet-view" id="filetView" tabindex="-1">
-          <p class="filet-note" id="filetColorNote" hidden>필레는 보통 한 가지 실로 떠서 색 구분은 사라져요.</p>
+          <p class="filet-note" id="filetColorNote" hidden>방안뜨기는 보통 한 가지 실로 떠서 색 구분은 사라져요.</p>
           <div class="filet-start" id="filetStart" data-dyn></div>
           <div class="filet-pair">
           <div class="filet-fig">
@@ -248,7 +248,7 @@
           </div>
           </div>
           <section class="filet-guide filet-guide-low" id="filetGuide">
-            <div class="filet-guide-title">필레 도안 보는 법</div>
+            <div class="filet-guide-title">방안뜨기(필레) 도안 보는 법</div>
             <ul id="filetGuideList" data-dyn></ul>
             <div class="filet-guide-btns">
               <button type="button" class="hex-cancel" id="filetGuideClose">닫기</button>
@@ -681,6 +681,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="/assets/pattern.js?v=12"></script>
+<script src="/assets/pattern.js?v=13"></script>
 </body>
 </html>
