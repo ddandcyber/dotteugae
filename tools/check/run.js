@@ -761,6 +761,18 @@ test('필레로 보기: 계산 공식, 창 열기·설정·기호도·PNG, 360px
         if (!/^Row 1: Chain 35, then work the first double crochet \(dc\) in the 8th chain/.test(r.start)) fail(`${label}: 시작 안내가 영어로 나오지 않아요 (${r.start.split('\n')[0]})`);
         const ko = (r.text.match(/[가-힣]+/g) || []);
         if (ko.length) fail(`${label}: 영어 페이지 필레 창에 한국어가 남아 있어요 (${[...new Set(ko)].slice(0, 6).join(', ')})`);
+        // 영어 문구: 범례에 (US terms) 한 번, 세우는 사슬은 버전에 맞게 first dc / first tr, 'post'·'upright'는 쓰지 않음
+        const en = () => page.evaluate(() => ({ legend: document.getElementById('filetLegend').innerText, start: document.getElementById('filetStart').innerText, all: document.getElementById('filetModal').innerText }));
+        let e = await en();
+        if ((e.legend.match(/\(US terms\)/g) || []).length !== 1) fail(`${label}: 기호 설명에 "(US terms)"가 한 번 있어야 해요 (${e.legend.replace(/\n/g, ' / ')})`);
+        if (!e.legend.includes('counts as first dc')) fail(`${label}: 한길긴뜨기 버전 기호 설명에 "counts as first dc"가 없어요`);
+        if (!e.start.includes('35 ch = turning chain (3 ch) on the right + 2 ch for the first space + 30 ch along the bottom')) fail(`${label}: 시작 사슬 설명이 새 문구가 아니에요 (${e.start.split('\n')[1]})`);
+        if (/\bposts?\b|upright/i.test(e.all)) fail(`${label}: 필레 창 영어에 "post"나 "upright"가 남아 있어요`);
+        await page.evaluate(() => document.querySelector('input[name="filetVer"][value="c"]').click()); await sleep(200);
+        e = await en();
+        if (!e.legend.includes('treble crochet (tr) (US terms)') || !e.legend.includes('counts as first tr')) fail(`${label}: 두길긴뜨기 버전 기호 설명이 tr에 맞지 않아요 (${e.legend.replace(/\n/g, ' / ')})`);
+        if (!e.start.includes('36 ch = turning chain (4 ch) on the right + 2 ch for the first space + 30 ch along the bottom')) fail(`${label}: 두길긴뜨기 1단 세로 사슬 4코가 맞게 나오지 않아요 (${e.start.split('\n')[1]})`);
+        if (/\bposts?\b|upright/i.test(e.all) || !e.all.includes('counts as first tr')) fail(`${label}: 두길긴뜨기 버전 보는 법·설명에 tr 문구가 맞지 않아요`);
       } else if (!/^1단 시작: 사슬 35코/.test(r.start)) fail(`${label}: 시작 안내가 이상해요 (${r.start.split('\n')[0]})`);
       errors.forEach(e => fail(`${label}: ${e}`));
     } finally { await ctx.close(); }
