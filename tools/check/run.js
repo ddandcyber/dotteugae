@@ -111,6 +111,8 @@ function diffCells(a, b) { let n = 0; for (let i = 0; i < Math.max(a.length, b.l
 const hexToRgb = h => `rgb(${parseInt(h.slice(1, 3), 16)}, ${parseInt(h.slice(3, 5), 16)}, ${parseInt(h.slice(5, 7), 16)})`;
 
 /* ---------- 점검 공통 도구 ---------- */
+// 빈 도안으로 열면 시작 화면이 뜨므로, 다른 기능을 보는 점검은 사람처럼 "빈 격자로 시작"을 눌러 넘김 (시작 화면 자체는 13번에서 확인)
+const SKIP_START = () => { document.addEventListener('DOMContentLoaded', () => { const b = document.getElementById('startBlank'); if (b && document.querySelector('.app.start-mode')) b.click(); }); };
 let BASE, BROWSER;
 async function openPage(urlPath, opt = {}) {
   const ctx = await BROWSER.createBrowserContext(); // 새 프로필 = 처음 온 사람
@@ -122,6 +124,7 @@ async function openPage(urlPath, opt = {}) {
   await page.setViewport({ width: w, height: h, isMobile: !!opt.mobile, hasTouch: !!opt.mobile, deviceScaleFactor: 1 });
   // 처음 한 번 뜨는 안내 말풍선은 점검에 방해가 되지 않게 '이미 봄'으로 둠
   await page.evaluateOnNewDocument(() => { try { if (localStorage.getItem('crochet-ribbon-hint-shown') === null) localStorage.setItem('crochet-ribbon-hint-shown', '1'); } catch (e) {} });
+  if (!opt.keepStart) await page.evaluateOnNewDocument(SKIP_START);
   const res = await page.goto(BASE + urlPath, { waitUntil: 'networkidle0', timeout: 30000 });
   await sleep(200);
   return { ctx, page, errors, status: res ? res.status() : 0, close: () => ctx.close() };
@@ -580,6 +583,7 @@ test('이미지 저장은 PNG 내려받기, 공유 버튼은 터치 기기에서
         navigator.canShare = d => !!(d && d.files && d.files.length);
         navigator.share = async d => { const f = d.files[0]; window.__shared = { n: d.files.length, type: f.type, name: f.name, size: f.size }; };
       });
+      await page.evaluateOnNewDocument(SKIP_START);
       await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
       const st = await page.evaluate(() => {
         const b = document.getElementById('shareImgBtn'), r = b.getBoundingClientRect();
@@ -804,6 +808,7 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
       await page.evaluateOnNewDocument(d => {
         try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); if (d) localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {}
       }, dark);
+      await page.evaluateOnNewDocument(SKIP_START);
       await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
       await page.evaluate(li => {
         rows = li.rows; cols = li.cols; gridData = li.solid.map(s => s ? '#222222' : null);
@@ -860,6 +865,114 @@ test('필레 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편집 막�
     } finally { await ctx.close(); }
   }
   note('계산 6가지, 탭 전환·편집 막힘·설정 5단계, 휴대폰·영어 2곳');
+});
+
+test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·저장된 도안·파일 열기면 건너뜀, 휴대폰·영어', async (fail, note) => {
+  const isStart = page => page.evaluate(() => document.querySelector('.app').classList.contains('start-mode') && !document.getElementById('startScreen').hidden);
+  const vis = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); return !!e && e.getClientRects().length > 0; }, sel);
+  // 1) 처음 온 사람(PC): 시작 화면이 보이고, 맨 위 막대는 그대로 쓸 수 있음 → "빈 격자로 시작"
+  {
+    const t = await openPage('/pattern/', { keepStart: true });
+    try {
+      const { page } = t;
+      if (!await isStart(page)) fail('처음 온 사람(빈 도안)인데 시작 화면이 보이지 않아요');
+      const cards = await Promise.all(['#startBlank', '#startText', '#startExample'].map(s => vis(page, s)));
+      if (!cards.every(Boolean)) fail(`시작 화면의 카드 세 개가 다 보이지 않아요 (${cards.join(',')})`);
+      if (await vis(page, '.ribbon') || await vis(page, '#gridCanvas')) fail('시작 화면인데 작업창이나 격자가 함께 보여요');
+      if (!await vis(page, '#langBtn') || !await vis(page, '#themeBtn') || !(await vis(page, '.tool-nav') || await vis(page, '.tool-menu'))) fail('시작 화면에서 맨 위 메뉴·EN·화면 모드 버튼이 안 보여요');
+      if ((await page.evaluate(() => localStorage.getItem('crochet-tool-v1'))) !== null) fail('시작 화면이 뜨면서 자동 저장(crochet-tool-v1)에 무언가를 썼어요');
+      const th0 = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+      await clickId(page, 'themeBtn');
+      if ((await page.evaluate(() => document.documentElement.getAttribute('data-theme'))) === th0) fail('시작 화면에서 화면 모드 버튼이 동작하지 않아요');
+      if (!await isStart(page)) fail('화면 모드를 바꾸자 시작 화면이 닫혔어요');
+      await clickId(page, 'startBlank');
+      if (await isStart(page)) fail('"빈 격자로 시작"을 눌러도 시작 화면이 닫히지 않아요');
+      const g = await page.evaluate(() => ({ w: document.getElementById('gridCanvas').getBoundingClientRect().width, empty: !gridData.some(Boolean), rows, cols, ribbon: document.querySelector('.ribbon').getClientRects().length > 0 }));
+      if (!(g.w > 100) || !g.ribbon) fail('"빈 격자로 시작" 뒤에 격자나 작업창이 보이지 않아요');
+      if (!g.empty || g.rows !== 20 || g.cols !== 20) fail(`"빈 격자로 시작" 뒤의 격자가 지금 격자(20×20 빈 격자)가 아니에요 (${g.cols}×${g.rows})`);
+      await clickCell(page, 0, 0);
+      if (!(await page.evaluate(() => !!gridData[0]))) fail('"빈 격자로 시작" 뒤에 칸을 칠할 수 없어요');
+      // 칠한 도안이 있는 재방문: 새로고침하면 시작 화면 없이 바로 작업 화면
+      await settle();
+      await page.reload({ waitUntil: 'networkidle0' }); await sleep(200);
+      if (await isStart(page)) fail('칠한 도안이 저장된 채로 다시 왔는데 시작 화면이 떠요');
+      if (!(await page.evaluate(() => !!gridData[0]))) fail('다시 왔을 때 칠한 칸이 그대로가 아니에요');
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); }
+  }
+  // 2) "글자로 시작": 글자 탭이 열리고 글자 입력칸에 커서
+  {
+    const t = await openPage('/pattern/', { keepStart: true });
+    try {
+      await clickId(t.page, 'startText');
+      const r = await t.page.evaluate(() => ({ pane: document.getElementById('pane-text').classList.contains('active'), focus: document.activeElement && document.activeElement.id }));
+      if (await isStart(t.page)) fail('"글자로 시작"을 눌러도 시작 화면이 닫히지 않아요');
+      if (!r.pane) fail('"글자로 시작" 뒤에 글자 탭이 열리지 않았어요');
+      if (r.focus !== 'textInput') fail(`"글자로 시작" 뒤에 글자 입력칸에 커서가 없어요 (${r.focus})`);
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); }
+  }
+  // 3) "예시 도안 열기": 한국어는 /examples/, 영어는 영어 홈의 예시 구역 /en/#examples
+  for (const [p, wantPath, wantHash] of [['/pattern/', '/examples/', ''], ['/en/pattern/', '/en/', '#examples']]) {
+    const t = await openPage(p, { keepStart: true });
+    try {
+      const { page } = t;
+      if (!await isStart(page)) { fail(`${p}: 빈 도안인데 시작 화면이 보이지 않아요`); continue; }
+      if (p.startsWith('/en/')) {
+        const en = await page.evaluate(() => ({ title: document.getElementById('startTitle').textContent, text: document.getElementById('startScreen').innerText }));
+        if (en.title !== 'How would you like to start?') fail(`${p}: 시작 화면 제목이 영어가 아니에요 (${en.title})`);
+        const ko = en.text.match(/[가-힣]+/g);
+        if (ko) fail(`${p}: 시작 화면에 한국어가 남아 있어요 (${[...new Set(ko)].slice(0, 5).join(', ')})`);
+      }
+      await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 15000 }), page.click('#startExample')]);
+      const u = new URL(page.url());
+      if (u.pathname !== wantPath || u.hash !== wantHash) fail(`${p}: "예시 도안 열기"가 ${wantPath}${wantHash}로 가지 않아요 (${u.pathname}${u.hash})`);
+      if (wantHash && !(await page.evaluate(h => !!document.querySelector(h), wantHash))) fail(`${p}: 영어 홈에 ${wantHash} 구역이 없어요`);
+      t.errors.forEach(e => fail(`${p}: ${e}`));
+    } finally { await t.close(); }
+  }
+  // 4) 예시 페이지의 "고쳐보기" 링크(#p=)로 열면 시작 화면 없이 그 도안
+  {
+    const html = fs.readFileSync(path.join(ROOT, 'examples', 'index.html'), 'utf8');
+    const m = html.match(/#p=([A-Za-z0-9_-]+)/);
+    if (!m) fail('예시 페이지에서 #p= 링크를 찾지 못했어요');
+    else {
+      const t = await openPage('/pattern/#p=' + m[1], { keepStart: true });
+      try {
+        if (await isStart(t.page)) fail('#p= 링크로 열었는데 시작 화면이 떠요');
+        if (!(await t.page.evaluate(() => gridData.some(Boolean)))) fail('#p= 링크로 연 도안이 보이지 않아요');
+        t.errors.forEach(e => fail(e));
+      } finally { await t.close(); }
+    }
+  }
+  // 5) 시작 화면이 떠 있을 때 도안 파일을 열면 시작 화면이 닫히고 그 도안
+  {
+    const dir = path.join(ROOT, 'examples', 'img');
+    const json = fs.readdirSync(dir).find(f => f.endsWith('.json'));
+    const t = await openPage('/pattern/', { keepStart: true });
+    try {
+      const input = await t.page.$('#openFileInput');
+      await input.uploadFile(path.join(dir, json));
+      if (!await waitFor(t.page, () => !document.querySelector('.app').classList.contains('start-mode') && gridData.some(Boolean), 5000)) fail(`시작 화면에서 도안 파일(${json})을 열었는데 시작 화면이 닫히지 않거나 도안이 안 보여요`);
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); }
+  }
+  // 6) 휴대폰 360px: 카드가 세로로 쌓이고 넘치지 않음
+  {
+    const t = await openPage('/pattern/', { keepStart: true, width: 360, height: 740, mobile: true });
+    try {
+      const r = await t.page.evaluate(() => {
+        const rs = ['startBlank', 'startText', 'startExample'].map(id => document.getElementById(id).getBoundingClientRect());
+        return { stacked: rs[1].top >= rs[0].bottom - 1 && rs[2].top >= rs[1].bottom - 1 && Math.abs(rs[0].left - rs[2].left) < 2, over: document.documentElement.scrollWidth - document.documentElement.clientWidth, lang: document.getElementById('langBtn').getClientRects().length > 0 };
+      });
+      if (!await isStart(t.page)) fail('360px: 빈 도안인데 시작 화면이 보이지 않아요');
+      if (!r.stacked) fail('360px: 시작 화면 카드가 세로로 쌓이지 않았어요');
+      if (r.over > 1) fail(`360px: 시작 화면이 옆으로 ${r.over}px 넘쳐요`);
+      if (!r.lang) fail('360px: 시작 화면에서 EN 버튼이 안 보여요');
+      t.errors.forEach(e => fail(`360px: ${e}`));
+    } finally { await t.close(); }
+  }
+  note('빈 도안·글자로 시작·예시(한·영)·#p= 링크·재방문·파일 열기·360px');
 });
 
 /* ---------- 실행 ---------- */

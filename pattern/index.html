@@ -19,7 +19,7 @@
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/pattern.css?v=10">
+<link rel="stylesheet" href="../assets/pattern.css?v=11">
 </head>
 <body>
 <div class="app area-work">
@@ -104,6 +104,19 @@
       <button type="button" class="ribbon-fold" id="ribbonFoldBtn" aria-controls="ribbon" aria-expanded="true" data-dyn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></button>
     </div>
   </div>
+
+  <!-- 시작 화면: 빈 도안으로 열었을 때만 (assets/pattern.js의 "시작 화면" 구역이 보이고 숨김) -->
+  <section class="start-screen" id="startScreen" aria-labelledby="startTitle" hidden>
+    <div class="start-inner">
+      <h2 class="start-title" id="startTitle">어떻게 시작할까요?</h2>
+      <p class="start-sub">고르면 바로 작업 화면으로 넘어가요. 작업은 자동으로 저장돼요.</p>
+      <div class="start-choices">
+        <button type="button" class="start-card main" id="startBlank"><span class="start-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></span><span class="start-t"><strong>빈 격자로 시작</strong><span>칸을 직접 칠해서 만들어요.</span></span></button>
+        <button type="button" class="start-card" id="startText"><span class="start-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/></svg></span><span class="start-t"><strong>글자로 시작</strong><span>문구를 도트 글자 도안으로 바꿔요.</span></span></button>
+        <a class="start-card" id="startExample" href="../examples/"><span class="start-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span><span class="start-t"><strong>예시 도안 열기</strong><span>만들어 둔 도안을 열어서 고쳐 써요.</span></span></a>
+      </div>
+    </div>
+  </section>
 
   <div class="workspace">
     <main class="stage canvas-card">
@@ -645,6 +658,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="../assets/pattern.js?v=11"></script>
+<script src="../assets/pattern.js?v=12"></script>
 </body>
 </html>

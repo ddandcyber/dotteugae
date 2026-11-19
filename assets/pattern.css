@@ -1073,6 +1073,31 @@
     .appbar:has(#shareImgBtn:not([hidden])) .ab-file{ display:none; }
   }
 
+  /* ===== 시작 화면 (빈 도안일 때만): 맨 위 막대는 그대로 두고, 작업창·작업 공간 자리에 카드 세 개 ===== */
+  .start-screen{ display:none; }
+  .app.start-mode .start-screen{ display:block; overflow:auto; background:var(--paper); padding:var(--s4) var(--s3); }
+  .app.start-mode{ grid-template-rows:auto minmax(0,1fr); }
+  .app.start-mode .ribbon, .app.start-mode .workspace, .app.start-mode #knitStartBtn{ display:none !important; }
+  .start-inner{ max-width:1040px; margin:0 auto; text-align:center; }
+  .start-title{ margin:var(--s3) 0 var(--s1); font-family:var(--display); font-size:calc(var(--fs-xl) * 1.25); line-height:1.3; color:var(--ink); }
+  .start-sub{ margin:0 0 var(--s4); color:var(--ink-soft); font-size:var(--fs); }
+  .start-choices{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:var(--s3); text-align:left; }
+  .start-card{ display:flex; flex-direction:column; gap:var(--s2); padding:var(--s4); min-height:200px; border:1px solid var(--line); border-radius:var(--r);
+               background:var(--card); color:var(--ink); font:inherit; text-align:left; text-decoration:none; cursor:pointer; }
+  .start-card:hover{ border-color:var(--teal); }
+  .start-card:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+  .start-ic{ width:56px; height:56px; flex-shrink:0; border-radius:var(--r); background:var(--stamp-bg); color:var(--teal); display:flex; align-items:center; justify-content:center; }
+  .start-ic svg{ width:28px; height:28px; }
+  .start-card.main .start-ic{ background:var(--teal); color:var(--card); }
+  .start-t{ display:flex; flex-direction:column; gap:4px; }
+  .start-t strong{ font-family:var(--display); font-size:var(--fs-lg); }
+  .start-t span{ color:var(--ink-soft); font-size:var(--fs); }
+  @media (max-width: 899px){
+    .app.start-mode .start-screen{ padding:var(--s3); }
+    .start-choices{ grid-template-columns:1fr; }
+    .start-card{ flex-direction:row; align-items:center; min-height:0; padding:var(--s3); }
+  }
+
   /* ===== 모양 통일 (단계 1) =====
      - 맨 위 막대·작업창·탭 줄은 같은 카드색이라 사이의 선을 없애고, 탭 줄 아래 선 하나만 남김
      - 작업창 묶음 사이 세로선은 없애고(묶음 이름이 구분), 왼쪽 가장자리를 맨 위 막대와 맞춤 */
