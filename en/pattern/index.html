@@ -20,7 +20,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/pattern.css?v=4">
+<link rel="stylesheet" href="/assets/pattern.css?v=5">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -120,6 +120,30 @@
       </div>
       <div class="rgroup-cap">편집</div>
     </div>
+    <div class="rgroup grp-filet">
+      <div class="rgroup-body">
+        <select class="filet-select" id="filetVerSel" aria-label="버전">
+          <option value="a">사슬 1 + 한길긴뜨기</option>
+          <option value="b" selected>사슬 2 + 한길긴뜨기</option>
+          <option value="c">사슬 2 + 두길긴뜨기</option>
+        </select>
+      </div>
+      <div class="rgroup-cap">버전</div>
+    </div>
+    <div class="rgroup grp-filet">
+      <div class="rgroup-body">
+        <div class="filet-colors" id="filetColors" data-dyn></div>
+        <button class="rb-btn" id="filetInvertBtn" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg><span>전체 뒤집기</span></button>
+      </div>
+      <div class="rgroup-cap">막힌 칸으로 볼 색</div>
+    </div>
+    <div class="rgroup grp-filet">
+      <div class="rgroup-body">
+        <button class="rb-btn" id="filetSaveImgBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>필레 이미지 저장</span></button>
+        <button class="rb-btn" id="filetShareBtn" aria-label="공유" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg><span>공유</span></button>
+      </div>
+      <div class="rgroup-cap">저장</div>
+    </div>
     <div class="ribbon-fold-wrap">
       <button type="button" class="ribbon-fold" id="ribbonFoldBtn" aria-controls="ribbon" aria-expanded="true" data-dyn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg></button>
     </div>
@@ -127,6 +151,10 @@
 
   <div class="workspace">
     <main class="stage canvas-card">
+      <div class="view-tabs" role="tablist" aria-label="보기">
+        <button type="button" class="view-tab" role="tab" id="tabDesign" aria-selected="true">도안</button>
+        <button type="button" class="view-tab" role="tab" id="tabFilet" aria-selected="false" tabindex="-1">필레</button>
+      </div>
       <div class="stamp-bar" id="stampBar">
             <div class="smode-row" id="stampModeRow">
               <button class="smode-btn active" data-smode="whole">통째로 옮기기</button>
@@ -191,6 +219,32 @@
       <div class="canvas-area">
         <div class="canvas-wrap">
           <canvas id="gridCanvas"></canvas>
+        </div>
+        <div class="filet-view" id="filetView" tabindex="-1">
+          <section class="filet-guide" id="filetGuide">
+            <div class="filet-guide-title">필레 도안 보는 법</div>
+            <ul id="filetGuideList" data-dyn></ul>
+            <div class="filet-guide-btns">
+              <button type="button" class="hex-cancel" id="filetGuideClose">닫기</button>
+              <button type="button" class="hex-cancel" id="filetGuideToday">오늘은 보지 않기</button>
+            </div>
+          </section>
+          <button type="button" class="link-btn filet-guide-open" id="filetGuideOpen" hidden>보는 법</button>
+          <p class="filet-note" id="filetColorNote" hidden>필레는 보통 한 가지 실로 떠서 색 구분은 사라져요.</p>
+          <div class="filet-start" id="filetStart" data-dyn></div>
+          <div class="filet-fig">
+            <div class="filet-fig-title">막힌 칸·빈 칸 미리보기 <span class="filet-fig-sub">검정 = 막힌 칸, 흰색 = 빈 칸</span></div>
+            <div class="filet-scrollbox"><canvas id="filetPreview"></canvas></div>
+          </div>
+          <div class="filet-fig">
+            <div class="filet-fig-title">기호도</div>
+            <div class="filet-legend" id="filetLegend" data-dyn></div>
+            <div class="filet-scrollbox" id="filetChart" data-dyn></div>
+          </div>
+          <div class="filet-fig">
+            <div class="filet-fig-title">줄별 설명</div>
+            <ol class="filet-rows" id="filetRows" data-dyn></ol>
+          </div>
         </div>
         <!-- 작업창을 접었을 때만 보이는 펼치기 손잡이 (좁은 화면: 캔버스 오른쪽 위) -->
         <button type="button" class="ribbon-handle handle-narrow" aria-controls="ribbon" aria-expanded="false" data-dyn><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
@@ -609,61 +663,9 @@
     </div>
   </div>
 
-  <div class="hex-modal filet-modal" id="filetModal" role="dialog" aria-modal="true" aria-labelledby="filetTitle">
-    <div class="hex-box filet-box">
-      <div class="filet-head">
-        <div class="hex-title" id="filetTitle">필레로 보기</div>
-        <button type="button" class="link-btn filet-guide-open" id="filetGuideOpen" hidden>보는 법</button>
-        <button type="button" class="filet-x" id="filetClose" aria-label="닫기" title="닫기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-      </div>
-      <div class="filet-body" id="filetBody">
-        <div class="filet-settings">
-          <div class="filet-set">
-            <div class="filet-label">버전</div>
-            <label class="filet-chip"><input type="radio" name="filetVer" value="a"><span>사슬 1 + 한길긴뜨기</span></label>
-            <label class="filet-chip"><input type="radio" name="filetVer" value="b" checked><span>사슬 2 + 한길긴뜨기</span></label>
-            <label class="filet-chip"><input type="radio" name="filetVer" value="c"><span>사슬 2 + 두길긴뜨기</span></label>
-          </div>
-          <div class="filet-set">
-            <div class="filet-label">막힌 칸으로 볼 색</div>
-            <div class="filet-colors" id="filetColors" data-dyn></div>
-            <button type="button" class="filet-chip filet-invert" id="filetInvertBtn" aria-pressed="false">전체 뒤집기</button>
-          </div>
-          <p class="filet-note" id="filetColorNote" hidden>필레는 보통 한 가지 실로 떠서 색 구분은 사라져요.</p>
-        </div>
-        <section class="filet-guide" id="filetGuide">
-          <div class="filet-guide-title">필레 도안 보는 법</div>
-          <ul id="filetGuideList" data-dyn></ul>
-          <div class="filet-guide-btns">
-            <button type="button" class="hex-cancel" id="filetGuideClose">닫기</button>
-            <button type="button" class="hex-cancel" id="filetGuideToday">오늘은 보지 않기</button>
-          </div>
-        </section>
-        <div class="filet-start" id="filetStart" data-dyn></div>
-        <div class="filet-fig">
-          <div class="filet-fig-title">막힌 칸·빈 칸 미리보기 <span class="filet-fig-sub">검정 = 막힌 칸, 흰색 = 빈 칸</span></div>
-          <div class="filet-scrollbox"><canvas id="filetPreview"></canvas></div>
-        </div>
-        <div class="filet-fig">
-          <div class="filet-fig-title">기호도</div>
-          <div class="filet-legend" id="filetLegend" data-dyn></div>
-          <div class="filet-scrollbox" id="filetChart" data-dyn></div>
-        </div>
-        <div class="filet-fig">
-          <div class="filet-fig-title">줄별 설명</div>
-          <ol class="filet-rows" id="filetRows" data-dyn></ol>
-        </div>
-      </div>
-      <div class="filet-foot">
-        <button type="button" class="hex-ok" id="filetSaveImgBtn">필레 도안 이미지 저장</button>
-        <button type="button" class="hex-cancel" id="filetShareBtn" hidden>공유</button>
-      </div>
-    </div>
-  </div>
-
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="/assets/pattern.js?v=6"></script>
+<script src="/assets/pattern.js?v=7"></script>
 </body>
 </html>

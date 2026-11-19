@@ -509,62 +509,62 @@
   .sw-act:active{ background:var(--paper-2); }
   .sw-act:disabled{ opacity:0.4; cursor:default; }
 
-  /* 필레로 보기 (큰 창) */
-  .filet-modal [hidden]{ display:none !important; }
-  .filet-box{ max-width:1000px; max-height:calc(100vh - 32px); max-height:calc(100dvh - 32px);
-              display:flex; flex-direction:column; padding:0; overflow:hidden; }
-  .filet-head{ display:flex; align-items:center; gap:10px; padding:12px 12px 10px 18px; border-bottom:1px solid var(--line); }
-  .filet-head .hex-title{ margin:0; flex:1; min-width:0; }
-  .filet-guide-open{ background:none; border:none; color:var(--teal); font-size:13.5px; font-weight:700; font-family:inherit; cursor:pointer; padding:6px 4px; text-decoration:underline; }
-  .filet-x{ width:38px; height:38px; border-radius:9px; border:none; background:transparent; color:var(--ink);
-            display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
-  .filet-x:hover{ background:var(--paper-2); }
-  .filet-x svg{ width:20px; height:20px; }
-  .filet-body{ flex:1; min-height:0; overflow-y:auto; overflow-x:hidden; padding:14px 18px 18px; color:var(--ink); }
-  .filet-settings{ display:flex; flex-direction:column; gap:12px; }
-  .filet-set{ display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
-  .filet-label{ width:100%; font-size:12.5px; font-weight:700; color:var(--ink-soft); }
-  .filet-colors{ display:flex; flex-wrap:wrap; gap:6px; }
-  .filet-chip{ display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 12px; max-width:100%;
-               border:1px solid var(--line-strong); border-radius:999px; background:var(--paper); color:var(--ink);
-               font-size:13.5px; font-weight:600; font-family:inherit; cursor:pointer; }
-  .filet-chip input{ margin:0; accent-color:var(--teal); }
-  .filet-chip:has(input:checked), .filet-invert[aria-pressed="true"]{ border-color:var(--teal); color:var(--teal); background:var(--paper-2); }
-  .filet-sw{ width:18px; height:18px; border-radius:5px; box-shadow:inset 0 0 0 1px var(--line-strong); flex-shrink:0; }
-  .filet-cnt{ font-family:var(--mono); font-size:12px; color:var(--ink-faint); }
-  .filet-empty{ font-size:13px; color:var(--ink-faint); }
-  .filet-note{ margin:0; font-size:13px; color:var(--berry); line-height:1.5; }
-  .filet-guide{ margin-top:14px; padding:14px 16px; border-radius:12px; background:var(--stamp-bg); border:1px solid var(--line); }
-  .filet-guide-title{ font-weight:700; font-size:15px; margin-bottom:6px; }
+  /* 필레로 보기: 캔버스 위 "도안 | 필레" 탭. 필레 탭이면 캔버스 자리에 필레 보기가 겹쳐 나옴 (읽기 전용) */
+  .view-tabs{ display:flex; gap:2px; padding:0 10px; flex-shrink:0; background:var(--card); border-bottom:1px solid var(--line); }
+  .view-tab{ height:36px; padding:0 18px; border:none; background:transparent; color:var(--ink-soft);
+             font-size:13.5px; font-weight:700; font-family:inherit; cursor:pointer; border-radius:8px 8px 0 0; }
+  .view-tab:hover{ background:var(--paper-2); }
+  .view-tab[aria-selected="true"]{ color:var(--teal); box-shadow:inset 0 -2px 0 var(--teal); }
+  .view-tab:focus-visible{ outline:2px solid var(--teal); outline-offset:-2px; }
+  .knit-mode .view-tabs{ display:none; }
+  .filet-view{ display:none; position:absolute; inset:0; z-index:2; overflow:auto; background:var(--paper); color:var(--ink);
+               padding:14px 16px 20px; outline:none; }
+  .filet-mode .filet-view{ display:block; }
+  .filet-mode .canvas-wrap{ visibility:hidden; }
+  /* 필레 탭의 작업창: 필레 묶음만 보이고, 편집 도구·오른쪽 패널·열기/저장·되돌리기는 숨김 (작업창이 접혀 있어도 필레 묶음은 보임) */
+  .ribbon .grp-filet{ display:none; }
+  .filet-mode .ribbon .grp-filet{ display:flex; }
+  .filet-mode .ribbon .rgroup:not(.grp-filet){ display:none; }
+  .app.filet-mode.ribbon-folded .ribbon{ display:flex; }
+  .filet-mode .ribbon-fold-wrap, .filet-mode .ribbon-handle{ display:none !important; }
+  .filet-mode .inspector, .filet-mode .appbar-mid, .filet-mode #knitStartBtn, .filet-mode #saveImgBtn, .filet-mode #shareImgBtn,
+  .filet-mode .stamp-bar{ display:none !important; }
+  .filet-mode .workspace{ grid-template-columns:minmax(0,1fr); }
+  .grp-filet [hidden], .filet-view [hidden]{ display:none !important; }
+  .filet-select{ height:36px; max-width:190px; padding:0 8px; border:1px solid var(--line-strong); border-radius:9px;
+                 background:var(--paper); color:var(--ink); font-size:13px; font-weight:600; font-family:inherit; }
+  .filet-colors{ display:flex; flex-wrap:wrap; align-content:center; gap:4px; max-width:260px; max-height:50px; overflow-y:auto; }
+  .filet-chip{ display:inline-flex; align-items:center; gap:4px; height:22px; padding:0 6px 0 4px; cursor:pointer;
+               border:1px solid var(--line-strong); border-radius:7px; background:var(--paper); }
+  .filet-chip input{ margin:0; width:14px; height:14px; accent-color:var(--teal); }
+  .filet-chip:has(input:checked){ border-color:var(--teal); }
+  .filet-sw{ width:14px; height:14px; border-radius:4px; box-shadow:inset 0 0 0 1px var(--line-strong); flex-shrink:0; }
+  .filet-empty{ font-size:12.5px; color:var(--ink-faint); }
+  #filetInvertBtn[aria-pressed="true"]{ background:var(--paper-2); border-color:var(--teal); color:var(--teal); }
+  .filet-note{ margin:0 0 8px; font-size:13px; color:var(--berry); line-height:1.5; }
+  .filet-guide{ padding:10px 14px; border-radius:12px; background:var(--stamp-bg); border:1px solid var(--line); margin-bottom:10px; }
+  .filet-guide-title{ font-weight:700; font-size:14px; margin-bottom:4px; }
   .filet-guide ul{ margin:0; padding-left:18px; font-size:13.5px; line-height:1.6; color:var(--ink-soft); }
-  .filet-guide-btns{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
-  .filet-guide-btns button{ height:38px; padding:0 14px; border-radius:10px; font-size:13.5px; font-weight:700; font-family:inherit; cursor:pointer; }
-  .filet-start{ margin-top:16px; }
-  .filet-start p{ margin:0 0 6px; font-size:18px; font-weight:700; line-height:1.45; }
+  .filet-guide-btns{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+  .filet-guide-btns button{ height:34px; padding:0 14px; border-radius:10px; font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; }
+  .filet-guide-open{ background:none; border:none; color:var(--teal); font-size:13.5px; font-weight:700; font-family:inherit; cursor:pointer;
+                     padding:4px 0; margin-bottom:6px; text-decoration:underline; }
+  .filet-start{ margin:6px 0 4px; }
+  .filet-start p{ margin:0 0 4px; font-size:18px; font-weight:700; line-height:1.45; }
   .filet-start p + p{ font-size:16px; font-weight:600; color:var(--ink-soft); }
-  .filet-start p.filet-sub{ font-size:13px; font-weight:500; color:var(--ink-faint); }
-  .filet-fig{ margin-top:18px; }
+  .filet-fig{ margin-top:16px; }
   .filet-fig-title{ font-weight:700; font-size:14px; margin-bottom:8px; }
   .filet-fig-sub{ font-weight:500; font-size:12.5px; color:var(--ink-faint); margin-left:4px; }
-  .filet-scrollbox{ width:fit-content; max-width:100%; max-height:70vh; overflow:auto; border:1px solid var(--line); border-radius:10px; background:#FFFFFF; }
+  .filet-scrollbox{ width:fit-content; max-width:100%; overflow-x:auto; overflow-y:hidden; border:1px solid var(--line); border-radius:10px; background:#FFFFFF; }
   .filet-scrollbox canvas, .filet-scrollbox svg{ display:block; }
   .filet-legend{ display:flex; flex-wrap:wrap; gap:6px 16px; margin-bottom:8px; font-size:13px; color:var(--ink-soft); }
   .filet-legend span{ display:inline-flex; align-items:center; gap:6px; }
   .filet-legend svg{ width:24px; height:30px; background:#FFFFFF; border-radius:4px; border:1px solid var(--line); flex-shrink:0; }
-  .filet-rows{ margin:0; padding:0; list-style:none; font-size:14px; line-height:1.55; }
-  .filet-rows li{ padding:6px 0; border-top:1px solid var(--line); color:var(--ink-soft); }
-  .filet-rows b{ color:var(--ink); }
-  .filet-runs{ color:var(--ink); overflow-wrap:anywhere; }
-  .filet-foot{ display:flex; gap:8px; padding:12px 18px; border-top:1px solid var(--line); }
-  .filet-foot button{ flex:1; min-width:0; height:46px; border-radius:12px; font-size:15px; font-weight:700; font-family:inherit; cursor:pointer; }
-  @media (max-width: 599px){
-    .filet-modal{ padding:8px; }
-    .filet-box{ max-height:calc(100vh - 16px); max-height:calc(100dvh - 16px); }
-    .filet-head{ padding-left:14px; }
-    .filet-body{ padding:12px 14px 16px; }
-    .filet-foot{ padding:10px 14px; }
+  .filet-rows{ margin:0; padding:0; list-style:none; font-size:14px; line-height:1.4; font-family:var(--mono); }
+  .filet-rows li{ padding:4px 0; border-top:1px solid var(--line); color:var(--ink); overflow-wrap:anywhere; }
+  @media (max-width: 899px){
+    .app.filet-mode .stage{ height:72vh; min-height:420px; }
     .filet-start p{ font-size:16.5px; }
-    .filet-foot button{ font-size:14px; }
   }
 
   .toast{
@@ -573,7 +573,7 @@
     background:var(--ink); color:var(--paper);
     font-size:14px; font-weight:600; padding:11px 16px; border-radius:12px;
     opacity:0; pointer-events:none; transition: opacity 180ms ease, transform 180ms ease;
-    max-width:calc(100% - 40px); text-align:center; z-index:30; /* 필레 창(대화상자) 위에서도 보이게 */
+    max-width:calc(100% - 40px); text-align:center; z-index:10;
   }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
   @media (prefers-reduced-motion: reduce){
