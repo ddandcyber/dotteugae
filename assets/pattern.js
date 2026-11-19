@@ -1,5 +1,5 @@
   /* ===== 언어 (한국어 / English) ===== */
-  const I18N_EN = {"도트뜨개": "Crochet Alpha", "도트뜨개에서 저장한 도안 파일이 아니에요": "This isn't a pattern file from Crochet Alpha", "홈": "Home", "도안 만들기": "Pattern maker", "코수 세기": "Stitch counter", "예시 도안": "Examples", "가이드": "Guides", "사이트 메뉴": "Site menu", "홈으로": "Home", "글자 간격": "Letter gap", "줄 간격": "Line gap", "줄이기": "Decrease", "늘리기": "Increase", "음수면 줄이 겹쳐요": "Negative overlaps lines", "칸": "cells", "장식 지우기": "Delete decoration", "확인": "OK", "닫기": "Close", "내 장식": "My decorations", "직접 만든 장식": "Ones you made", "＋ 새 장식 그리기": "＋ Draw new decoration", "기본 장식": "Built-in", "내 장식에 추가": "Add to my decorations", "지금 떠 있는 모양을 내 장식으로 저장": "Save the floating shape as a decoration", "새 장식 그리기": "New decoration", "장식 편집": "Edit decoration", "장식 이름 (예: 우리 고양이)": "Name (e.g. My cat)", "가로": "Width", "세로": "Height", "가로 줄이기": "Narrower", "가로 늘리기": "Wider", "세로 줄이기": "Shorter", "세로 늘리기": "Taller", "그리기": "Draw", "지우기": "Erase", "모두 지우기": "Clear all", "칸을 누르거나 끌어서 그려요. 넣을 때는 '칠할 색'으로 칠해져요.": "Tap or drag to draw. It's painted with the paint color when placed.", "아직 만든 장식이 없어요": "No decorations yet", "편집": "Edit", "\"{n}\" 장식을 지울까요?": "Delete \"{n}\"?", "내 장식은 60개까지 저장할 수 있어요": "You can keep up to 60 decorations", "장식은 60칸 이하만 저장할 수 있어요": "Decorations can be up to 60 cells", "저장할 칸이 없어요": "Nothing to save", "장식 이름을 정해주세요": "Name this decoration", "내 장식 {n}": "My decoration {n}", "내 장식에 추가했어요. 장식 탭에서 언제든 넣을 수 있어요": "Added to My decorations. Use it anytime from the Decor tab.", "장식을 고쳤어요": "Decoration updated", "내 장식에 추가했어요. 눌러서 도안에 넣어보세요": "Added. Tap it to place it on the pattern.", "저장 공간이 부족해서 장식을 저장하지 못했어요": "Not enough storage to save the decoration", "열기": "Open", "저장": "Save", "이미지로 저장": "Save image", "도안 파일 열기 (Ctrl+O)": "Open pattern file (Ctrl+O)", "도안 파일로 저장 (Ctrl+S)": "Save pattern file (Ctrl+S)", "도안 파일": "Pattern file", "다시 열어서 이어 작업할 수 있어요": "Reopen later to keep working", "링크 복사": "Copy link", "도안이 담긴 링크를 복사해요": "Copy a link that contains this pattern", "저장하면 격자 크기, 칠한 칸, 배경색, 내 팔레트가 .json 파일 하나에 담겨요. 파일을 캔버스에 끌어다 놓아도 열려요.": "Saving puts the grid size, painted cells, background and your palette in one .json file. You can also drop the file onto the canvas to open it.", "격자 크기가 올바르지 않아요": "Invalid grid size", "색 정보가 올바르지 않아요": "Invalid color data", "칸 정보가 올바르지 않아요": "Invalid cell data", "도안을 열었어요 ({c}코 × {r}단)": "Pattern opened ({c} × {r})", "저장했어요. 떠 있는 글자·장식은 확정한 뒤에 저장돼요": "Saved. Floating items are saved once you place them.", "도안 파일을 저장했어요": "Pattern file saved", "파일이 너무 커요": "File is too large", "도안을 열지 못했어요: ": "Couldn't open the pattern: ", "도안 링크를 복사했어요": "Pattern link copied", "아래 링크를 복사하세요": "Copy this link", "링크의 도안을 열었어요. 이전 작업은 되돌리기로 돌아갈 수 있어요": "Opened the pattern from the link. Undo to return to your previous work.", "링크의 도안을 열지 못했어요": "Couldn't open the pattern in the link", "제자리에 놓았어요": "Placed", "선택": "Select", "복사": "Copy", "붙여넣기": "Paste", "삭제": "Delete", "반짝이·별": "Sparkles & stars", "귀여운 것": "Cute", "테두리 줄": "Borders", "자연": "Nature", "반짝임 (X)": "Twinkle (X)", "별 (소)": "Star (S)", "별 (중)": "Star (M)", "별 (대)": "Star (L)", "하트 (소)": "Heart (S)", "하트 (중)": "Heart (M)", "하트 (대)": "Heart (L)", "빈 하트": "Outline heart", "튤립": "Tulip", "잎사귀": "Leaf", "달": "Moon", "해": "Sun", "구름": "Cloud", "물방울": "Drop", "웃는 얼굴": "Smiley", "리본": "Bow", "왕관": "Crown", "음표": "Note", "점선": "Dots", "물결선": "Wave line", "지그재그": "Zigzag", "체크 줄": "Checker line", "격자를 끌어서 옮기거나 복사할 부분을 골라주세요": "Drag on the grid to select an area to move or copy", "고른 곳에 칠한 칸이 없어요": "Nothing painted in that area", "선택 도구로 영역을 고르거나 글자·장식을 띄운 뒤 복사해주세요": "Select an area or place text/decoration first, then copy", "복사했어요. 붙여넣기로 몇 개든 넣을 수 있어요": "Copied. Paste as many as you like.", "지웠어요": "Deleted", "선택한 부분 옮기기": "Move selection", "위치 옮기기": "Move", "격자를 끌어서 영역을 고르면 그 부분을 옮기거나 복사할 수 있어요": "Drag a box on the grid to move or copy that area", "떠 있는 글자·장식·선택 영역 복사 (Ctrl+C)": "Copy floating item (Ctrl+C)", "붙여넣기 (Ctrl+V)": "Paste (Ctrl+V)", "복사 (Ctrl+C)": "Copy (Ctrl+C)", "삭제 (Delete)": "Delete (Del)", "폰트": "Font", "크기": "Size", "간격": "Spacing", "정렬": "Align", "흐름": "Flow", "그림자": "Shadow", "거리": "Distance", "색": "Color", "여백": "Margin", "띄어쓰기": "Space", "줄": "Line", "글자 사이 칸 수": "Cells between letters", "띄어쓰기 칸 수": "Cells per space", "줄 사이 칸 수 (음수면 줄이 붙어요)": "Cells between lines (negative overlaps)", "글자에 맞추기": "Fit to text", "약 {n}칸": "~{n} cells", "캔버스에서 끌어 위치를 정한 뒤 넣어주세요.": "Drag on the canvas to position, then add.", "누르면 글자가 도안 위에 올라와요.": "Places the text on the pattern.", "→ {c}코 × {r}단": "→ {c} × {r}", "실시간 미리보기": "Live preview", "바꾸는 대로 캔버스에 바로 보여줘요": "Shows changes on the canvas as you go", "이대로 도안에 넣기": "Add to pattern", "문구를 쓰거나 설정을 바꾸면 캔버스에 바로 미리 보여요. 끌어서 위치를 정하고 \"이대로 도안에 넣기\"나 완료를 누르면 도안에 들어가요.": "Text and setting changes preview right on the canvas. Drag to position it, then tap \"Add to pattern\" or Done.", "도구": "Tools", "편집": "Edit", "변형": "Transform", "격자": "Grid", "글자": "Text", "장식": "Decor", "색 바꾸기": "Recolor", "도움말": "Help", "도구 모음": "Toolbar", "칠하지 않은 칸의 색": "Color of unpainted cells", "나중에 바꿔도 칠한 무늬는 그대로예요.": "Changing it later keeps your pattern.", "{c}코 × {r}단": "{c} sts × {r} rows", "작업 단 {n}": "Row {n}", "90°": "90°", "270°": "270°", "통째로 옮기기": "Move all", "글자 하나씩 옮기기": "Move letters", "처음 배치로": "Reset layout", "· 옮길 글자를 눌러서 끌어요. 화살표는 고른 글자만 한 칸씩 움직여요. 다 되면 완료를 눌러요.": "· Tap a letter and drag it. Arrows move only the selected letter. Tap Done when finished.", "먼저 옮길 글자를 눌러주세요": "Tap a letter to move first", "반짝이 · 하트 · 별": "Sparkles · hearts · stars", "'칠할 색'으로 찍혀요. 누르면 장식이 도안 위에 올라오고, 끌어서 원하는 자리에 놓으면 돼요.": "Uses the paint color. Tap to place one on the pattern, then drag it into place.", "글자 흐름": "Text flow", "물결": "Wave", "통통": "Bounce", "오르막": "Rise", "내리막": "Fall", "높낮이": "Height", "흐름 약하게": "Less", "흐름 강하게": "More", "한 줄 안에서 글자가 위아래로 한 번 출렁여요.": "Letters ripple up and down once across each line.", "글자가 하나씩 번갈아 위로 올라가 통통 튀는 느낌이 나요.": "Every other letter is raised for a bouncy look.", "글자마다 조금씩 올라가요. 높낮이 = 글자 하나당 올라가는 칸 수예요.": "Each letter steps up. Height = cells per letter.", "글자마다 조금씩 내려가요. 높낮이 = 글자 하나당 내려가는 칸 수예요.": "Each letter steps down. Height = cells per letter.", "가로 가운데 정렬": "Center horizontally", "세로 가운데 정렬": "Center vertically", "↔ 가운데": "↔ Center", "↕ 가운데": "↕ Center", "도트 폰트 (1칸 = 1도트)": "Pixel fonts (1 dot = 1 cell)", "굵은 글씨 (크기 자유)": "Bold fonts (any size)", "Fraunces Black (영문 · 둥근 세리프)": "Fraunces Black (Latin · soft serif)", "Abril Fatface (영문 · 우아한 세리프)": "Abril Fatface (Latin · elegant serif)", "Alfa Slab One (영문 · 각진 세리프)": "Alfa Slab One (Latin · slab serif)", "검은고딕 (한글 · 굵은 고딕)": "Black Han Sans (Korean · heavy)", "도현체 (한글 · 반듯한 고딕)": "Do Hyeon (Korean · clean)", "주아체 (한글 · 동글동글)": "Jua (Korean · rounded)", "줄 간격": "Line gap", "여러 줄일 때 정렬": "Alignment (multiple lines)", "가운데": "Center", "줄 간격을 0이나 음수로 하면 줄이 촘촘하게 붙어요. 줄 맨 앞에 띄어쓰기를 넣으면 그 줄만 오른쪽으로 밀려서 엇갈린 배치를 만들 수 있어요.": "Set the line gap to 0 or below to stack lines tightly. Add spaces at the start of a line to push just that line right for a staggered layout.", "장식 넣기": "Decorations", "'칠할 색'으로 찍혀요": "Uses the paint color", "누르면 장식이 도안 위에 올라가요. 글자처럼 끌어서 원하는 자리에 놓으면 돼요.": "Tap to place a decoration on the pattern, then drag it into place like text.", "반짝이 (소)": "Sparkle (S)", "반짝이 (중)": "Sparkle (M)", "반짝이 (대)": "Sparkle (L)", "하트": "Heart", "별": "Star", "꽃": "Flower", "글자 높이": "Text height", "작업 내용 자동 저장": "Auto-saved", "배경색": "Background", "칠하지 않은 칸의 색 · 나중에 바꿔도 무늬는 그대로예요": "Color of unpainted cells · changing it later keeps your pattern", "격자 크기 · 여백": "Grid size · Margins", "격자 크기": "Grid size", "단": "Rows", "코": "Sts", "새 격자 만들기": "New grid", "여백 늘리기": "Add margin", "그린 도안은 그대로 두고 칸만 추가": "Adds cells, keeps your drawing", "여백 줄이기": "Trim margin", "그린 도안은 그대로 두고 빈 칸만 더하거나 빼요": "Adds or removes empty cells, keeps your drawing", "더 줄일 수 없어요": "Can't make it any smaller", "가장자리에 칠한 칸이 있어서 줄일 수 없어요": "Can't trim: there are painted cells on that edge", "사방 모두": "All sides", "위": "Top", "아래": "Bottom", "왼쪽": "Left", "오른쪽": "Right", "칠하기": "Paint", "채우기": "Fill", "되돌리기": "Undo", "다시하기": "Redo", "되돌리기 (Ctrl+Z)": "Undo (Ctrl+Z)", "다시하기 (Ctrl+Shift+Z / Ctrl+Y)": "Redo (Ctrl+Shift+Z / Ctrl+Y)", "칠할 색": "Paint color", "글자 위치 옮기기": "Move text", "· 격자를 손가락으로 끌면 손을 뗀 자리에 고정돼요. 화살표로 한 칸씩 맞춘 뒤엔 완료를 눌러요. 칠할 색을 누르면 글자 색이 바뀌어요.": "· Drag on the grid and it locks where you let go. After nudging with the arrows, tap Done. Tap a paint color to change the text color.", "왼쪽으로": "Left", "위로": "Up", "아래로": "Down", "오른쪽으로": "Right", "취소": "Cancel", "완료": "Done", "회전": "Rotate", "시계 방향으로 90도 회전": "Rotate 90° clockwise", "시계 방향으로 270도 회전": "Rotate 270° clockwise", "작업 단": "Row", "아래 단": "Row below", "위 단": "Row above", "좌우 뒤집기": "Mirror", "화면 보기": "Zoom", "축소": "Zoom out", "확대": "Zoom in", "맞춤": "Fit", "모두 지우기": "Clear all", "이미지 저장": "Save image", "문구로 도안 만들기": "Text to pattern", "글자 → 도트": "Text → dots", "문구": "Text", "예: 뜨개": "e.g. Knit", "폰트": "Font", "둥근모꼴": "DungGeunMo", "Neo둥근모": "NeoDunggeunmo", "전기칩 한글": "DenkiChip Hangul", "도스고딕": "DOS Gothic", "도스명조": "DOS Myungjo", "도스필기": "DOS Pilgi", "이야기 굵은체": "DOS Iyagi Bold", "갈무리14": "Galmuri14", "갈무리11": "Galmuri11", "갈무리11 굵게": "Galmuri11 Bold", "갈무리9": "Galmuri9", "갈무리7 (가장 작음)": "Galmuri7 (smallest)", "도스샘물": "DOS Saemmul", "미래로글꼴": "Miraero", "테두리": "Outline", "테두리 색 고르기": "Choose outline color", "종류": "Style", "한 색": "One color", "지직 (두 색)": "Glitch (two colors)", "색 1": "Color 1", "색 2": "Color 2", "그림자 색 1 고르기": "Choose shadow color 1", "그림자 색 2 고르기": "Choose shadow color 2", "화살표 방향으로 색 1, 반대쪽으로 색 2가 어긋나요. 두 색이 겹치는 칸은 색 1이에요.": "Color 1 shifts toward the arrow and color 2 the opposite way. Where they overlap, color 1 is used.", "이 칸 색 바꾸기": "Change this color", "이 칸 지우기": "Remove this color", "바꾸기": "Change", "지워도 이미 칠한 칸의 색은 그대로예요.": "Cells you've already painted keep their color.", "색이 하나뿐이라 지울 수 없어요.": "This is the only color, so it can't be removed.", "이미 팔레트에 있는 색이에요": "That color is already in the palette", "팔레트에서 지웠어요. 칠한 칸은 그대로예요": "Removed from the palette. Painted cells are unchanged", "한 번 더 누르면 바꾸기·지우기": "Tap again to change or remove","이 폰트에 없는 글자가 있어서 다른 글꼴로 대신 그려져요: {chars}": "This font doesn't have some of these characters, so another font draws them: {chars}", "이 글자가 모두 있는 폰트: {fonts}": "Fonts that have all of them: {fonts}","나눔손글씨 펜": "Nanum Pen", "본명조 중간 굵게": "Noto Serif KR SemiBold", "본명조 굵게": "Noto Serif KR Bold", "글자 높이 (30칸부터)": "Letter height (30 cells min.)", "도트 폰트": "Pixel fonts", "일반 글꼴": "Regular fonts", "물마루": "Mulmaru", "모나12": "Mona12", "모나10x12": "Mona10x12", "Departure Mono (영문 전용)": "Departure Mono (Latin only)", "글자 크기": "Text size", "기본으로": "Reset", "글자 작게": "Smaller", "글자 크게": "Larger", "기본이 가장 작은 크기예요. 더 작게 뜨려면 갈무리9(10칸)나 갈무리7(8칸)을 골라보세요.": "Basic is the smallest size. For smaller text, try Galmuri9 (10 rows) or Galmuri7 (8 rows).", "글자 간격": "Letter gap", "칸": "cells", "띄어쓰기": "Space width", "간격은 기본 크기 기준이라, 글자 크기를 2배로 하면 간격도 2배가 돼요.": "Gaps are measured at basic size, so doubling the text size doubles them too.", "그림자": "Shadow", "글자 색은 '칠할 색'을 따라가요": "Text uses the paint color", "방향": "Direction", "없음": "None", "오른쪽 아래": "Down-right", "왼쪽 아래": "Down-left", "거리": "Distance", "그림자 가깝게": "Closer", "그림자 멀게": "Farther", "그림자 색": "Shadow color", "지금 도안에 얹기": "Place on grid", "글자에 코·단 맞추기": "Fit grid to text", "글자 둘레 여백": "Margin", "격자를 글자 크기 + 여백으로 새로 만들고 글자를 가운데에 넣어요. 그려둔 도안은 지워지지만 되돌리기로 복구할 수 있어요.": "Creates a new grid sized to the text plus margin and centers the text. Your current drawing is cleared, but Undo brings it back.", "색 한번에 바꾸기": "Replace color", "도안 전체": "Whole pattern", "바꿀 색": "From", "도안에 쓰인 색": "Colors in use", "새 색": "To", "사용한 폰트 · 라이선스": "Fonts & licenses", "MIT License 전문 (도스 계열 폰트)": "Full MIT License (DOS fonts)", "색 추가": "Add color", "눌러서 색상표로 고르기": "Tap to open the color picker", "헥스코드를 입력하거나, 왼쪽 네모를 눌러 색상표에서 골라요.": "Type a hex code, or tap the square to pick from the color picker.", "추가": "Add", "화면 모드": "Theme", "#RRGGBB 형식으로 입력해 주세요 (예: #FF8800)": "Use #RRGGBB format (e.g. #FF8800)", "흰색 (기본)": "White (default)", "다른 색 (헥스코드 입력)": "Other color (hex code)", "지우개 (배경색으로 되돌림)": "Eraser (back to background)", "색 추가 (헥스코드 입력)": "Add color (hex code)", "배경색 고르기": "Choose background", "칠할 색 추가": "Add paint color", "그림자 색 고르기": "Choose shadow color", "{n}단": "Row {n}", "글자 옮기기를 끝낸 뒤에 회전해주세요": "Finish moving the text before rotating", "{deg}° 회전했어요 ({c}코 × {r}단)": "Rotated {deg}° ({c} sts × {r} rows)", "만드는 중...": "Working...", "글자를 그리지 못했어요. 다른 문구나 폰트를 시도해보세요.": "Couldn't draw the text. Try different text or another font.", "변환 중 오류가 발생했어요: ": "Conversion error: ", "{n}칸": "{n} cells", "글자에 맞춰 도안 만들기": "Make pattern from text", "도안에 글자 넣기": "Add text to pattern", "글자가 지금 도안 위에 올라가요. 끌어서 원하는 위치로 옮기고 손을 떼면 그 자리에 고정돼요. 격자보다 글자가 크면 격자가 알맞게 늘어나요.": "The text is placed on your current pattern. Drag it where you want and it locks when you let go. If the text is bigger than the grid, the grid grows to fit.", "지난번 글자 기준: {c}코 × {r}단": "Based on last text: {c} sts × {r} rows", "글자가 여백 포함 {c}코 × {r}단이라 최대 크기(200)를 넘어요. 글자 크기나 여백을 줄이거나 문구를 나눠서 넣어주세요.": "With margin the text is {c} sts × {r} rows, over the 200 limit. Reduce the size or margin, or split the text.", "격자를 {c}코 × {r}단으로 맞췄어요": "Grid set to {c} sts × {r} rows", "글자가 {c}코 × {r}단이라 최대 크기(200)를 넘어요. 글자 크기를 줄이거나 문구를 나눠서 넣어주세요.": "The text is {c} sts × {r} rows, over the 200 limit. Reduce the size or split the text.", "글자가 들어가도록 격자를 {c}코 × {r}단으로 늘렸어요": "Grid enlarged to {c} sts × {r} rows to fit the text", "글자를 넣었어요": "Text placed", "기본": "Basic", "{n}배": "{n}×", "글자 높이 약 {n}칸": "Text height ≈ {n} rows", "배경 (칠하지 않은 칸)": "Background (unpainted)", "바꿀 색과 새 색을 골라주세요": "Pick a From and a To color", "같은 색이에요. 다른 새 색을 골라주세요": "Same color — pick a different To color", "{n}칸 바꾸기": "Replace {n} cells", "{n}칸의 색을 바꿨어요": "Recolored {n} cells", "코바늘도안": "crochet-pattern", "이미지를 만들지 못했어요. 격자를 줄여서 다시 시도해보세요.": "Couldn't create the image. Try a smaller grid.", "코바늘 도안": "Crochet pattern", "도안 이미지를 저장했어요": "Pattern image saved", "화면: 시스템 설정": "Theme: system", "화면: 밝게": "Theme: light", "화면: 어둡게": "Theme: dark", "한국어로 보기": "한국어로 보기", "작업 시작하기": "Start working", "다른 도구를 숨기고 도안과 작업 단만 크게 보여요": "Hide the tools and show only the pattern and current row", "도안 수정으로": "Back to editing", "글자 옮기기를 끝낸 뒤에 작업을 시작해주세요": "Finish moving the text before you start", "격자의 단을 누르거나 ＋ − 로 한 단씩 옮겨요": "Tap a row on the grid, or use ＋ − to move one row at a time", "왼쪽부터 →": "From left →", "← 오른쪽부터": "← From right", "읽는 방향": "Read", "단마다 번갈아 (1단은 오른쪽부터)": "Alternate each row (row 1 from right)", "단마다 번갈아 (1단은 왼쪽부터)": "Alternate each row (row 1 from left)", "항상 왼쪽부터": "Always from left", "항상 오른쪽부터": "Always from right", "총 {n}단": "of {n}", "접기": "Hide", "펼치기": "Show", "위쪽 막대 접기": "Hide the top bar", "위쪽 막대 펼치기": "Show the top bar", "작업창 접기": "Collapse toolbar", "작업창 펼치기": "Expand toolbar", "여기를 누르면 도구가 펼쳐져요": "Tap here to show the tools", "실제 비율": "Real ratio", "게이지에 맞춰 칸을 실제 완성작처럼 납작하게(또는 길쭉하게) 보여요": "Squash or stretch cells to match your gauge, like the finished piece", "게이지에 맞춰 칸을 실제 완성작처럼 보여요": "Shape cells like the finished piece, based on your gauge", "게이지": "Gauge", "실물에서 한 코·한 단의 모양": "the real shape of a stitch and row", "게이지 예시": "Gauge presets", "정사각형 칸 (보정 안 함)": "Square cells (no correction)", "대바늘 메리야스뜨기 (약 22코 × 30단)": "Knit stockinette (about 22 sts × 30 rows)", "코바늘 짧은뜨기 (약 18코 × 20단)": "Single crochet (about 18 sts × 20 rows)", "직접 입력": "Custom", "10cm 안에": "In 10 cm", "10cm 안의 코 수": "Stitches in 10 cm", "10cm 안의 단 수": "Rows in 10 cm", "실제 비율로 보기": "Show real proportions", "뜨개는 보통 한 코가 한 단보다 넓어서, 정사각형 격자에 그린 모양이 실물에서는 옆으로 퍼져 보여요. 내 게이지(10cm 안의 코 수·단 수)를 넣고 켜 두면 완성작과 같은 모양으로 보면서 그릴 수 있어요.": "A stitch is usually wider than a row is tall, so a design drawn on square cells looks stretched sideways once it’s made. Enter your gauge (stitches and rows in 10 cm) and turn this on to draw while seeing the finished shape.", "칸이 정사각형이에요": "Cells are square", "한 칸이 세로보다 가로가 {n}배 넓어요": "Each cell is {n}× wider than tall", "한 칸이 가로보다 세로가 {n}배 길어요": "Each cell is {n}× taller than wide", "이 게이지로 뜨면 완성 크기 약 {w} × {h}cm": "At this gauge the finished piece is about {w} × {h} cm", "게이지에 10cm 안의 코 수·단 수를 넣으면 칸 모양이 실물처럼 바뀌어요": "Enter stitches and rows in 10 cm under Gauge to reshape the cells", "동글 굵게": "Dongle Bold", "싱글데이": "Single Day", "동해독도": "East Sea Dokdo", "Leckerli One (영문 전용)": "Leckerli One (Latin only)", "Pirata One (영문 전용)": "Pirata One (Latin only)", "Abril Fatface (영문 전용)": "Abril Fatface (Latin only)", "Dancing Script Bold (영문 전용)": "Dancing Script Bold (Latin only)", "UnifrakturMaguntia (영문 전용)": "UnifrakturMaguntia (Latin only)", "글자 높이 ({n}칸부터)": "Letter height ({n} cells min.)", "공유": "Share"};
+  const I18N_EN = {"도트뜨개": "Crochet Alpha", "도트뜨개에서 저장한 도안 파일이 아니에요": "This isn't a pattern file from Crochet Alpha", "홈": "Home", "도안 만들기": "Pattern maker", "코수 세기": "Stitch counter", "예시 도안": "Examples", "가이드": "Guides", "사이트 메뉴": "Site menu", "홈으로": "Home", "글자 간격": "Letter gap", "줄 간격": "Line gap", "줄이기": "Decrease", "늘리기": "Increase", "음수면 줄이 겹쳐요": "Negative overlaps lines", "칸": "cells", "장식 지우기": "Delete decoration", "확인": "OK", "닫기": "Close", "내 장식": "My decorations", "직접 만든 장식": "Ones you made", "＋ 새 장식 그리기": "＋ Draw new decoration", "기본 장식": "Built-in", "내 장식에 추가": "Add to my decorations", "지금 떠 있는 모양을 내 장식으로 저장": "Save the floating shape as a decoration", "새 장식 그리기": "New decoration", "장식 편집": "Edit decoration", "장식 이름 (예: 우리 고양이)": "Name (e.g. My cat)", "가로": "Width", "세로": "Height", "가로 줄이기": "Narrower", "가로 늘리기": "Wider", "세로 줄이기": "Shorter", "세로 늘리기": "Taller", "그리기": "Draw", "지우기": "Erase", "모두 지우기": "Clear all", "칸을 누르거나 끌어서 그려요. 넣을 때는 '칠할 색'으로 칠해져요.": "Tap or drag to draw. It's painted with the paint color when placed.", "아직 만든 장식이 없어요": "No decorations yet", "편집": "Edit", "\"{n}\" 장식을 지울까요?": "Delete \"{n}\"?", "내 장식은 60개까지 저장할 수 있어요": "You can keep up to 60 decorations", "장식은 60칸 이하만 저장할 수 있어요": "Decorations can be up to 60 cells", "저장할 칸이 없어요": "Nothing to save", "장식 이름을 정해주세요": "Name this decoration", "내 장식 {n}": "My decoration {n}", "내 장식에 추가했어요. 장식 탭에서 언제든 넣을 수 있어요": "Added to My decorations. Use it anytime from the Decor tab.", "장식을 고쳤어요": "Decoration updated", "내 장식에 추가했어요. 눌러서 도안에 넣어보세요": "Added. Tap it to place it on the pattern.", "저장 공간이 부족해서 장식을 저장하지 못했어요": "Not enough storage to save the decoration", "열기": "Open", "저장": "Save", "이미지로 저장": "Save image", "도안 파일 열기 (Ctrl+O)": "Open pattern file (Ctrl+O)", "도안 파일로 저장 (Ctrl+S)": "Save pattern file (Ctrl+S)", "도안 파일": "Pattern file", "다시 열어서 이어 작업할 수 있어요": "Reopen later to keep working", "링크 복사": "Copy link", "도안이 담긴 링크를 복사해요": "Copy a link that contains this pattern", "저장하면 격자 크기, 칠한 칸, 배경색, 내 팔레트가 .json 파일 하나에 담겨요. 파일을 캔버스에 끌어다 놓아도 열려요.": "Saving puts the grid size, painted cells, background and your palette in one .json file. You can also drop the file onto the canvas to open it.", "격자 크기가 올바르지 않아요": "Invalid grid size", "색 정보가 올바르지 않아요": "Invalid color data", "칸 정보가 올바르지 않아요": "Invalid cell data", "도안을 열었어요 ({c}코 × {r}단)": "Pattern opened ({c} × {r})", "저장했어요. 떠 있는 글자·장식은 확정한 뒤에 저장돼요": "Saved. Floating items are saved once you place them.", "도안 파일을 저장했어요": "Pattern file saved", "파일이 너무 커요": "File is too large", "도안을 열지 못했어요: ": "Couldn't open the pattern: ", "도안 링크를 복사했어요": "Pattern link copied", "아래 링크를 복사하세요": "Copy this link", "링크의 도안을 열었어요. 이전 작업은 되돌리기로 돌아갈 수 있어요": "Opened the pattern from the link. Undo to return to your previous work.", "링크의 도안을 열지 못했어요": "Couldn't open the pattern in the link", "제자리에 놓았어요": "Placed", "선택": "Select", "복사": "Copy", "붙여넣기": "Paste", "삭제": "Delete", "반짝이·별": "Sparkles & stars", "귀여운 것": "Cute", "테두리 줄": "Borders", "자연": "Nature", "반짝임 (X)": "Twinkle (X)", "별 (소)": "Star (S)", "별 (중)": "Star (M)", "별 (대)": "Star (L)", "하트 (소)": "Heart (S)", "하트 (중)": "Heart (M)", "하트 (대)": "Heart (L)", "빈 하트": "Outline heart", "튤립": "Tulip", "잎사귀": "Leaf", "달": "Moon", "해": "Sun", "구름": "Cloud", "물방울": "Drop", "웃는 얼굴": "Smiley", "리본": "Bow", "왕관": "Crown", "음표": "Note", "점선": "Dots", "물결선": "Wave line", "지그재그": "Zigzag", "체크 줄": "Checker line", "격자를 끌어서 옮기거나 복사할 부분을 골라주세요": "Drag on the grid to select an area to move or copy", "고른 곳에 칠한 칸이 없어요": "Nothing painted in that area", "선택 도구로 영역을 고르거나 글자·장식을 띄운 뒤 복사해주세요": "Select an area or place text/decoration first, then copy", "복사했어요. 붙여넣기로 몇 개든 넣을 수 있어요": "Copied. Paste as many as you like.", "지웠어요": "Deleted", "선택한 부분 옮기기": "Move selection", "위치 옮기기": "Move", "격자를 끌어서 영역을 고르면 그 부분을 옮기거나 복사할 수 있어요": "Drag a box on the grid to move or copy that area", "떠 있는 글자·장식·선택 영역 복사 (Ctrl+C)": "Copy floating item (Ctrl+C)", "붙여넣기 (Ctrl+V)": "Paste (Ctrl+V)", "복사 (Ctrl+C)": "Copy (Ctrl+C)", "삭제 (Delete)": "Delete (Del)", "폰트": "Font", "크기": "Size", "간격": "Spacing", "정렬": "Align", "흐름": "Flow", "그림자": "Shadow", "거리": "Distance", "색": "Color", "여백": "Margin", "띄어쓰기": "Space", "줄": "Line", "글자 사이 칸 수": "Cells between letters", "띄어쓰기 칸 수": "Cells per space", "줄 사이 칸 수 (음수면 줄이 붙어요)": "Cells between lines (negative overlaps)", "글자에 맞추기": "Fit to text", "약 {n}칸": "~{n} cells", "캔버스에서 끌어 위치를 정한 뒤 넣어주세요.": "Drag on the canvas to position, then add.", "누르면 글자가 도안 위에 올라와요.": "Places the text on the pattern.", "→ {c}코 × {r}단": "→ {c} × {r}", "실시간 미리보기": "Live preview", "바꾸는 대로 캔버스에 바로 보여줘요": "Shows changes on the canvas as you go", "이대로 도안에 넣기": "Add to pattern", "문구를 쓰거나 설정을 바꾸면 캔버스에 바로 미리 보여요. 끌어서 위치를 정하고 \"이대로 도안에 넣기\"나 완료를 누르면 도안에 들어가요.": "Text and setting changes preview right on the canvas. Drag to position it, then tap \"Add to pattern\" or Done.", "도구": "Tools", "편집": "Edit", "변형": "Transform", "격자": "Grid", "글자": "Text", "장식": "Decor", "색 바꾸기": "Recolor", "도움말": "Help", "도구 모음": "Toolbar", "칠하지 않은 칸의 색": "Color of unpainted cells", "나중에 바꿔도 칠한 무늬는 그대로예요.": "Changing it later keeps your pattern.", "{c}코 × {r}단": "{c} sts × {r} rows", "작업 단 {n}": "Row {n}", "90°": "90°", "270°": "270°", "통째로 옮기기": "Move all", "글자 하나씩 옮기기": "Move letters", "처음 배치로": "Reset layout", "· 옮길 글자를 눌러서 끌어요. 화살표는 고른 글자만 한 칸씩 움직여요. 다 되면 완료를 눌러요.": "· Tap a letter and drag it. Arrows move only the selected letter. Tap Done when finished.", "먼저 옮길 글자를 눌러주세요": "Tap a letter to move first", "반짝이 · 하트 · 별": "Sparkles · hearts · stars", "'칠할 색'으로 찍혀요. 누르면 장식이 도안 위에 올라오고, 끌어서 원하는 자리에 놓으면 돼요.": "Uses the paint color. Tap to place one on the pattern, then drag it into place.", "글자 흐름": "Text flow", "물결": "Wave", "통통": "Bounce", "오르막": "Rise", "내리막": "Fall", "높낮이": "Height", "흐름 약하게": "Less", "흐름 강하게": "More", "한 줄 안에서 글자가 위아래로 한 번 출렁여요.": "Letters ripple up and down once across each line.", "글자가 하나씩 번갈아 위로 올라가 통통 튀는 느낌이 나요.": "Every other letter is raised for a bouncy look.", "글자마다 조금씩 올라가요. 높낮이 = 글자 하나당 올라가는 칸 수예요.": "Each letter steps up. Height = cells per letter.", "글자마다 조금씩 내려가요. 높낮이 = 글자 하나당 내려가는 칸 수예요.": "Each letter steps down. Height = cells per letter.", "가로 가운데 정렬": "Center horizontally", "세로 가운데 정렬": "Center vertically", "↔ 가운데": "↔ Center", "↕ 가운데": "↕ Center", "도트 폰트 (1칸 = 1도트)": "Pixel fonts (1 dot = 1 cell)", "굵은 글씨 (크기 자유)": "Bold fonts (any size)", "Fraunces Black (영문 · 둥근 세리프)": "Fraunces Black (Latin · soft serif)", "Abril Fatface (영문 · 우아한 세리프)": "Abril Fatface (Latin · elegant serif)", "Alfa Slab One (영문 · 각진 세리프)": "Alfa Slab One (Latin · slab serif)", "검은고딕 (한글 · 굵은 고딕)": "Black Han Sans (Korean · heavy)", "도현체 (한글 · 반듯한 고딕)": "Do Hyeon (Korean · clean)", "주아체 (한글 · 동글동글)": "Jua (Korean · rounded)", "줄 간격": "Line gap", "여러 줄일 때 정렬": "Alignment (multiple lines)", "가운데": "Center", "줄 간격을 0이나 음수로 하면 줄이 촘촘하게 붙어요. 줄 맨 앞에 띄어쓰기를 넣으면 그 줄만 오른쪽으로 밀려서 엇갈린 배치를 만들 수 있어요.": "Set the line gap to 0 or below to stack lines tightly. Add spaces at the start of a line to push just that line right for a staggered layout.", "장식 넣기": "Decorations", "'칠할 색'으로 찍혀요": "Uses the paint color", "누르면 장식이 도안 위에 올라가요. 글자처럼 끌어서 원하는 자리에 놓으면 돼요.": "Tap to place a decoration on the pattern, then drag it into place like text.", "반짝이 (소)": "Sparkle (S)", "반짝이 (중)": "Sparkle (M)", "반짝이 (대)": "Sparkle (L)", "하트": "Heart", "별": "Star", "꽃": "Flower", "글자 높이": "Text height", "작업 내용 자동 저장": "Auto-saved", "배경색": "Background", "칠하지 않은 칸의 색 · 나중에 바꿔도 무늬는 그대로예요": "Color of unpainted cells · changing it later keeps your pattern", "격자 크기 · 여백": "Grid size · Margins", "격자 크기": "Grid size", "단": "Rows", "코": "Sts", "새 격자 만들기": "New grid", "여백 늘리기": "Add margin", "그린 도안은 그대로 두고 칸만 추가": "Adds cells, keeps your drawing", "여백 줄이기": "Trim margin", "그린 도안은 그대로 두고 빈 칸만 더하거나 빼요": "Adds or removes empty cells, keeps your drawing", "더 줄일 수 없어요": "Can't make it any smaller", "가장자리에 칠한 칸이 있어서 줄일 수 없어요": "Can't trim: there are painted cells on that edge", "사방 모두": "All sides", "위": "Top", "아래": "Bottom", "왼쪽": "Left", "오른쪽": "Right", "칠하기": "Paint", "채우기": "Fill", "되돌리기": "Undo", "다시하기": "Redo", "되돌리기 (Ctrl+Z)": "Undo (Ctrl+Z)", "다시하기 (Ctrl+Shift+Z / Ctrl+Y)": "Redo (Ctrl+Shift+Z / Ctrl+Y)", "칠할 색": "Paint color", "글자 위치 옮기기": "Move text", "· 격자를 손가락으로 끌면 손을 뗀 자리에 고정돼요. 화살표로 한 칸씩 맞춘 뒤엔 완료를 눌러요. 칠할 색을 누르면 글자 색이 바뀌어요.": "· Drag on the grid and it locks where you let go. After nudging with the arrows, tap Done. Tap a paint color to change the text color.", "왼쪽으로": "Left", "위로": "Up", "아래로": "Down", "오른쪽으로": "Right", "취소": "Cancel", "완료": "Done", "회전": "Rotate", "시계 방향으로 90도 회전": "Rotate 90° clockwise", "시계 방향으로 270도 회전": "Rotate 270° clockwise", "작업 단": "Row", "아래 단": "Row below", "위 단": "Row above", "좌우 뒤집기": "Mirror", "화면 보기": "Zoom", "축소": "Zoom out", "확대": "Zoom in", "맞춤": "Fit", "모두 지우기": "Clear all", "이미지 저장": "Save image", "문구로 도안 만들기": "Text to pattern", "글자 → 도트": "Text → dots", "문구": "Text", "예: 뜨개": "e.g. Knit", "폰트": "Font", "둥근모꼴": "DungGeunMo", "Neo둥근모": "NeoDunggeunmo", "전기칩 한글": "DenkiChip Hangul", "도스고딕": "DOS Gothic", "도스명조": "DOS Myungjo", "도스필기": "DOS Pilgi", "이야기 굵은체": "DOS Iyagi Bold", "갈무리14": "Galmuri14", "갈무리11": "Galmuri11", "갈무리11 굵게": "Galmuri11 Bold", "갈무리9": "Galmuri9", "갈무리7 (가장 작음)": "Galmuri7 (smallest)", "도스샘물": "DOS Saemmul", "미래로글꼴": "Miraero", "테두리": "Outline", "테두리 색 고르기": "Choose outline color", "종류": "Style", "한 색": "One color", "지직 (두 색)": "Glitch (two colors)", "색 1": "Color 1", "색 2": "Color 2", "그림자 색 1 고르기": "Choose shadow color 1", "그림자 색 2 고르기": "Choose shadow color 2", "화살표 방향으로 색 1, 반대쪽으로 색 2가 어긋나요. 두 색이 겹치는 칸은 색 1이에요.": "Color 1 shifts toward the arrow and color 2 the opposite way. Where they overlap, color 1 is used.", "이 칸 색 바꾸기": "Change this color", "이 칸 지우기": "Remove this color", "바꾸기": "Change", "지워도 이미 칠한 칸의 색은 그대로예요.": "Cells you've already painted keep their color.", "색이 하나뿐이라 지울 수 없어요.": "This is the only color, so it can't be removed.", "이미 팔레트에 있는 색이에요": "That color is already in the palette", "팔레트에서 지웠어요. 칠한 칸은 그대로예요": "Removed from the palette. Painted cells are unchanged", "한 번 더 누르면 바꾸기·지우기": "Tap again to change or remove","이 폰트에 없는 글자가 있어서 다른 글꼴로 대신 그려져요: {chars}": "This font doesn't have some of these characters, so another font draws them: {chars}", "이 글자가 모두 있는 폰트: {fonts}": "Fonts that have all of them: {fonts}","나눔손글씨 펜": "Nanum Pen", "본명조 중간 굵게": "Noto Serif KR SemiBold", "본명조 굵게": "Noto Serif KR Bold", "글자 높이 (30칸부터)": "Letter height (30 cells min.)", "도트 폰트": "Pixel fonts", "일반 글꼴": "Regular fonts", "물마루": "Mulmaru", "모나12": "Mona12", "모나10x12": "Mona10x12", "Departure Mono (영문 전용)": "Departure Mono (Latin only)", "글자 크기": "Text size", "기본으로": "Reset", "글자 작게": "Smaller", "글자 크게": "Larger", "기본이 가장 작은 크기예요. 더 작게 뜨려면 갈무리9(10칸)나 갈무리7(8칸)을 골라보세요.": "Basic is the smallest size. For smaller text, try Galmuri9 (10 rows) or Galmuri7 (8 rows).", "글자 간격": "Letter gap", "칸": "cells", "띄어쓰기": "Space width", "간격은 기본 크기 기준이라, 글자 크기를 2배로 하면 간격도 2배가 돼요.": "Gaps are measured at basic size, so doubling the text size doubles them too.", "그림자": "Shadow", "글자 색은 '칠할 색'을 따라가요": "Text uses the paint color", "방향": "Direction", "없음": "None", "오른쪽 아래": "Down-right", "왼쪽 아래": "Down-left", "거리": "Distance", "그림자 가깝게": "Closer", "그림자 멀게": "Farther", "그림자 색": "Shadow color", "지금 도안에 얹기": "Place on grid", "글자에 코·단 맞추기": "Fit grid to text", "글자 둘레 여백": "Margin", "격자를 글자 크기 + 여백으로 새로 만들고 글자를 가운데에 넣어요. 그려둔 도안은 지워지지만 되돌리기로 복구할 수 있어요.": "Creates a new grid sized to the text plus margin and centers the text. Your current drawing is cleared, but Undo brings it back.", "색 한번에 바꾸기": "Replace color", "도안 전체": "Whole pattern", "바꿀 색": "From", "도안에 쓰인 색": "Colors in use", "새 색": "To", "사용한 폰트 · 라이선스": "Fonts & licenses", "MIT License 전문 (도스 계열 폰트)": "Full MIT License (DOS fonts)", "색 추가": "Add color", "눌러서 색상표로 고르기": "Tap to open the color picker", "헥스코드를 입력하거나, 왼쪽 네모를 눌러 색상표에서 골라요.": "Type a hex code, or tap the square to pick from the color picker.", "추가": "Add", "화면 모드": "Theme", "#RRGGBB 형식으로 입력해 주세요 (예: #FF8800)": "Use #RRGGBB format (e.g. #FF8800)", "흰색 (기본)": "White (default)", "다른 색 (헥스코드 입력)": "Other color (hex code)", "지우개 (배경색으로 되돌림)": "Eraser (back to background)", "색 추가 (헥스코드 입력)": "Add color (hex code)", "배경색 고르기": "Choose background", "칠할 색 추가": "Add paint color", "그림자 색 고르기": "Choose shadow color", "{n}단": "Row {n}", "글자 옮기기를 끝낸 뒤에 회전해주세요": "Finish moving the text before rotating", "{deg}° 회전했어요 ({c}코 × {r}단)": "Rotated {deg}° ({c} sts × {r} rows)", "만드는 중...": "Working...", "글자를 그리지 못했어요. 다른 문구나 폰트를 시도해보세요.": "Couldn't draw the text. Try different text or another font.", "변환 중 오류가 발생했어요: ": "Conversion error: ", "{n}칸": "{n} cells", "글자에 맞춰 도안 만들기": "Make pattern from text", "도안에 글자 넣기": "Add text to pattern", "글자가 지금 도안 위에 올라가요. 끌어서 원하는 위치로 옮기고 손을 떼면 그 자리에 고정돼요. 격자보다 글자가 크면 격자가 알맞게 늘어나요.": "The text is placed on your current pattern. Drag it where you want and it locks when you let go. If the text is bigger than the grid, the grid grows to fit.", "지난번 글자 기준: {c}코 × {r}단": "Based on last text: {c} sts × {r} rows", "글자가 여백 포함 {c}코 × {r}단이라 최대 크기(200)를 넘어요. 글자 크기나 여백을 줄이거나 문구를 나눠서 넣어주세요.": "With margin the text is {c} sts × {r} rows, over the 200 limit. Reduce the size or margin, or split the text.", "격자를 {c}코 × {r}단으로 맞췄어요": "Grid set to {c} sts × {r} rows", "글자가 {c}코 × {r}단이라 최대 크기(200)를 넘어요. 글자 크기를 줄이거나 문구를 나눠서 넣어주세요.": "The text is {c} sts × {r} rows, over the 200 limit. Reduce the size or split the text.", "글자가 들어가도록 격자를 {c}코 × {r}단으로 늘렸어요": "Grid enlarged to {c} sts × {r} rows to fit the text", "글자를 넣었어요": "Text placed", "기본": "Basic", "{n}배": "{n}×", "글자 높이 약 {n}칸": "Text height ≈ {n} rows", "배경 (칠하지 않은 칸)": "Background (unpainted)", "바꿀 색과 새 색을 골라주세요": "Pick a From and a To color", "같은 색이에요. 다른 새 색을 골라주세요": "Same color — pick a different To color", "{n}칸 바꾸기": "Replace {n} cells", "{n}칸의 색을 바꿨어요": "Recolored {n} cells", "코바늘도안": "crochet-pattern", "이미지를 만들지 못했어요. 격자를 줄여서 다시 시도해보세요.": "Couldn't create the image. Try a smaller grid.", "코바늘 도안": "Crochet pattern", "도안 이미지를 저장했어요": "Pattern image saved", "화면: 시스템 설정": "Theme: system", "화면: 밝게": "Theme: light", "화면: 어둡게": "Theme: dark", "한국어로 보기": "한국어로 보기", "작업 시작하기": "Start working", "다른 도구를 숨기고 도안과 작업 단만 크게 보여요": "Hide the tools and show only the pattern and current row", "도안 수정으로": "Back to editing", "글자 옮기기를 끝낸 뒤에 작업을 시작해주세요": "Finish moving the text before you start", "격자의 단을 누르거나 ＋ − 로 한 단씩 옮겨요": "Tap a row on the grid, or use ＋ − to move one row at a time", "왼쪽부터 →": "From left →", "← 오른쪽부터": "← From right", "읽는 방향": "Read", "단마다 번갈아 (1단은 오른쪽부터)": "Alternate each row (row 1 from right)", "단마다 번갈아 (1단은 왼쪽부터)": "Alternate each row (row 1 from left)", "항상 왼쪽부터": "Always from left", "항상 오른쪽부터": "Always from right", "총 {n}단": "of {n}", "접기": "Hide", "펼치기": "Show", "위쪽 막대 접기": "Hide the top bar", "위쪽 막대 펼치기": "Show the top bar", "작업창 접기": "Collapse toolbar", "작업창 펼치기": "Expand toolbar", "여기를 누르면 도구가 펼쳐져요": "Tap here to show the tools", "실제 비율": "Real ratio", "게이지에 맞춰 칸을 실제 완성작처럼 납작하게(또는 길쭉하게) 보여요": "Squash or stretch cells to match your gauge, like the finished piece", "게이지에 맞춰 칸을 실제 완성작처럼 보여요": "Shape cells like the finished piece, based on your gauge", "게이지": "Gauge", "실물에서 한 코·한 단의 모양": "the real shape of a stitch and row", "게이지 예시": "Gauge presets", "정사각형 칸 (보정 안 함)": "Square cells (no correction)", "대바늘 메리야스뜨기 (약 22코 × 30단)": "Knit stockinette (about 22 sts × 30 rows)", "코바늘 짧은뜨기 (약 18코 × 20단)": "Single crochet (about 18 sts × 20 rows)", "직접 입력": "Custom", "10cm 안에": "In 10 cm", "10cm 안의 코 수": "Stitches in 10 cm", "10cm 안의 단 수": "Rows in 10 cm", "실제 비율로 보기": "Show real proportions", "뜨개는 보통 한 코가 한 단보다 넓어서, 정사각형 격자에 그린 모양이 실물에서는 옆으로 퍼져 보여요. 내 게이지(10cm 안의 코 수·단 수)를 넣고 켜 두면 완성작과 같은 모양으로 보면서 그릴 수 있어요.": "A stitch is usually wider than a row is tall, so a design drawn on square cells looks stretched sideways once it’s made. Enter your gauge (stitches and rows in 10 cm) and turn this on to draw while seeing the finished shape.", "칸이 정사각형이에요": "Cells are square", "한 칸이 세로보다 가로가 {n}배 넓어요": "Each cell is {n}× wider than tall", "한 칸이 가로보다 세로가 {n}배 길어요": "Each cell is {n}× taller than wide", "이 게이지로 뜨면 완성 크기 약 {w} × {h}cm": "At this gauge the finished piece is about {w} × {h} cm", "게이지에 10cm 안의 코 수·단 수를 넣으면 칸 모양이 실물처럼 바뀌어요": "Enter stitches and rows in 10 cm under Gauge to reshape the cells", "동글 굵게": "Dongle Bold", "싱글데이": "Single Day", "동해독도": "East Sea Dokdo", "Leckerli One (영문 전용)": "Leckerli One (Latin only)", "Pirata One (영문 전용)": "Pirata One (Latin only)", "Abril Fatface (영문 전용)": "Abril Fatface (Latin only)", "Dancing Script Bold (영문 전용)": "Dancing Script Bold (Latin only)", "UnifrakturMaguntia (영문 전용)": "UnifrakturMaguntia (Latin only)", "글자 높이 ({n}칸부터)": "Letter height ({n} cells min.)", "공유": "Share", "필레로 보기": "Filet view", "그린 도안을 필레 크로셰 도안(기호도·줄별 설명)으로 바꿔서 보여줘요": "Shows your design as a filet crochet chart with row-by-row instructions", "필레 도안": "Filet chart", "버전": "Mesh style", "사슬 1 + 한길긴뜨기": "Ch 1 + dc", "사슬 2 + 한길긴뜨기": "Ch 2 + dc", "사슬 2 + 두길긴뜨기": "Ch 2 + tr", "막힌 칸으로 볼 색": "Colors to treat as blocks", "전체 뒤집기": "Invert all", "필레는 보통 한 가지 실로 떠서 색 구분은 사라져요.": "Filet is usually worked in one color, so the color differences will disappear.", "보는 법": "How to read", "필레 도안 보는 법": "How to read a filet chart", "오늘은 보지 않기": "Hide for today", "막힌 칸·빈 칸 미리보기": "Blocks & spaces preview", "검정 = 막힌 칸, 흰색 = 빈 칸": "Black = block, white = space", "기호도": "Stitch chart", "줄별 설명": "Row-by-row instructions", "필레 도안 이미지 저장": "Save filet chart image", "한길긴뜨기": "double crochet (dc)", "두길긴뜨기": "treble crochet (tr)", "사슬": "chain (ch)", "세우는 사슬 3코 - 첫 기둥 1코로 셈": "Turning chain of 3 – counts as the first post", "막힌 칸 {n}": "Block {n}", "빈 칸 {n}": "Space {n}", "오른쪽 → 왼쪽": "right → left", "왼쪽 → 오른쪽": "left → right", "시작 사슬 {n}코": "Foundation chain {n}", "단 바꿀 때 사슬 {n}코 세우기": "Turn: ch {n}", "1단 시작: 사슬 {n}코를 뜨고, 바늘에서 {m}번째 사슬에 첫 {st}를 떠요.": "Row 1: Chain {n}, then work the first {st} in the {m} chain from the hook.", "{n}코 = 오른쪽 세로 사슬 {h}코 + 첫 빈 칸의 사슬 {k}코 + 맨 아래 사슬 {b}코": "{n} ch = {h} upright ch on the right + {k} ch for the first space + {b} ch along the bottom", "{n}코 = 오른쪽 세로 사슬 {h}코 + 맨 아래 사슬 {b}코": "{n} ch = {h} upright ch on the right + {b} ch along the bottom", "한 줄은 {n}코예요 (기둥과 사슬을 모두 셈).": "Each row has {n} stitches (posts and chains both counted).", "가로 {c}칸 × 세로 {r}단": "{c} squares × {r} rows", "빈 칸: 사슬 {k}코를 뜨고, 다음 기둥 위에 {st} 1코를 떠요.": "Space: ch {k}, then work 1 {st} on top of the next post.", "막힌 칸: 칸 안에 {st} {k}코를 채우고, 다음 기둥 위에 {st} 1코를 떠요.": "Block: fill the square with {k} {st}, then work 1 {st} on top of the next post.", "1단은 도안 맨 아래 줄이에요. 홀수 단은 오른쪽 → 왼쪽, 짝수 단은 왼쪽 → 오른쪽으로 떠요.": "Row 1 is the bottom row of the chart. Work odd rows right → left and even rows left → right.", "1단 시작: 첫 칸은 맨 아래 줄의 맨 오른쪽 칸이에요. 사슬을 (가로 칸 수 × {k1}) + {e}코 뜨고(첫 칸이 막힌 칸이면 + {s}코), 첫 코는 바늘에서 {fe}번째(막힌 칸이면 {fs}번째) 사슬에 떠요.": "Row 1: the first square is the rightmost square of the bottom row. Chain (squares across × {k1}) + {e} (+ {s} if the first square is a block), and work the first stitch in the {fe} chain from the hook (the {fs} if it's a block).", "단 바꿀 때: 다음 단 첫 칸이 막힌 칸이면 사슬 {ts}코(첫 기둥 1코로 셈), 빈 칸이면 사슬 {te}코를 세워요.": "Turning: if the next row starts with a block, ch {ts} (counts as the first post); if it starts with a space, ch {te}.", "칠한 칸이 없어요": "No painted cells", "배경색과 같은 색": "Same as background", "필레도안": "filet-chart", "필레 도안 이미지를 저장했어요": "Filet chart image saved"};
   const I18N_EN_HTML = {"help": "\n            <li><b>Paint</b>: tap or drag over cells. <b>Fill</b>: colors a whole connected area of the same color at once.</li>\n            <li>Tap the selected paint color again (or right-click a color) to change or remove that palette slot. Cells you've already painted keep their color.</li>\n            <li><b>Current row</b> counts from the bottom as row 1 and is outlined on the grid.</li>\n            <li>The background is the color of unpainted cells, so changing it later keeps your pattern intact.</li>\n            <li>In Text to pattern, choose a <b>Shadow</b> direction to lay a shadow color behind the letters. Set the style to <b>Glitch (two colors)</b> to shift two colors in opposite directions. <b>Outline</b> wraps the letters by one or two cells, corners included.</li>\n            <li>Drag the text and let go to lock it in place. Placed it wrong? Tap <b>Undo</b>.</li>\n            <li><b>Rotate</b> turns the whole pattern 90° or 270° clockwise — handy when working rows vertically.</li>\n            <li>Add words one at a time and move each to stagger lines.</li>\n            <li><b>Text flow</b> makes letters wave, bounce, or climb up and down diagonally.</li>\n            <li>Make your own decorations with <b>Draw new decoration</b> in the Decor tab, or select something on the canvas and tap <b>Add to my decorations</b>.</li>\n            <li>Use the <b>Select</b> tool to drag a box around placed text or decorations to move them again — each connected blob can be moved on its own.</li>\n            <li><b>Copy</b> and <b>Paste</b> floating text, decorations or selections as many times as you like. Keys: Ctrl+C · Ctrl+X · Ctrl+V · Delete · Esc · Enter · arrows</li>\n            <li>After adding text, tap <b>Move letters</b> to pick and move each letter freely — great for fine-tuning a wave layout.</li>\n            <li>While moving text, tap <b>↔ Center · ↕ Center</b> to center it on the grid.</li>\n            <li><b>Save image</b> downloads a PNG file right away. On a phone it may go to your Downloads folder instead of your photo gallery. To add it to your gallery, tap <b>Share</b> next to it and save from there.</li>\n            <li>Use the arrow button at the right end of the toolbar (below it on phones) to collapse it so the pattern fills the screen. Tap the small arrow handle at the top right to bring it back. Keyboard: Ctrl+\\ (Cmd+\\ on Mac)</li>\n          ", "credits": "\n              <li><b>DungGeunMo</b> — original by Kim Jung-tae, conversion by Kil Hyung-jin · Public domain</li>\n              <li><b>NeoDunggeunmo</b> — © 2017–2024 Eunbin Jeong (Dalgona.) · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/neodgm/neodgm\" target=\"_blank\" rel=\"noopener\">github.com/neodgm</a></li>\n              <li><b>DenkiChip Hangul</b> (x10y12pxDenkiChipHangul) — © 2026 Lee Minseo, x8y12pxDenkiChip Project Authors · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a></li>\n              <li><b>Galmuri</b> — © 2019–2025 Lee Minseo, Reserved Font Name \"Galmuri\" · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/quiple/galmuri\" target=\"_blank\" rel=\"noopener\">github.com/quiple/galmuri</a></li>\n              <li><b>DOS Gothic · DOS Myungjo · DOS Pilgi · DOS Iyagi Bold</b> — © 2016–2022 Damheo Lee (leedheo) · MIT License · <a href=\"https://github.com/hurss/fonts\" target=\"_blank\" rel=\"noopener\">github.com/hurss/fonts</a></li>\n              <li><b>DOS Saemmul</b> — © 2016 Damheo Lee (leedheo) · MIT License · <a href=\"https://github.com/hurss/fonts\" target=\"_blank\" rel=\"noopener\">github.com/hurss/fonts</a></li>\n              <li><b>Miraero</b> (by leedheo) — © 2016–2022 Damheo Lee (leedheo), Reserved Font Name \"MiraeroNormal\" · MIT License · <a href=\"https://github.com/hurss/fonts\" target=\"_blank\" rel=\"noopener\">github.com/hurss/fonts</a></li>\n              <li><b>Nanum Pen</b> — © 2010 NHN Corporation (now NAVER), Reserved Font Names \"Nanum\", \"NanumPen\" and others · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://hangeul.naver.com/font\" target=\"_blank\" rel=\"noopener\">hangeul.naver.com</a></li>\n              <li><b>Mulmaru</b> — © 2025 Mushsooni, Reserved Font Name \"물마루\", \"Mulmaru\" · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/mushsooni/mulmaru\" target=\"_blank\" rel=\"noopener\">github.com/mushsooni/mulmaru</a></li>\n              <li><b>Mona12 · Mona10x12</b> — © 2025 Monad ABXY, Reserved Font Name \"Mona\" · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://monadabxy.com/fonts/mona/\" target=\"_blank\" rel=\"noopener\">monadabxy.com</a></li>\n\n              <li><b>Departure Mono</b> — © 2022–2024 Helena Zhang · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://departuremono.com\" target=\"_blank\" rel=\"noopener\">departuremono.com</a></li>\n              <li><b>Noto Serif KR</b> — © 2017–2024 Adobe · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/notofonts/noto-cjk\" target=\"_blank\" rel=\"noopener\">github.com/notofonts/noto-cjk</a></li>\n              <li><b>Dongle Bold</b> — Copyright 2021 The Dongle Project Authors (https://github.com/yangheeryu/Dongle) · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/google/fonts/tree/main/ofl/dongle\" target=\"_blank\" rel=\"noopener\">github.com/google/fonts</a></li>\n              <li><b>Single Day</b> — Copyright 2015 DXKorea Inc. All rights reserved. · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/google/fonts/tree/main/ofl/singleday\" target=\"_blank\" rel=\"noopener\">github.com/google/fonts</a></li>\n              <li><b>East Sea Dokdo</b> — Copyright (c) YoonDesign Inc. All Rights Reserved. · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/google/fonts/tree/main/ofl/eastseadokdo\" target=\"_blank\" rel=\"noopener\">github.com/google/fonts</a></li>\n              <li><b>Leckerli One</b> — Copyright (c) 2011 Gesine Todt (www.gesine-todt.de), with Reserved Font Names \"Leckerli\" and \"Leckerli One\". · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/google/fonts/tree/main/ofl/leckerlione\" target=\"_blank\" rel=\"noopener\">github.com/google/fonts</a></li>\n              <li><b>Pirata One</b> — Copyright (c) 2012, Rodrigo Fuenzalida, Nicolas Massi (www.taip.com.ar / abc.taip.com.ar), with Reserved Font Name 'Pirata' · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/google/fonts/tree/main/ofl/pirataone\" target=\"_blank\" rel=\"noopener\">github.com/google/fonts</a></li>\n              <li><b>Abril Fatface</b> — Copyright (c) 2011, TypeTogether (www.type-together.com), with Reserved Font Names \"Abril\" and \"Abril Fatface\" · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/google/fonts/tree/main/ofl/abrilfatface\" target=\"_blank\" rel=\"noopener\">github.com/google/fonts</a></li>\n              <li><b>Dancing Script</b> — Copyright 2016 The Dancing Script Project Authors (https://github.com/googlefonts/DancingScript), with Reserved Font Name 'Dancing Script'. · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/google/fonts/tree/main/ofl/dancingscript\" target=\"_blank\" rel=\"noopener\">github.com/google/fonts</a></li>\n              <li><b>UnifrakturMaguntia</b> — Copyright (c) 2010, j. 'mach' wust, with Reserved Font Name UnifrakturMaguntia. Copyright (c) 2009, Peter Wiegel. · <a href=\"https://openfontlicense.org\" target=\"_blank\" rel=\"noopener\">SIL OFL 1.1</a> · <a href=\"https://github.com/google/fonts/tree/main/ofl/unifrakturmaguntia\" target=\"_blank\" rel=\"noopener\">github.com/google/fonts</a></li>\n            "};
   // 언어는 페이지 주소로 정함: /en/pattern/은 HTML에서 window.FORCE_LANG = 'en'을 두고, 한국어 /pattern/은 항상 한국어.
   // (예전에 쓰던 저장 이름 crochet-ui-lang은 이제 읽지도 쓰지도 않음. 지우지도 않음)
@@ -2757,13 +2757,13 @@
       done(blob, name);
     }, 'image/png');
   }
-  function downloadExportImage(blob, name){
+  function downloadExportImage(blob, name, msg){
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url; a.download = name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url), 2000);
-    toast(t('도안 이미지를 저장했어요'));
+    toast(msg || t('도안 이미지를 저장했어요'));
   }
   // '이미지로 저장'은 어느 기기에서나 바로 PNG 파일을 내려받음 (공유 창을 열지 않음)
   document.getElementById('saveImgBtn').addEventListener('click', ()=>{
@@ -2783,6 +2783,378 @@
       catch(e){
         if(e && e.name === 'AbortError') return; // 사용자가 공유 창을 닫음
         downloadExportImage(blob, name);         // 공유가 안 되면 내려받기로
+      }
+    });
+  });
+
+  /* ===== 필레로 보기 (보기 전용: 도안 데이터·저장 내용은 바꾸지 않음) ===== */
+  // 필레 크로셰 공식의 숫자는 모두 이 버전 표 한 곳에 있음.
+  //   k = 빈 칸을 채우는 사슬 수, h = 기둥 높이(사슬 수로 셈: 한길긴뜨기 3, 두길긴뜨기 4)
+  //   turnSolid / turnEmpty = 단 바꿀 때 세우는 사슬 수 (다음 단 첫 칸이 막힌 칸이면 3코 = 첫 기둥 1코로 셈 / 빈 칸이면 3코 + k코)
+  // 이 표로 filetPlan이 계산하는 값 (n = 도안 가로 칸 수):
+  //   한 줄 총 코수 = (k+1)×n + 1
+  //   1단 첫 칸이 빈 칸:   시작 사슬 = (k+1)×n + k + h, 첫 코는 바늘에서 (h + 2k + 1)번째 사슬
+  //   1단 첫 칸이 막힌 칸: 시작 사슬 = (k+1)×n + h,     첫 코는 바늘에서 (h + 1)번째 사슬
+  //   a: 2n+1 / 빈 칸 시작 2n+4코·6번째 / 막힌 칸 시작 2n+3코·4번째 / 단 바꿀 때 4코·3코
+  //   b: 3n+1 / 빈 칸 시작 3n+5코·8번째 / 막힌 칸 시작 3n+3코·4번째 / 단 바꿀 때 5코·3코
+  //   c: 3n+1 / 빈 칸 시작 3n+6코·9번째 / 막힌 칸 시작 3n+4코·5번째 / 단 바꿀 때 5코·3코
+  // ※ 아직 실제로 떠서 확인하지 않은 값 3개: a의 막힌 칸 시작(2n+3, 4번째), a의 단 바꿀 때 4코(turnEmpty),
+  //    c의 막힌 칸 시작(3n+4, 5번째). 떠 보고 다르면 이 표의 숫자만 고치면 됨.
+  const FILET_VERSIONS = {
+    a: { k:1, h:3, stitch:'dc', turnSolid:3, turnEmpty:4, label:'사슬 1 + 한길긴뜨기' }, // 확인 전: 막힌 칸 시작 2n+3·4번째, 단 바꿀 때 4코
+    b: { k:2, h:3, stitch:'dc', turnSolid:3, turnEmpty:5, label:'사슬 2 + 한길긴뜨기' }, // 기본값
+    c: { k:2, h:4, stitch:'tr', turnSolid:3, turnEmpty:5, label:'사슬 2 + 두길긴뜨기' }, // 확인 전: 막힌 칸 시작 3n+4·5번째
+  };
+  const FILET_DEFAULT_VERSION = 'b';
+  // 순수 계산 함수 (화면·저장과 상관없음. 자동 점검이 직접 부름)
+  // input = { cols, rows, solid }: solid[i*cols + j]가 true면 막힌 칸 (i = 위에서 0, j = 왼쪽에서 0)
+  // 1단 = 맨 아래 줄. 홀수 단은 오른쪽→왼쪽, 짝수 단은 왼쪽→오른쪽 → 1단 첫 칸 = 맨 아래 줄의 맨 오른쪽 칸
+  function filetPlan(input, version){
+    const ver = FILET_VERSIONS[version] ? version : FILET_DEFAULT_VERSION;
+    const v = FILET_VERSIONS[ver];
+    const n = input.cols, R = input.rows, k = v.k, h = v.h;
+    const rowList = [];
+    for(let r = 1; r <= R; r++){
+      const i = R - r, rtl = r % 2 === 1;
+      const cells = [];
+      for(let q = 0; q < n; q++) cells.push(!!input.solid[i*n + (rtl ? n-1-q : q)]); // 작업 순서대로
+      const runs = [];
+      cells.forEach(s => { const last = runs[runs.length-1]; if(last && last.solid === s) last.n++; else runs.push({ solid:s, n:1 }); });
+      rowList.push({ row:r, dir: rtl ? 'rtl' : 'ltr', cells, runs, turn: r === 1 ? null : (cells[0] ? v.turnSolid : v.turnEmpty) });
+    }
+    const firstEmpty = !(rowList[0] && rowList[0].cells[0]);
+    const base = (k+1)*n;
+    return {
+      version: ver, k, h, stitch: v.stitch, cols: n, rows: R,
+      rowStitches: base + 1,
+      firstEmpty,
+      startChain: firstEmpty ? base + k + h : base + h,
+      firstStitchAt: firstEmpty ? h + 2*k + 1 : h + 1,
+      startParts: { upright: h, firstChains: firstEmpty ? k : 0, base },
+      turnSolid: v.turnSolid, turnEmpty: v.turnEmpty,
+      rowList,
+    };
+  }
+  // "빈 칸 7, 막힌 칸 2, 빈 칸 1"
+  function filetRunsText(runs){
+    return runs.map(u => t(u.solid ? '막힌 칸 {n}' : '빈 칸 {n}', { n:u.n })).join(', ');
+  }
+  const filetOrd = m => {
+    if(LANG !== 'en') return String(m);
+    const s = ['th','st','nd','rd'], v = m % 100;
+    return m + (s[(v-20)%10] || s[v] || s[0]);
+  };
+  const filetStName = plan => t(plan.stitch === 'tr' ? '두길긴뜨기' : '한길긴뜨기');
+  function filetStartLines(plan){
+    const p = plan.startParts;
+    const l1 = t('1단 시작: 사슬 {n}코를 뜨고, 바늘에서 {m}번째 사슬에 첫 {st}를 떠요.', { n:plan.startChain, m:filetOrd(plan.firstStitchAt), st:filetStName(plan) });
+    const l2 = plan.firstEmpty
+      ? t('{n}코 = 오른쪽 세로 사슬 {h}코 + 첫 빈 칸의 사슬 {k}코 + 맨 아래 사슬 {b}코', { n:plan.startChain, h:p.upright, k:p.firstChains, b:p.base })
+      : t('{n}코 = 오른쪽 세로 사슬 {h}코 + 맨 아래 사슬 {b}코', { n:plan.startChain, h:p.upright, b:p.base });
+    return [l1, l2];
+  }
+  const filetTitleText = plan => `${t('필레 도안')} · ${t(FILET_VERSIONS[plan.version].label)} · ${t('가로 {c}칸 × 세로 {r}단', { c:plan.cols, r:plan.rows })}`;
+
+  // 기호도 그리기 재료: 선·타원·글자 목록 (화면은 SVG, 이미지 저장은 캔버스로 같은 목록을 그림)
+  function filetChartPrims(plan){
+    const CW = 26, RH = plan.h === 4 ? 40 : 32, LM = 48, TOP = 12, BOT = 26;
+    const n = plan.cols, R = plan.rows, k = plan.k;
+    const W = LM*2 + CW*n, H = TOP + RH*R + BOT;
+    const P = [];
+    const xOf = c => LM + c*CW; // c번째 기둥 자리 (왼쪽부터 0..n)
+    const slashes = plan.stitch === 'tr' ? 2 : 1;
+    const stem = (x, yb, yt) => {
+      P.push({ t:'line', x1:x, y1:yb, x2:x, y2:yt });
+      P.push({ t:'line', x1:x-5, y1:yt, x2:x+5, y2:yt });              // 기둥 위 가로 막대
+      for(let s = 0; s < slashes; s++){                                  // 기둥 중간 빗금 (두길긴뜨기는 2개)
+        const ym = yt + (yb - yt) * (slashes === 1 ? 0.55 : 0.42 + s*0.24);
+        P.push({ t:'line', x1:x-4, y1:ym+3, x2:x+4, y2:ym-3 });
+      }
+    };
+    const chainH = (cx, cy, rx, tag) => P.push({ t:'ell', cx, cy, rx, ry:Math.min(3.4, rx*0.8), tag });
+    const chainV = (cx, cy, ry, tag) => P.push({ t:'ell', cx, cy, rx:3.6, ry, tag });
+    plan.rowList.forEach(row => {
+      const r = row.row, rtl = row.dir === 'rtl';
+      const yb = TOP + (R - r + 1)*RH, yt = TOP + (R - r)*RH + 5;
+      const startEdge = rtl ? n : 0; // 시작 쪽 가장자리: 첫 기둥 대신 세우는 사슬
+      for(let c = 0; c <= n; c++) if(c !== startEdge) stem(xOf(c), yb, yt);
+      row.cells.forEach((solid, q) => {
+        const x0 = xOf(rtl ? n-1-q : q);
+        if(solid){ for(let s = 1; s <= k; s++) stem(x0 + CW*s/(k+1), yb, yt); }
+        else {
+          const w = CW / k, tag = (r === 1 && q === 0) ? 'fc-first' : '';
+          for(let s = 0; s < k; s++) chainH(x0 + w*(s+0.5), yt + 3, w/2 - 1.4, tag); // 빈 칸 사슬은 기둥 위쪽 높이
+        }
+      });
+      const cnt = r === 1 ? plan.h : plan.turnSolid, seg = (yb - yt) / cnt;
+      for(let s = 0; s < cnt; s++) chainV(xOf(startEdge), yb - seg*(s+0.5), seg/2 - 0.8, r === 1 ? 'fc-up' : '');
+      P.push({ t:'text', x: rtl ? W - LM/2 : LM/2, y:(yt + yb)/2, s: rtl ? '← ' + r : r + ' →' });
+    });
+    // 맨 아래 시작 사슬: 가로 타원 (k+1)×n개
+    const fw = CW / (k+1), fy = TOP + R*RH + 11;
+    for(let s = 0; s < (k+1)*n; s++) chainH(LM + fw*(s+0.5), fy, fw/2 - 1, 'fc-base');
+    return { W, H, P };
+  }
+  const filetF = v => Math.round(v*10)/10;
+  function filetChartSvg(ch){
+    let lines = '', ells = '', tagged = '', texts = '';
+    ch.P.forEach(p => {
+      if(p.t === 'line') lines += `M${filetF(p.x1)} ${filetF(p.y1)}L${filetF(p.x2)} ${filetF(p.y2)}`;
+      else if(p.t === 'ell'){
+        if(p.tag) tagged += `<ellipse class="${p.tag}" cx="${filetF(p.cx)}" cy="${filetF(p.cy)}" rx="${filetF(p.rx)}" ry="${filetF(p.ry)}"/>`;
+        else ells += `M${filetF(p.cx - p.rx)} ${filetF(p.cy)}a${filetF(p.rx)} ${filetF(p.ry)} 0 1 0 ${filetF(2*p.rx)} 0a${filetF(p.rx)} ${filetF(p.ry)} 0 1 0 ${filetF(-2*p.rx)} 0`;
+      } else texts += `<text x="${filetF(p.x)}" y="${filetF(p.y)}">${p.s}</text>`;
+    });
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${ch.W}" height="${ch.H}" viewBox="0 0 ${ch.W} ${ch.H}" role="img">`
+      + `<rect width="${ch.W}" height="${ch.H}" fill="#FFFFFF"/>`
+      + `<g fill="none" stroke="#222222" stroke-width="1.4" stroke-linecap="round"><path d="${lines}"/><path d="${ells}"/>${tagged}</g>`
+      + `<g fill="#4E5045" font-size="12" font-weight="600" font-family="IBM Plex Mono, monospace" text-anchor="middle" dominant-baseline="central">${texts}</g></svg>`;
+  }
+  function filetDrawChart(x, ch, ox, oy){
+    x.save(); x.translate(ox, oy);
+    x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, ch.W, ch.H);
+    x.strokeStyle = '#222222'; x.lineWidth = 1.4; x.lineCap = 'round';
+    x.beginPath();
+    ch.P.forEach(p => {
+      if(p.t === 'line'){ x.moveTo(p.x1, p.y1); x.lineTo(p.x2, p.y2); }
+      else if(p.t === 'ell'){ x.moveTo(p.cx + p.rx, p.cy); x.ellipse(p.cx, p.cy, p.rx, p.ry, 0, 0, Math.PI*2); }
+    });
+    x.stroke();
+    x.fillStyle = '#4E5045'; x.font = '600 12px "IBM Plex Mono", monospace'; x.textAlign = 'center'; x.textBaseline = 'middle';
+    ch.P.forEach(p => { if(p.t === 'text') x.fillText(p.s, p.x, p.y); });
+    x.restore();
+  }
+  // 막힌 칸/빈 칸 미리보기 격자 (검정 = 막힌 칸, 흰색 = 빈 칸, 양옆에 단 번호)
+  function filetPreviewGeom(plan){
+    const cell = Math.max(8, Math.min(18, Math.floor(560 / Math.max(plan.cols, 1))));
+    const L = 34;
+    return { cell, L, W: L*2 + cell*plan.cols, H: cell*plan.rows + 1 };
+  }
+  function filetDrawPreview(x, plan, ox, oy, g){
+    const { cell, L } = g, n = plan.cols, R = plan.rows;
+    x.save(); x.translate(ox, oy);
+    x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, g.W, g.H);
+    x.fillStyle = '#111111';
+    plan.rowList.forEach(row => {
+      const y = (R - row.row)*cell;
+      row.cells.forEach((s, q) => { if(s) x.fillRect(L + (row.dir === 'rtl' ? n-1-q : q)*cell, y, cell, cell); });
+    });
+    x.strokeStyle = 'rgba(128,128,128,0.55)'; x.lineWidth = 1; x.beginPath();
+    for(let i = 0; i <= R; i++){ x.moveTo(L, i*cell + 0.5); x.lineTo(L + n*cell, i*cell + 0.5); }
+    for(let j = 0; j <= n; j++){ x.moveTo(L + j*cell + 0.5, 0); x.lineTo(L + j*cell + 0.5, R*cell); }
+    x.stroke();
+    x.fillStyle = '#5B5C4F'; x.font = `600 ${Math.max(9, Math.min(12, cell - 3))}px "IBM Plex Mono", monospace`; x.textBaseline = 'middle';
+    const nums = cell >= 14 ? Array.from({ length:R }, (_, q) => q + 1) : [...new Set([1, ...gridLabelNums(R, Math.ceil(14 / cell))])];
+    nums.forEach(r => {
+      const y = (R - r)*cell + cell/2;
+      x.textAlign = 'right'; x.fillText(String(r), L - 5, y);
+      x.textAlign = 'left';  x.fillText(String(r), L + n*cell + 5, y);
+    });
+    x.restore();
+  }
+
+  const filetModal = document.getElementById('filetModal');
+  const FILET_GUIDE_KEY = 'crochet-filet-guide-hide'; // '오늘은 보지 않기'를 누른 날짜 (YYYY-MM-DD)
+  let filetVersion = FILET_DEFAULT_VERSION;
+  let filetColorList = [];          // [색, 칸 수] 도안에 실제로 쓴 색 (많이 쓴 순서)
+  let filetSolidColors = new Set(); // 막힌 칸으로 볼 색
+  let filetInvert = false;
+  let filetGuideShown = true;
+  let filetCurrentPlan = null;
+  const filetToday = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+  // 지금 도안 → 막힌 칸 표. 화면에 보이는 좌우 방향(좌우 뒤집기 포함) 그대로. gridData는 읽기만 함
+  function filetSolidGrid(){
+    const solid = new Array(rows*cols);
+    for(let i = 0; i < rows; i++) for(let j = 0; j < cols; j++){
+      const c = gridData[i*cols + j];
+      let s = !!c && filetSolidColors.has(String(c).toUpperCase());
+      if(filetInvert) s = !s;
+      solid[i*cols + (flipped ? cols-1-j : j)] = s;
+    }
+    return { cols, rows, solid };
+  }
+  function renderFiletColors(){
+    const el = document.getElementById('filetColors');
+    el.innerHTML = '';
+    if(!filetColorList.length){
+      const e = document.createElement('span'); e.className = 'filet-empty'; e.textContent = t('칠한 칸이 없어요');
+      el.appendChild(e); return;
+    }
+    const bgU = bgColor.toUpperCase();
+    filetColorList.forEach(([c, cnt]) => {
+      const lab = document.createElement('label'); lab.className = 'filet-chip';
+      lab.title = c === bgU ? c + ' · ' + t('배경색과 같은 색') : c;
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = filetSolidColors.has(c); cb.dataset.color = c;
+      cb.setAttribute('aria-label', c);
+      cb.addEventListener('change', () => { if(cb.checked) filetSolidColors.add(c); else filetSolidColors.delete(c); renderFilet(); });
+      const sw = document.createElement('span'); sw.className = 'filet-sw'; sw.style.background = c;
+      const n = document.createElement('span'); n.className = 'filet-cnt'; n.textContent = t('{n}칸', { n:cnt });
+      lab.append(cb, sw, n); el.appendChild(lab);
+    });
+  }
+  function filetLegendHtml(plan){
+    const slashes = plan.stitch === 'tr' ? '<path d="M9 19l8-6"/><path d="M9 25l8-6"/>' : '<path d="M9 21l8-6"/>';
+    const stemSvg = `<svg viewBox="0 0 26 34" aria-hidden="true"><g fill="none" stroke="#222" stroke-width="1.6" stroke-linecap="round"><path d="M13 30V5M8 5h10"/>${slashes}</g></svg>`;
+    const chSvg = '<svg viewBox="0 0 26 34" aria-hidden="true"><ellipse cx="13" cy="17" rx="8" ry="4" fill="none" stroke="#222" stroke-width="1.6"/></svg>';
+    const upSvg = '<svg viewBox="0 0 26 34" aria-hidden="true"><g fill="none" stroke="#222" stroke-width="1.5"><ellipse cx="13" cy="7" rx="3.6" ry="4"/><ellipse cx="13" cy="16.5" rx="3.6" ry="4"/><ellipse cx="13" cy="26" rx="3.6" ry="4"/></g></svg>';
+    return `<span>${stemSvg}${filetStName(plan)}</span><span>${chSvg}${t('사슬')}</span><span>${upSvg}${t('세우는 사슬 3코 - 첫 기둥 1코로 셈')}</span>`;
+  }
+  function renderFiletGuide(plan){
+    const st = filetStName(plan), k = plan.k;
+    const items = [
+      t('빈 칸: 사슬 {k}코를 뜨고, 다음 기둥 위에 {st} 1코를 떠요.', { k, st }),
+      t('막힌 칸: 칸 안에 {st} {k}코를 채우고, 다음 기둥 위에 {st} 1코를 떠요.', { k, st }),
+      t('1단은 도안 맨 아래 줄이에요. 홀수 단은 오른쪽 → 왼쪽, 짝수 단은 왼쪽 → 오른쪽으로 떠요.'),
+      t('1단 시작: 첫 칸은 맨 아래 줄의 맨 오른쪽 칸이에요. 사슬을 (가로 칸 수 × {k1}) + {e}코 뜨고(첫 칸이 막힌 칸이면 + {s}코), 첫 코는 바늘에서 {fe}번째(막힌 칸이면 {fs}번째) 사슬에 떠요.',
+        { k1:k+1, e:k + plan.h, s:plan.h, fe:filetOrd(plan.h + 2*k + 1), fs:filetOrd(plan.h + 1) }),
+      t('단 바꿀 때: 다음 단 첫 칸이 막힌 칸이면 사슬 {ts}코(첫 기둥 1코로 셈), 빈 칸이면 사슬 {te}코를 세워요.', { ts:plan.turnSolid, te:plan.turnEmpty }),
+    ];
+    const ul = document.getElementById('filetGuideList');
+    ul.innerHTML = '';
+    items.forEach(s => { const li = document.createElement('li'); li.textContent = s; ul.appendChild(li); });
+    document.getElementById('filetGuide').hidden = !filetGuideShown;
+    document.getElementById('filetGuideOpen').hidden = filetGuideShown;
+  }
+  function renderFilet(){
+    const plan = filetPlan(filetSolidGrid(), filetVersion);
+    filetCurrentPlan = plan;
+    const inv = document.getElementById('filetInvertBtn');
+    inv.setAttribute('aria-pressed', filetInvert ? 'true' : 'false');
+    const bgU = bgColor.toUpperCase();
+    document.getElementById('filetColorNote').hidden = filetColorList.filter(([c]) => c !== bgU).length < 2;
+    renderFiletGuide(plan);
+    const [l1, l2] = filetStartLines(plan);
+    const st = document.getElementById('filetStart');
+    st.innerHTML = '';
+    [l1, l2, t('한 줄은 {n}코예요 (기둥과 사슬을 모두 셈).', { n:plan.rowStitches })].forEach((s, q) => {
+      const p = document.createElement('p'); p.textContent = s; if(q === 2) p.className = 'filet-sub'; st.appendChild(p);
+    });
+    // 미리보기 격자
+    const g = filetPreviewGeom(plan), pc = document.getElementById('filetPreview');
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    pc.width = Math.round(g.W * dpr); pc.height = Math.round(g.H * dpr);
+    pc.style.width = g.W + 'px'; pc.style.height = g.H + 'px';
+    const pctx = pc.getContext('2d'); pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    filetDrawPreview(pctx, plan, 0, 0, g);
+    // 기호도
+    document.getElementById('filetLegend').innerHTML = filetLegendHtml(plan);
+    const chartBox = document.getElementById('filetChart');
+    chartBox.innerHTML = filetChartSvg(filetChartPrims(plan));
+    chartBox.firstChild.setAttribute('aria-label', t('기호도'));
+    // 줄별 설명
+    const ol = document.getElementById('filetRows');
+    ol.innerHTML = '';
+    plan.rowList.forEach(row => {
+      const li = document.createElement('li');
+      const head = document.createElement('b'); head.textContent = t('{n}단', { n:row.row });
+      const meta = document.createElement('span');
+      meta.textContent = ` (${t(row.dir === 'rtl' ? '오른쪽 → 왼쪽' : '왼쪽 → 오른쪽')}) · `
+        + (row.turn === null ? t('시작 사슬 {n}코', { n:plan.startChain }) : t('단 바꿀 때 사슬 {n}코 세우기', { n:row.turn }));
+      const runs = document.createElement('div'); runs.className = 'filet-runs'; runs.textContent = filetRunsText(row.runs);
+      li.append(head, meta, runs); ol.appendChild(li);
+    });
+  }
+  function openFilet(){
+    const counts = new Map();
+    gridData.forEach(c => { if(c){ const u = String(c).toUpperCase(); counts.set(u, (counts.get(u) || 0) + 1); } });
+    filetColorList = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+    const bgU = bgColor.toUpperCase();
+    // 기본: 배경이 아닌 칸은 전부 막힌 칸 (칠하지 않은 칸과 배경색으로 칠한 칸은 빈 칸)
+    filetSolidColors = new Set(filetColorList.map(e => e[0]).filter(c => c !== bgU));
+    filetInvert = false;
+    let hide = null;
+    try{ hide = localStorage.getItem(FILET_GUIDE_KEY); }catch(e){}
+    filetGuideShown = hide !== filetToday();
+    document.querySelectorAll('input[name="filetVer"]').forEach(r => { r.checked = r.value === filetVersion; });
+    document.getElementById('filetShareBtn').hidden = shareImgBtn.hidden;
+    renderFiletColors();
+    renderFilet();
+    filetModal.classList.add('show');
+    document.getElementById('filetBody').scrollTop = 0;
+    window.addEventListener('keydown', filetKey, true);
+    setTimeout(() => document.getElementById('filetClose').focus(), 30);
+  }
+  function closeFilet(){
+    filetModal.classList.remove('show');
+    window.removeEventListener('keydown', filetKey, true);
+    // 큰 도안이면 기호도가 무거우니 닫을 때 비움
+    document.getElementById('filetChart').innerHTML = '';
+    document.getElementById('filetRows').innerHTML = '';
+    filetCurrentPlan = null;
+  }
+  // 창이 열려 있는 동안 키보드 단축키(되돌리기·지우기·화살표 등)가 뒤의 도안에 닿지 않게 막음
+  function filetKey(e){
+    if(e.key === 'Escape'){ e.preventDefault(); closeFilet(); }
+    e.stopPropagation();
+  }
+  document.getElementById('filetBtn').addEventListener('click', openFilet);
+  document.getElementById('filetClose').addEventListener('click', closeFilet);
+  filetModal.addEventListener('click', e => { if(e.target === filetModal) closeFilet(); });
+  document.querySelectorAll('input[name="filetVer"]').forEach(r => r.addEventListener('change', () => {
+    if(r.checked){ filetVersion = r.value; renderFilet(); }
+  }));
+  document.getElementById('filetInvertBtn').addEventListener('click', () => { filetInvert = !filetInvert; renderFilet(); });
+  document.getElementById('filetGuideClose').addEventListener('click', () => { filetGuideShown = false; renderFiletGuide(filetCurrentPlan); });
+  document.getElementById('filetGuideToday').addEventListener('click', () => {
+    try{ localStorage.setItem(FILET_GUIDE_KEY, filetToday()); }catch(e){}
+    filetGuideShown = false; renderFiletGuide(filetCurrentPlan);
+  });
+  document.getElementById('filetGuideOpen').addEventListener('click', () => { filetGuideShown = true; renderFiletGuide(filetCurrentPlan); });
+
+  // 필레 도안 이미지: 제목 + 시작 안내 + 미리보기 격자 + 기호도를 한 장의 PNG로
+  function wrapCanvasText(x, s, maxW){
+    const out = []; let line = '';
+    s.split(' ').forEach(w => {
+      const next = line ? line + ' ' + w : w;
+      if(line && x.measureText(next).width > maxW){ out.push(line); line = w; } else line = next;
+    });
+    if(line) out.push(line);
+    return out;
+  }
+  function makeFiletImage(done){
+    const plan = filetCurrentPlan;
+    if(!plan) return;
+    const ch = filetChartPrims(plan), pv = filetPreviewGeom(plan);
+    const PAD = 28, GAP = 22, FONT = 'Inter, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif';
+    const W0 = Math.max(720, ch.W, pv.W) + PAD*2;
+    const meas = document.createElement('canvas').getContext('2d');
+    const [l1, l2] = filetStartLines(plan);
+    const lines = [];
+    [['700 22px ' + FONT, filetTitleText(plan), 32], ['700 18px ' + FONT, l1, 27], ['600 16px ' + FONT, l2, 25]].forEach(([f, s, lh]) => {
+      meas.font = f; wrapCanvasText(meas, s, W0 - PAD*2).forEach(l => lines.push([f, l, lh]));
+    });
+    const textH = lines.reduce((a, l) => a + l[2], 0);
+    const H0 = PAD + textH + GAP + pv.H + GAP + ch.H + PAD;
+    // 큰 도안은 휴대폰 브라우저의 캔버스 한도(약 1,600만 화소)를 넘지 않게 줄여서 그림
+    const sc = Math.min(1, 8000 / W0, 8000 / H0, Math.sqrt(16e6 / (W0*H0)));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.floor(W0*sc)); c.height = Math.max(1, Math.floor(H0*sc));
+    const x = c.getContext('2d');
+    x.scale(sc, sc);
+    x.fillStyle = '#F3EFE4'; x.fillRect(0, 0, W0, H0);
+    let y = PAD;
+    x.fillStyle = '#24261F'; x.textAlign = 'left'; x.textBaseline = 'top';
+    lines.forEach(([f, s, lh]) => { x.font = f; x.fillText(s, PAD, y); y += lh; });
+    y += GAP;
+    filetDrawPreview(x, plan, PAD, y, pv); y += pv.H + GAP;
+    filetDrawChart(x, ch, PAD, y);
+    const d = new Date();
+    const name = `${t('필레도안')}_${plan.cols}x${plan.rows}_${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.png`;
+    c.toBlob(blob => {
+      if(!blob){ toast(t('이미지를 만들지 못했어요. 격자를 줄여서 다시 시도해보세요.')); return; }
+      done(blob, name);
+    }, 'image/png');
+  }
+  document.getElementById('filetSaveImgBtn').addEventListener('click', () => {
+    makeFiletImage((blob, name) => downloadExportImage(blob, name, t('필레 도안 이미지를 저장했어요')));
+  });
+  document.getElementById('filetShareBtn').addEventListener('click', () => {
+    makeFiletImage(async (blob, name) => {
+      const file = new File([blob], name, { type:'image/png' });
+      try{ await navigator.share({ files:[file], title:t('필레 도안') }); }
+      catch(e){
+        if(e && e.name === 'AbortError') return;
+        downloadExportImage(blob, name, t('필레 도안 이미지를 저장했어요'));
       }
     });
   });

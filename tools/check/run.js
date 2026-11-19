@@ -605,6 +605,169 @@ test('이미지 저장은 PNG 내려받기, 공유 버튼은 터치 기기에서
   note(coarseSeen ? 'PC 2곳, 휴대폰 2곳 확인' : 'PC 2곳 확인');
 });
 
+// 계산 함수 검사용 도안 "Li": 가로 10, 세로 12, 1단 = 맨 아래 줄, 가로 번호는 왼쪽부터 1
+function filetLi() {
+  const n = 10, R = 12, solid = new Array(n * R).fill(false);
+  const set = (r1, r2, cs) => { for (let r = r1; r <= r2; r++) for (const c of cs) solid[(R - r) * n + c - 1] = true; };
+  set(2, 11, [2, 3]); set(2, 3, [4, 5, 6]); set(2, 8, [8, 9]); set(10, 11, [8, 9]);
+  return { cols: n, rows: R, solid };
+}
+test('필레로 보기: 계산 공식, 창 열기·설정·기호도·PNG, 360px·어두운 화면, 영어, 도안 데이터 그대로', async (fail, note) => {
+  const LI = filetLi();
+  // 1) 계산 함수 (화면과 따로)
+  {
+    const t = await openPage('/pattern/');
+    try {
+      const r = await t.page.evaluate(li => {
+        const inv = { cols: li.cols, rows: li.rows, solid: li.solid.map(s => !s) };
+        const all = (n, v) => ({ cols: n, rows: 3, solid: new Array(n * 3).fill(v) });
+        const p = filetPlan(li, 'b'), q = filetPlan(inv, 'b');
+        const pick = x => [x.startChain, x.firstStitchAt];
+        return {
+          b: [p.startChain, p.firstStitchAt, p.rowStitches, p.rowList[8].dir, filetRunsText(p.rowList[8].runs)],
+          bi: [q.startChain, q.firstStitchAt, filetRunsText(q.rowList[8].runs)],
+          a30: pick(filetPlan(all(30, false), 'a')), b25: pick(filetPlan(all(25, false), 'b')),
+          c10e: pick(filetPlan(all(10, false), 'c')), c10s: pick(filetPlan(all(10, true), 'c')),
+        };
+      }, LI);
+      const eq = (got, want, what) => { if (JSON.stringify(got) !== JSON.stringify(want)) fail(`${what}: ${JSON.stringify(want)}이어야 하는데 ${JSON.stringify(got)}이에요`); };
+      eq(r.b, [35, 8, 31, 'rtl', '빈 칸 7, 막힌 칸 2, 빈 칸 1'], 'Li 버전 b (시작 사슬, 몇 번째, 한 줄 코수, 9단 방향, 9단 설명)');
+      eq(r.bi, [33, 4, '막힌 칸 7, 빈 칸 2, 막힌 칸 1'], 'Li 뒤집기 후 버전 b');
+      eq(r.a30, [64, 6], '버전 a 가로 30칸 빈 칸 시작');
+      eq(r.b25, [80, 8], '버전 b 가로 25칸 빈 칸 시작');
+      eq(r.c10e, [36, 9], '버전 c 가로 10칸 빈 칸 시작');
+      eq(r.c10s, [34, 5], '버전 c 가로 10칸 막힌 칸 시작');
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); }
+  }
+  // 2) 화면: Li를 빨강으로, 1단 맨 오른쪽 칸만 파랑으로 칠한 도안
+  {
+    const t = await openPage('/pattern/');
+    const dl = fs.mkdtempSync(path.join(os.tmpdir(), 'dotteugae-filet-'));
+    try {
+      const { page, ctx } = t;
+      await page.evaluate((li, red, blue) => {
+        rows = li.rows; cols = li.cols;
+        gridData = li.solid.map(s => s ? red : null);
+        gridData[(rows - 1) * cols + cols - 1] = blue;
+        rowsInput.value = rows; colsInput.value = cols;
+        sizeCanvas(); drawGrid(); saveState();
+      }, LI, RED, BLUE);
+      await settle();
+      const before = await page.evaluate(() => ({ store: localStorage.getItem('crochet-tool-v1'), data: JSON.stringify(gridData) }));
+      const state = () => page.evaluate(() => {
+        const p = filetCurrentPlan;
+        const drawn = document.querySelectorAll('#filetChart .fc-up, #filetChart .fc-first, #filetChart .fc-base').length;
+        return { open: document.getElementById('filetModal').classList.contains('show'), start: p && p.startChain, at: p && p.firstStitchAt, drawn,
+          text: document.getElementById('filetStart').innerText };
+      });
+      const expect = async (start, what) => {
+        const s = await state();
+        if (!s.open) { fail(`${what}: 필레 창이 열려 있지 않아요`); return; }
+        if (s.start !== start) fail(`${what}: 시작 사슬이 ${start}코여야 하는데 ${s.start}코예요`);
+        if (s.drawn !== s.start) fail(`${what}: 기호도에 그린 사슬(세로 + 첫 빈 칸 + 가로)이 ${s.drawn}개인데 시작 사슬은 ${s.start}코예요`);
+        if (!s.text.includes(`사슬 ${s.start}코`) || !s.text.includes(`${s.at}번째`)) fail(`${what}: 시작 안내 글이 계산과 달라요 (${s.text.split('\n')[0]})`);
+      };
+      await clickId(page, 'filetBtn');
+      await expect(33, '처음 열었을 때 (빨강·파랑 = 막힌 칸)');
+      const ui = await page.evaluate(() => ({
+        colors: document.querySelectorAll('#filetColors input[type=checkbox]').length,
+        note: !document.getElementById('filetColorNote').hidden,
+        guide: !document.getElementById('filetGuide').hidden,
+        row9: (document.querySelector('#filetRows li:nth-child(9) .filet-runs') || {}).textContent,
+      }));
+      if (ui.colors !== 2) fail(`색 체크박스가 2개(빨강·파랑)여야 하는데 ${ui.colors}개예요`);
+      if (!ui.note) fail('색이 2개인데 "필레는 보통 한 가지 실로…" 안내가 보이지 않아요');
+      if (!ui.guide) fail('처음 열었는데 "필레 도안 보는 법" 카드가 보이지 않아요');
+      if (ui.row9 !== '빈 칸 7, 막힌 칸 2, 빈 칸 1') fail(`줄별 설명 9단이 다르게 나와요 (${ui.row9})`);
+      await page.evaluate(c => { document.querySelector(`#filetColors input[data-color="${c}"]`).click(); }, BLUE); await sleep(150);
+      await expect(35, '파랑 체크를 끈 뒤');
+      await clickId(page, 'filetInvertBtn');
+      await expect(33, '전체 뒤집기 뒤');
+      await page.evaluate(() => document.querySelector('input[name="filetVer"][value="a"]').click()); await sleep(150);
+      await expect(23, '버전 a로 바꾼 뒤');
+      await page.evaluate(() => document.querySelector('input[name="filetVer"][value="c"]').click()); await sleep(150);
+      await expect(34, '버전 c로 바꾼 뒤');
+      // PNG 저장
+      const cdp = await page.createCDPSession();
+      try { await cdp.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: dl, browserContextId: ctx.id }); }
+      catch (e) { await cdp.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dl }); }
+      await clickId(page, 'filetSaveImgBtn');
+      let file = null;
+      for (let i = 0; i < 50 && !file; i++) { await sleep(200); file = fs.readdirSync(dl).find(f => f.endsWith('.png')); }
+      if (!file) fail("'필레 도안 이미지 저장'을 눌렀는데 PNG 파일이 내려받아지지 않았어요");
+      else {
+        await sleep(300);
+        const buf = fs.readFileSync(path.join(dl, file));
+        if (buf.length < 100 || buf.readUInt32BE(0) !== 0x89504E47) fail(`내려받은 필레 도안 파일이 PNG가 아니에요 (${file})`);
+        if (!/^필레도안_10x12_\d{8}\.png$/.test(file)) fail(`필레 도안 파일 이름 형식이 달라요 (${file})`);
+      }
+      // 보는 법 카드: 오늘은 보지 않기 → 다시 열면 접혀 있음 → "보는 법"으로 펼침
+      await clickId(page, 'filetGuideToday');
+      await page.keyboard.press('Escape'); await sleep(200);
+      if (await page.evaluate(() => document.getElementById('filetModal').classList.contains('show'))) fail('Esc를 눌러도 필레 창이 닫히지 않아요');
+      await clickId(page, 'filetBtn');
+      const g = await page.evaluate(() => ({ key: localStorage.getItem('crochet-filet-guide-hide'), guide: !document.getElementById('filetGuide').hidden, link: !document.getElementById('filetGuideOpen').hidden }));
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(g.key || '')) fail(`'오늘은 보지 않기'가 crochet-filet-guide-hide에 날짜를 저장하지 않았어요 (${g.key})`);
+      if (g.guide || !g.link) fail("'오늘은 보지 않기' 뒤에 다시 열었는데 보는 법 카드가 접혀 있지 않거나 '보는 법' 링크가 없어요");
+      await clickId(page, 'filetGuideOpen');
+      if (await page.evaluate(() => document.getElementById('filetGuide').hidden)) fail("'보는 법'을 눌러도 카드가 펼쳐지지 않아요");
+      // 창이 열려 있는 동안 되돌리기 단축키가 도안에 닿지 않아야 함
+      await page.keyboard.down('Control'); await page.keyboard.press('KeyZ'); await page.keyboard.up('Control'); await sleep(150);
+      await clickId(page, 'filetClose');
+      await settle();
+      const after = await page.evaluate(() => ({ store: localStorage.getItem('crochet-tool-v1'), data: JSON.stringify(gridData) }));
+      if (after.data !== before.data) fail('필레 창을 열고 닫은 뒤 도안 칸(gridData)이 바뀌었어요');
+      if (after.store !== before.store) fail('필레 창을 열고 닫은 뒤 자동 저장(crochet-tool-v1) 내용이 바뀌었어요');
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); fs.rmSync(dl, { recursive: true, force: true }); }
+  }
+  // 3) 휴대폰 360px + 어두운 화면, 그리고 영어 페이지
+  for (const [p, w, dark] of [['/pattern/', 360, true], ['/en/pattern/', 390, false]]) {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    page.on('console', m => { if (m.type() === 'error') errors.push('콘솔 오류: ' + m.text().split('\n')[0]); });
+    try {
+      await page.setViewport({ width: w, height: 760, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+      await page.evaluateOnNewDocument(d => {
+        try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); if (d) localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {}
+      }, dark);
+      await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
+      await page.evaluate(li => {
+        rows = li.rows; cols = li.cols; gridData = li.solid.map(s => s ? '#222222' : null);
+        rowsInput.value = rows; colsInput.value = cols; sizeCanvas(); drawGrid();
+      }, LI);
+      // 휴대폰은 작업창이 접힌 채로 열릴 수 있어서, 사람처럼 먼저 펼친 뒤 버튼을 누름
+      if (await page.evaluate(() => ribbonFolded)) { await page.evaluate(() => setRibbonFolded(false)); await sleep(300); }
+      await page.evaluate(() => document.getElementById('filetBtn').scrollIntoView());
+      await page.click('#filetBtn'); await sleep(300);
+      const r = await page.evaluate(() => {
+        const vw = document.documentElement.clientWidth, m = document.getElementById('filetModal');
+        const inScroll = el => !!el.closest('.filet-scrollbox');
+        const out = [...m.querySelectorAll('*')].filter(e => !inScroll(e) && e.getClientRects().length)
+          .filter(e => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.right > vw + 1 || b.left < -1); })
+          .map(e => e.id || e.className || e.tagName);
+        return { open: m.classList.contains('show'), out: [...new Set(out)].slice(0, 6), wide: document.documentElement.scrollWidth - vw,
+          theme: document.documentElement.getAttribute('data-theme'), title: document.getElementById('filetTitle').textContent,
+          start: document.getElementById('filetStart').innerText, text: m.innerText };
+      });
+      const label = `${p} ${w}px${dark ? ' 어두운 화면' : ''}`;
+      if (!r.open) { fail(`${label}: 필레 창이 열리지 않아요`); continue; }
+      if (r.out.length || r.wide > 1) fail(`${label}: 필레 창이 화면 밖으로 넘쳐요 (${r.out.join(', ') || r.wide + 'px'})`);
+      if (p.startsWith('/en/')) {
+        if (r.title !== 'Filet view') fail(`${label}: 창 제목이 영어가 아니에요 (${r.title})`);
+        if (!/^Row 1: Chain 35, then work the first double crochet \(dc\) in the 8th chain/.test(r.start)) fail(`${label}: 시작 안내가 영어로 나오지 않아요 (${r.start.split('\n')[0]})`);
+        const ko = (r.text.match(/[가-힣]+/g) || []);
+        if (ko.length) fail(`${label}: 영어 페이지 필레 창에 한국어가 남아 있어요 (${[...new Set(ko)].slice(0, 6).join(', ')})`);
+      } else if (!/^1단 시작: 사슬 35코/.test(r.start)) fail(`${label}: 시작 안내가 이상해요 (${r.start.split('\n')[0]})`);
+      errors.forEach(e => fail(`${label}: ${e}`));
+    } finally { await ctx.close(); }
+  }
+  note('계산 6가지, 화면 설정 5단계, 휴대폰·영어 2곳');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();
