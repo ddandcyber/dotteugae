@@ -1182,6 +1182,143 @@ test('색이 많을 때 안내: 5색 없음·6색 나옴·닫기·색이 줄면 
   note('칠하기·되돌리기·다시하기·닫기·글자 넣기·파일 열기, 방안뜨기 탭, 영어, 휴대폰 4곳');
 });
 
+test('최근에 쓴 색: 순서·중복·6개 한도·새로고침 유지·누르면 선택·팔레트에서 지우면 빠짐, 저장소 오류, 영어, 휴대폰', async (fail, note) => {
+  const COLORS = ['#222222', '#D32F2F', '#FBC02D', '#1976D2', '#388E3C', '#8E24AA', '#00ACC1', '#F57C00'];
+  const recent = page => page.evaluate(() => {
+    const row = document.getElementById('recentRow');
+    return { chips: [...document.querySelectorAll('#recentChips .recent-chip')].map(b => b.dataset.color), shown: !row.hidden && row.getClientRects().length > 0,
+      active: activeColor, sel: [...document.querySelectorAll('#recentChips .recent-chip.selected')].map(b => b.dataset.color),
+      store: (() => { try { return localStorage.getItem('crochet-recent-colors'); } catch (e) { return null; } })(), label: document.querySelector('.recent-label').textContent,
+      names: [...document.querySelectorAll('#recentChips .recent-chip')].map(b => b.getAttribute('aria-label')) };
+  });
+  const setPalette = page => page.evaluate(cs => { PRESET_COLORS.length = 0; cs.forEach(c => PRESET_COLORS.push(c)); activeColor = PRESET_COLORS[0]; buildPalette(); }, COLORS);
+  const eq = (got, want, what) => { if (JSON.stringify(got) !== JSON.stringify(want)) fail(what + ': ' + JSON.stringify(want) + '이어야 하는데 ' + JSON.stringify(got) + '이에요'); };
+  const pick = async (page, ...idx) => { for (const k of idx) { await pickColor(page, COLORS[k]); await sleep(120); } };
+  // 1) 한국어 PC
+  {
+    const t = await openPage('/pattern/');
+    try {
+      const { page } = t;
+      await setPalette(page);
+      const ribbonH = () => page.evaluate(() => Math.round(document.querySelector('.ribbon').getBoundingClientRect().height));
+      let r = await recent(page);
+      if (r.shown || r.chips.length) fail('처음 열었는데 "최근" 줄이 보여요');
+      const h0 = await ribbonH();
+      await pick(page, 1);
+      r = await recent(page);
+      eq(r.chips, [COLORS[1], COLORS[0]], '색을 하나 고른 뒤 최근 목록(바꾸기 전에 쓰던 색도 들어감)');
+      await pick(page, 2, 3);
+      r = await recent(page);
+      eq(r.chips, [COLORS[3], COLORS[2], COLORS[1], COLORS[0]], '색 3개를 고른 뒤 최근 목록 순서');
+      if (!r.shown) fail('최근 색이 여럿인데 "최근" 줄이 안 보여요');
+      if (r.label !== '최근') fail('"최근" 라벨이 아니에요 (' + r.label + ')');
+      eq(r.sel, [COLORS[3]], '지금 고른 색의 선택 표시');
+      if (r.names.some(n => !n || !/^최근 색 #[0-9A-F]{6}$/.test(n))) fail('최근 색 버튼의 접근성 이름이 없거나 형식이 달라요 (' + r.names.join(', ') + ')');
+      const h1 = await ribbonH();
+      if (Math.abs(h1 - h0) > 1) fail('"최근" 줄이 생기면서 작업창이 두꺼워졌어요 (' + h0 + 'px → ' + h1 + 'px)');
+      // 최근 색을 누르면 그 색이 칠할 색이 됨 + 맨 앞으로, 중복 없음
+      await page.click('#recentChips .recent-chip[data-color="' + COLORS[1] + '"]'); await sleep(150);
+      r = await recent(page);
+      eq(r.chips, [COLORS[1], COLORS[3], COLORS[2], COLORS[0]], '같은 색을 다시 고른 뒤(맨 앞으로, 중복 없음)');
+      if (r.active !== COLORS[1]) fail('최근 색을 눌렀는데 칠할 색이 바뀌지 않았어요 (' + r.active + ')');
+      eq(r.sel, [COLORS[1]], '최근 색을 누른 뒤 선택 표시');
+      await clickCell(page, 0, 0);
+      if ((await page.evaluate(() => gridData[0])) !== COLORS[1]) fail('최근 색을 누른 뒤 칠했는데 그 색으로 칠해지지 않았어요');
+      // 7개째 색: 6개 유지, 가장 오래된 색이 빠짐
+      await pick(page, 4, 5, 6);
+      r = await recent(page);
+      eq(r.chips, [COLORS[6], COLORS[5], COLORS[4], COLORS[1], COLORS[3], COLORS[2]], '색을 더 골라 6개를 넘겼을 때(7번째부터 가장 오래된 색이 빠짐)');
+      if (new Set(r.chips).size !== r.chips.length) fail('최근 목록에 같은 색이 두 번 있어요');
+      eq(JSON.parse(r.store || 'null'), r.chips, '저장된 crochet-recent-colors 내용');
+      const tool = await page.evaluate(() => localStorage.getItem('crochet-tool-v1') || '');
+      if (/recent/i.test(tool)) fail('최근 색이 자동 저장(crochet-tool-v1)에 들어갔어요');
+      // 새로고침 뒤에도 유지
+      await settle();
+      await page.reload({ waitUntil: 'networkidle0' }); await sleep(250);
+      r = await recent(page);
+      eq(r.chips, [COLORS[6], COLORS[5], COLORS[4], COLORS[1], COLORS[3], COLORS[2]], '새로고침 뒤 최근 목록');
+      if (!r.shown) fail('새로고침 뒤 "최근" 줄이 안 보여요');
+      // 팔레트에서 지운 색, 바뀐 색은 목록에서 빠짐
+      await page.evaluate(c => { const sw = [...document.querySelectorAll('#palette .swatch')].find(s => getComputedStyle(s).backgroundColor === c); sw.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true })); }, hexToRgb(COLORS[6]));
+      await sleep(150);
+      await clickId(page, 'swatchDelete'); await sleep(200);
+      r = await recent(page);
+      if (r.chips.includes(COLORS[6]) || r.chips.length !== 5) fail('팔레트에서 지운 색이 최근 목록에 남아 있어요 (' + r.chips.join(', ') + ')');
+      await page.evaluate(() => { PRESET_COLORS[PRESET_COLORS.findIndex(c => c === '#FBC02D')] = '#123456'; buildPalette(); });
+      r = await recent(page);
+      if (r.chips.includes(COLORS[2]) || r.chips.length !== 4) fail('팔레트에서 바뀌어 사라진 색이 최근 목록에 남아 있어요 (' + r.chips.join(', ') + ')');
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); }
+  }
+  // 2) 저장소를 못 쓰는 브라우저: 그 화면 안에서는 그대로 동작
+  {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    try {
+      await page.setViewport({ width: 1440, height: 900 });
+      await page.evaluateOnNewDocument(() => {
+        try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); } catch (e) {}
+        const g = Storage.prototype.getItem, s = Storage.prototype.setItem;
+        Storage.prototype.getItem = function (k) { if (k === 'crochet-recent-colors') throw new Error('blocked'); return g.call(this, k); };
+        Storage.prototype.setItem = function (k, v) { if (k === 'crochet-recent-colors') throw new Error('blocked'); return s.call(this, k, v); };
+      });
+      await page.evaluateOnNewDocument(SKIP_START);
+      await page.goto(BASE + '/pattern/', { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(250);
+      await setPalette(page);
+      await pick(page, 1, 2, 3);
+      const r = await recent(page);
+      eq(r.chips, [COLORS[3], COLORS[2], COLORS[1], COLORS[0]], '저장소를 못 쓸 때 최근 목록');
+      errors.forEach(e => fail('저장소를 못 쓸 때: ' + e));
+    } finally { await ctx.close(); }
+  }
+  // 3) 영어 페이지
+  {
+    const t = await openPage('/en/pattern/');
+    try {
+      const { page } = t;
+      await setPalette(page);
+      await pick(page, 1, 2);
+      const r = await recent(page);
+      eq(r.chips, [COLORS[2], COLORS[1], COLORS[0]], '영어 페이지 최근 목록');
+      if (r.label !== 'Recent') fail('/en/pattern/: 라벨이 "Recent"가 아니에요 (' + r.label + ')');
+      if (r.names.some(n => !/^Recent color #[0-9A-F]{6}$/.test(n || ''))) fail('/en/pattern/: 최근 색 버튼 이름이 영어가 아니에요 (' + r.names.join(', ') + ')');
+      t.errors.forEach(e => fail('/en/pattern/: ' + e));
+    } finally { await t.close(); }
+  }
+  // 4) 휴대폰 폭 (작업창을 펼친 상태, 어두운 화면)
+  for (const [p, w] of [['/pattern/', 320], ['/pattern/', 360], ['/en/pattern/', 390]]) {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    try {
+      await page.setViewport({ width: w, height: 740, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+      await page.evaluateOnNewDocument(() => { try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {} });
+      await page.evaluateOnNewDocument(SKIP_START);
+      await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
+      await page.evaluate(() => setRibbonFolded(false)); await sleep(300);
+      // 팔레트가 아주 길면(색 9개 이상) 휴대폰 320px에서는 팔레트 자체가 넘치므로, 여기서는 색 6개로 "최근" 줄만 확인
+      await page.evaluate(cs => { PRESET_COLORS.length = 0; cs.slice(0, 6).forEach(c => PRESET_COLORS.push(c)); activeColor = PRESET_COLORS[0]; buildPalette(); }, COLORS);
+      await pick(page, 1, 2, 3, 4);
+      const m = await page.evaluate(() => {
+        const vw = document.documentElement.clientWidth, row = document.getElementById('recentRow'), rr = row.getBoundingClientRect();
+        const chips = [...document.querySelectorAll('#recentChips .recent-chip')].map(b => b.getBoundingClientRect());
+        return { shown: row.getClientRects().length > 0, rowIn: rr.left >= 0 && rr.right <= vw, chipsIn: chips.every(c => c.left >= 0 && c.right <= vw), minW: Math.min(...chips.map(c => c.width)), n: chips.length, over: document.documentElement.scrollWidth - vw, theme: document.documentElement.getAttribute('data-theme') };
+      });
+      const label = p + ' ' + w + 'px 어두운 화면';
+      if (!m.shown || m.n !== 5) { fail(label + ': 최근 줄이 안 보이거나 색 개수가 달라요 (' + JSON.stringify(m) + ')'); continue; }
+      if (m.theme !== 'dark') fail(label + ': 어두운 화면이 적용되지 않았어요');
+      if (!m.rowIn || !m.chipsIn) fail(label + ': 최근 줄이 화면 밖으로 넘치거나 잘려요');
+      if (m.minW < 20) fail(label + ': 휴대폰에서 최근 색 버튼이 너무 작아요 (' + m.minW + 'px)');
+      if (m.over > 1) fail(label + ': 가로로 ' + m.over + 'px 넘쳐요');
+      errors.forEach(e => fail(label + ': ' + e));
+    } finally { await ctx.close(); }
+  }
+  note('순서·중복·6개·새로고침·누르면 선택·지우면 빠짐, 저장소 오류, 영어, 휴대폰 3곳');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();

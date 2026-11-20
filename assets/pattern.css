@@ -1113,6 +1113,22 @@
     .start-card.main{ padding-top:calc(var(--s3) + 18px); }
   }
 
+  /* ===== 최근 색 줄: 칠할 색 팔레트 바로 아래 (작업창 높이는 그대로) ===== */
+  .grp-color .rgroup-body{ flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; }
+  .recent-row{ display:flex; align-items:center; gap:var(--s1); height:14px; }
+  .recent-row[hidden]{ display:none; }
+  .recent-label{ font-size:var(--fs-xs); line-height:1; font-weight:600; color:var(--ink-faint); white-space:nowrap; }
+  .recent-chips{ display:flex; align-items:center; gap:6px; }
+  .recent-chip{ position:relative; width:13px; height:13px; padding:0; border:0; border-radius:50%; cursor:pointer; box-shadow:inset 0 0 0 1px var(--line-strong); }
+  .recent-chip::before{ content:""; position:absolute; inset:-5px; } /* 눌리는 범위를 눈에 보이는 크기보다 넓힘 */
+  .recent-chip.selected{ box-shadow:0 0 0 2px var(--card), 0 0 0 3.5px var(--teal); }
+  .recent-chip:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+  @media (pointer: coarse){
+    .recent-row{ height:22px; }
+    .recent-chip{ width:22px; height:22px; }
+    .recent-chip::before{ inset:-3px; }
+  }
+
   /* ===== 색이 많을 때 안내 (한 줄, 부드러운 안내색) ===== */
   .color-note{ display:flex; align-items:flex-start; gap:var(--s1); padding:var(--s1) var(--s3); background:var(--stamp-bg); color:var(--ink); border-bottom:1px solid var(--line); font-size:var(--fs); line-height:1.4; }
   .color-note[hidden]{ display:none; }
