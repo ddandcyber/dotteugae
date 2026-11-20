@@ -1796,7 +1796,7 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
           const heroArt = document.querySelector('.hero-art'), haCs = heroArt && getComputedStyle(heroArt);
           // 구조 모양(한·영 비교용): 구역 종류와 그 안의 카드·목록 개수
           const shape = kinds.join('>') + '|ex' + galCards.length + '|st' + document.querySelectorAll('.strength-card').length + '|fl' + document.querySelectorAll('.feature-lines li').length + '|tc' + document.querySelectorAll('.tool-cards .tool-card').length + '|gd' + document.querySelectorAll('.guide-item').length + '|faq' + document.querySelectorAll('.faq details').length + '|more' + document.querySelectorAll('.gallery-sec .sec-more').length + '|stimg' + [...document.querySelectorAll('.strength-card')].map(c => c.querySelectorAll('.strength-img img').length).join('');
-          const sImgs = [...document.querySelectorAll('.strength-card .strength-img img')].map(i => { const b = i.getBoundingClientRect(), box = i.closest('.strength-img'), bc = getComputedStyle(box); return { src: i.getAttribute('src'), file: i.src.split('/').pop(), ok: i.complete && i.naturalWidth > 0, alt: (i.getAttribute('alt') || '').trim(), lazy: i.getAttribute('loading'), ratio: Math.abs(b.width / b.height - i.naturalWidth / i.naturalHeight), inCard: i.closest('.strength-card').querySelector('h3').textContent.trim(), radius: parseFloat(bc.borderTopLeftRadius), border: bc.borderTopStyle !== 'none' && parseFloat(bc.borderTopWidth) > 0, natW: i.naturalWidth, shownW: b.width }; });
+          const sImgs = [...document.querySelectorAll('.strength-card .strength-img img')].map(i => { const b = i.getBoundingClientRect(), box = i.closest('.strength-img'), bc = getComputedStyle(box); return { src: i.getAttribute('src'), file: i.src.split('/').pop(), ok: i.complete && i.naturalWidth > 0, alt: (i.getAttribute('alt') || '').trim(), lazy: i.getAttribute('loading'), ratio: Math.abs(b.width / b.height - i.naturalWidth / i.naturalHeight), inCard: i.closest('.strength-card').querySelector('h3').textContent.trim(), radius: parseFloat(bc.borderTopLeftRadius), border: bc.borderTopStyle !== 'none' && parseFloat(bc.borderTopWidth) > 0, natW: i.naturalWidth, shownW: b.width, shownH: b.height, boxTop: Math.round(box.getBoundingClientRect().top), boxH: Math.round(box.getBoundingClientRect().height), inBox: b.left >= box.getBoundingClientRect().left - 1 && b.right <= box.getBoundingClientRect().right + 1 && b.top >= box.getBoundingClientRect().top - 1 && b.bottom <= box.getBoundingClientRect().bottom + 1, boxRight: box.getBoundingClientRect().right, cardRight: i.closest('.strength-card').getBoundingClientRect().right }; });
           return { kinds, bg, shape,
             eyebrow: eb ? eb.textContent.trim() : null, ebBefore: !!(eb && h1 && (eb.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING)), ebPill: ebCs ? parseFloat(ebCs.borderTopLeftRadius) >= 12 && parseFloat(ebCs.paddingLeft) > 0 : false,
             ebInH1: !!(eb && h1 && h1.textContent.includes(eb.textContent.trim())),
@@ -1829,16 +1829,25 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
           if (r.heroCols !== 2 || r.exCols !== 3 || r.stCols !== 2 || r.tcCols !== 2) fail(L + 'PC 배치가 달라요 (히어로 ' + r.heroCols + '열, 예시 ' + r.exCols + '열, 강점 ' + r.stCols + '열, 도구 ' + r.tcCols + '열)');
           if (r.thumbs.some(t => t.fillW < 0.98)) fail(L + '예시 그림이 그림 칸 너비를 꽉 채우지 않아요');
         } else if (r.heroCols !== 1 || r.exCols !== 1 || r.stCols !== 1 || r.tcCols !== 1) fail(L + '휴대폰에서 1열로 쌓이지 않아요 (히어로 ' + r.heroCols + ', 예시 ' + r.exCols + ', 강점 ' + r.stCols + ', 도구 ' + r.tcCols + ')');
-        // 방안뜨기 강점 카드의 실제 기호도 그림 (한·영 같은 파일, 둘째 카드에만)
-        if (r.sImgs.length !== 1) fail(L + '강점 카드 그림이 1개가 아니에요 (' + r.sImgs.length + ')');
+        // 강점 카드 그림: 첫 카드 = You are my home 예시, 둘째 카드 = 하트 방안뜨기 기호도 (한·영 같은 파일)
+        const WANT = [['you-are-my-home.png', /문구|text/i, '문구 카드'], ['filet-heart.webp', /방안뜨기|filet/i, '방안뜨기 카드']];
+        if (r.sImgs.length !== 2) fail(L + '강점 카드 그림이 2개가 아니에요 (' + r.sImgs.length + ')');
         else {
-          const g = r.sImgs[0];
-          if (g.file !== 'filet-amour.webp' || !g.ok) fail(L + '방안뜨기 카드 그림(assets/filet-amour.webp)이 안 보여요 (' + g.src + ')');
-          if (!/방안뜨기|filet/i.test(g.inCard)) fail(L + '그림이 방안뜨기 카드가 아닌 곳에 있어요 (' + g.inCard + ')');
-          if (!g.alt || g.lazy !== 'lazy') fail(L + '방안뜨기 카드 그림에 alt나 loading="lazy"가 없어요');
-          if (g.ratio > 0.03) fail(L + '방안뜨기 카드 그림 비율이 깨졌어요');
-          if (g.radius < 8 || !g.border) fail(L + '방안뜨기 카드 그림에 둥근 모서리·테두리가 없어요');
-          if (g.natW < g.shownW * 1.5) fail(L + '방안뜨기 카드 그림 해상도가 표시 크기의 2배에 못 미쳐요 (' + g.natW + ' / ' + Math.round(g.shownW) + ')');
+          r.sImgs.forEach((g, k) => {
+            const [file, cardRe, name] = WANT[k];
+            if (g.file !== file || !g.ok) fail(L + name + ' 그림(' + file + ')이 안 보여요 (' + g.src + ')');
+            if (!cardRe.test(g.inCard)) fail(L + name + ' 그림이 다른 카드에 있어요 (' + g.inCard + ')');
+            if (!g.alt || g.lazy !== 'lazy') fail(L + name + ' 그림에 alt나 loading="lazy"가 없어요');
+            if (g.ratio > 0.03) fail(L + name + ' 그림 비율이 깨졌어요');
+            if (g.radius < 8 || !g.border) fail(L + name + ' 그림 칸에 둥근 모서리·테두리가 없어요');
+            if (g.natW < g.shownW * 1.5) fail(L + name + ' 그림 해상도가 표시 크기의 2배에 못 미쳐요 (' + g.natW + ' / ' + Math.round(g.shownW) + ')');
+            if (!g.inBox || g.boxRight > g.cardRight + 1) fail(L + name + ' 그림이 칸이나 카드 밖으로 넘쳐요');
+            if (g.shownH > 301) fail(L + name + ' 그림 높이가 300px을 넘어요 (' + Math.round(g.shownH) + ')');
+          });
+          const [a, h] = r.sImgs;
+          // 하트 기호도: 기호가 뭉개지지 않게 충분히 크게 (도안 20단이 이 높이 안에 들어감)
+          if (h.shownH < (w === 1440 ? 280 : 200)) fail(L + '하트 기호도가 너무 작게 보여요 (높이 ' + Math.round(h.shownH) + 'px)');
+          if (w === 1440 && (a.boxTop !== h.boxTop || a.boxH !== h.boxH)) fail(L + 'PC에서 두 카드 그림 칸의 위치·높이가 달라요 (' + a.boxTop + '/' + a.boxH + ', ' + h.boxTop + '/' + h.boxH + ')');
         }
         shapes[p] = r.shape;
         errors.forEach(e => fail(L + e));
@@ -1851,8 +1860,9 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
     const html = fs.readFileSync(path.join(ROOT, file), 'utf8');
     if (!/<section class="home-sec alt gallery-sec">[\s\S]*?id="examples"/.test(html)) fail(label + ': 예시 갤러리 제목에 id="examples"가 없어요');
   }
-  const imgSize = fs.statSync(path.join(ROOT, 'assets/filet-amour.webp')).size;
-  if (imgSize > 150 * 1024) fail('assets/filet-amour.webp가 150KB를 넘어요 (' + Math.round(imgSize / 1024) + 'KB)');
+  const imgSize = fs.statSync(path.join(ROOT, 'assets/filet-heart.webp')).size;
+  if (imgSize > 100 * 1024) fail('assets/filet-heart.webp가 100KB를 넘어요 (' + Math.round(imgSize / 1024) + 'KB)');
+  if (fs.existsSync(path.join(ROOT, 'assets/filet-amour.webp'))) fail('더 이상 쓰지 않는 assets/filet-amour.webp가 남아 있어요');
   note('한·영 × 1440·390·320px × 라이트·다크, 구조 ' + shapes['/'] + ', 방안뜨기 그림 ' + Math.round(imgSize / 1024) + 'KB');
 });
 
