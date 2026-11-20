@@ -1690,26 +1690,31 @@ test('소개 페이지 디자인 값: 제목이 낱말 중간에서 안 끊김, 
     try {
       const v = await page.evaluate(() => {
         const cs = (sel) => getComputedStyle(document.querySelector(sel)), px = x => parseFloat(x);
-        const wrap = document.querySelector('.wrap'), main = cs('.site-main'), hero = cs('.hero'), h1 = cs('.hero h1'), lead = cs('.hero .lead'), h2 = cs('main h2'), card = cs('.card'), btn = cs('.btn');
-        return { wrapMax: cs('.wrap').maxWidth, mainTop: px(main.paddingTop), mainBottom: px(main.paddingBottom), cols: hero.gridTemplateColumns.split(' ').length, gap: px(hero.columnGap), h1Size: px(h1.fontSize), h1Lh: px(h1.lineHeight) / px(h1.fontSize), h1LS: px(h1.letterSpacing) / px(h1.fontSize), h1Weight: parseInt(h1.fontWeight, 10), h1Break: h1.wordBreak,
+        const wrap = document.querySelector('.wrap'), secs = [...document.querySelectorAll('main > .home-sec')], hero = cs('.hero'), h1 = cs('.hero h1'), lead = cs('.hero .lead'), h2 = cs('main h2'), card = cs('.card'), btn = cs('.btn');
+        const sp = secs.map(e => getComputedStyle(e)); const gaps = sp.slice(1).map((c, i) => px(sp[i].paddingBottom) + px(c.paddingTop));
+        const pads = [...document.querySelectorAll('.strength-card, .tool-card')].map(e => px(getComputedStyle(e).paddingLeft));
+        return { gaps, pads, mainTop: secs.length ? px(sp[0].paddingTop) : -1, mainBottom: secs.length ? px(sp[sp.length - 1].paddingBottom) : -1, wrapMax: cs('.wrap').maxWidth, cols: hero.gridTemplateColumns.split(' ').length, gap: px(hero.columnGap), h1Size: px(h1.fontSize), h1Lh: px(h1.lineHeight) / px(h1.fontSize), h1LS: px(h1.letterSpacing) / px(h1.fontSize), h1Weight: parseInt(h1.fontWeight, 10), h1Break: h1.wordBreak,
           leadSize: px(lead.fontSize), leadLh: px(lead.lineHeight) / px(lead.fontSize), leadMax: px(lead.maxWidth), h2Size: px(h2.fontSize), h2Break: h2.wordBreak, h2LS: px(h2.letterSpacing) / px(h2.fontSize), radius: px(card.borderTopLeftRadius),
           btnH: document.querySelector('.btn').getBoundingClientRect().height, btnPad: px(btn.paddingLeft), btnR: px(btn.borderTopLeftRadius), btnW: parseInt(btn.fontWeight, 10), wrapW: Math.round(wrap.getBoundingClientRect().width) };
       });
       const L = w + 'px: ';
       if (w === 1440) {
         if (v.wrapMax !== '1120px' || v.wrapW > 1120) fail(L + '컨테이너 최대 폭이 1120px이 아니에요 (' + v.wrapMax + ', ' + v.wrapW + ')');
-        if (v.mainTop !== 56 || v.mainBottom !== 88) fail(L + '본문 위아래 여백이 56/88px이 아니에요 (' + v.mainTop + '/' + v.mainBottom + ')');
+        if (v.mainTop !== 72 || v.mainBottom !== 112) fail(L + '홈 본문 위아래 여백이 72/112px이 아니에요 (' + v.mainTop + '/' + v.mainBottom + ')');
+        if (!v.gaps.length || v.gaps.some(g => g < 80 || g > 96)) fail(L + '홈 구역 사이 간격이 80~96px이 아니에요 (' + v.gaps.join(', ') + ')');
+        if (!v.pads.length || v.pads.some(p => p < 28 || p > 32)) fail(L + '강점·도구 카드 안쪽 여백이 28~32px이 아니에요 (' + v.pads.join(', ') + ')');
         if (v.cols !== 2 || v.gap < 64 || v.gap > 80) fail(L + '히어로가 2열에 열 간격 64~80px이어야 해요 (' + v.cols + '열, ' + v.gap + 'px)');
-        if (Math.round(v.h1Size) !== 60) fail(L + '히어로 제목 크기가 60px이 아니에요 (' + v.h1Size + ')');
+        if (Math.round(v.h1Size) !== 64) fail(L + '히어로 제목 크기가 64px이 아니에요 (' + v.h1Size + ')');
         if (Math.round(v.h2Size) !== 40) fail(L + '섹션 제목 크기가 40px이 아니에요 (' + v.h2Size + ')');
       } else {
-        if (v.mainTop !== 28 || v.mainBottom !== 44) fail(L + '휴대폰 본문 위아래 여백이 28/44px(절반)이 아니에요 (' + v.mainTop + '/' + v.mainBottom + ')');
+        if (v.mainTop !== 36 || v.mainBottom !== 56) fail(L + '휴대폰 홈 본문 위아래 여백이 36/56px(절반)이 아니에요 (' + v.mainTop + '/' + v.mainBottom + ')');
+        if (!v.gaps.length || v.gaps.some(g => g !== 56)) fail(L + '휴대폰 홈 구역 사이 간격이 56px이 아니에요 (' + v.gaps.join(', ') + ')');
         if (v.cols !== 1) fail(L + '휴대폰에서 히어로가 1열이어야 해요 (' + v.cols + '열)');
-        if (Math.round(v.h1Size) !== 38) fail(L + '히어로 제목 최소 크기가 38px이 아니에요 (' + v.h1Size + ')');
+        if (Math.round(v.h1Size) !== 40) fail(L + '히어로 제목 최소 크기가 40px이 아니에요 (' + v.h1Size + ')');
         if (Math.round(v.h2Size) !== 28) fail(L + '섹션 제목 최소 크기가 28px이 아니에요 (' + v.h2Size + ')');
       }
       if (Math.abs(v.h1Lh - 1.15) > 0.01 || Math.abs(v.h1LS + 0.02) > 0.003 || v.h1Weight < 600 || v.h1Weight > 700 || v.h1Break !== 'keep-all') fail(L + '히어로 제목 줄간격·자간·굵기·줄바꿈이 맞지 않아요 (' + JSON.stringify([v.h1Lh, v.h1LS, v.h1Weight, v.h1Break]) + ')');
-      if (v.leadSize !== 17 || Math.abs(v.leadLh - 1.75) > 0.01 || v.leadMax < 480 || v.leadMax > 520) fail(L + '히어로 설명 글(17px, 줄간격 1.75, 최대 폭 480~520px)이 맞지 않아요 (' + JSON.stringify([v.leadSize, v.leadLh, v.leadMax]) + ')');
+      if (v.leadSize !== 18 || Math.abs(v.leadLh - 1.75) > 0.01 || v.leadMax !== 500) fail(L + '히어로 설명 글(18px, 줄간격 1.75, 최대 폭 500px)이 맞지 않아요 (' + JSON.stringify([v.leadSize, v.leadLh, v.leadMax]) + ')');
       if (v.h2Break !== 'keep-all' || Math.abs(v.h2LS + 0.02) > 0.003) fail(L + '섹션 제목 자간·줄바꿈이 맞지 않아요');
       if (v.radius < 18 || v.radius > 20) fail(L + '카드 모서리가 18~20px이 아니에요 (' + v.radius + ')');
       if (v.btnH < 48 || v.btnH > 50 || v.btnPad !== 24 || v.btnR !== 14 || v.btnW !== 600) fail(L + '버튼(높이 48~50, 좌우 24, 둥글기 14, 굵기 600)이 맞지 않아요 (' + JSON.stringify([v.btnH, v.btnPad, v.btnR, v.btnW]) + ')');
@@ -1755,6 +1760,85 @@ test('소개 페이지 디자인 값: 제목이 낱말 중간에서 안 끊김, 
     } finally { await ctx.close(); }
   }
   note('제목 어절, 타이포·여백·카드·버튼 값, 호버 3가지 환경');
+});
+
+test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드→도구→가이드→질문), eyebrow, 시연 그림, 한·영 같은 구조, 배경 번갈아, 이미지 alt·lazy, 휴대폰 1열·그림 비율', async (fail, note) => {
+  const ORDER = ['hero-sec', 'gallery-sec', 'strengths-sec', 'tools-sec', 'guides-sec', 'faq-sec'];
+  const shapes = {};
+  for (const [p, eyebrow] of [['/', '방안뜨기(filet) 도안 지원'], ['/en/', 'Filet charts included']]) {
+    for (const [w, mobile] of [[1440, false], [390, true], [320, true]]) for (const scheme of ['light', 'dark']) {
+      const ctx = await BROWSER.createBrowserContext();
+      const page = await ctx.newPage();
+      const errors = [];
+      page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+      try {
+        await page.setViewport({ width: w, height: 900, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 1 });
+        await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }]);
+        await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 });
+        await page.evaluate(async () => { window.scrollTo(0, document.body.scrollHeight); await new Promise(r => setTimeout(r, 300)); window.scrollTo(0, 0); });
+        await sleep(300);
+        const L = p + ' ' + w + 'px ' + (scheme === 'dark' ? '어두운' : '밝은') + ' 화면: ';
+        const r = await page.evaluate(ORDER => {
+          const secs = [...document.querySelectorAll('main > section.home-sec')];
+          const kinds = secs.map(s => ORDER.find(k => s.classList.contains(k)) || s.className);
+          const bg = secs.map(s => getComputedStyle(s).backgroundColor);
+          const hero = document.querySelector('.hero-sec');
+          const eb = hero && hero.querySelector('.eyebrow'), h1 = hero && hero.querySelector('h1');
+          const ebCs = eb && getComputedStyle(eb);
+          const heroImgs = hero ? [...hero.querySelectorAll('img')] : [];
+          const imgs = [...document.querySelectorAll('main img')];
+          const vw = document.documentElement.clientWidth;
+          const gal = document.querySelector('.gallery-sec');
+          const galCards = gal ? [...gal.querySelectorAll('.ex-card')] : [];
+          const thumbs = galCards.map(c => { const i = c.querySelector('.thumb img'), t = c.querySelector('.thumb').getBoundingClientRect(), ir = i.getBoundingClientRect(); return { natural: i.naturalWidth / i.naturalHeight, shown: ir.width / ir.height, fillW: Math.min(ir.width, t.width) / t.width, loaded: i.complete && i.naturalWidth > 0, contain: getComputedStyle(i).objectFit }; });
+          const tops = sel => [...document.querySelectorAll(sel)].map(e => Math.round(e.getBoundingClientRect().left));
+          const heroArt = document.querySelector('.hero-art'), haCs = heroArt && getComputedStyle(heroArt);
+          // 구조 모양(한·영 비교용): 구역 종류와 그 안의 카드·목록 개수
+          const shape = kinds.join('>') + '|ex' + galCards.length + '|st' + document.querySelectorAll('.strength-card').length + '|fl' + document.querySelectorAll('.feature-lines li').length + '|tc' + document.querySelectorAll('.tool-cards .tool-card').length + '|gd' + document.querySelectorAll('.guide-item').length + '|faq' + document.querySelectorAll('.faq details').length + '|more' + document.querySelectorAll('.gallery-sec .sec-more').length;
+          return { kinds, bg, shape,
+            eyebrow: eb ? eb.textContent.trim() : null, ebBefore: !!(eb && h1 && (eb.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING)), ebPill: ebCs ? parseFloat(ebCs.borderTopLeftRadius) >= 12 && parseFloat(ebCs.paddingLeft) > 0 : false,
+            ebInH1: !!(eb && h1 && h1.textContent.includes(eb.textContent.trim())),
+            heroImg: heroImgs.map(i => ({ src: i.getAttribute('src'), lazy: i.getAttribute('loading'), alt: i.getAttribute('alt'), ok: i.complete && i.naturalWidth > 0 })),
+            heroArtRadius: haCs ? parseFloat(haCs.borderTopLeftRadius) : 0, heroArtShadow: haCs ? haCs.boxShadow : 'none',
+            noAlt: imgs.filter(i => !(i.getAttribute('alt') || '').trim()).map(i => i.getAttribute('src')),
+            notLazy: imgs.filter(i => !i.closest('.hero-sec') && i.getAttribute('loading') !== 'lazy').map(i => i.getAttribute('src')),
+            thumbs, exCols: new Set(tops('.gallery-sec .ex-card')).size, stCols: new Set(tops('.strength-card')).size, tcCols: new Set(tops('.tool-cards .tool-card')).size,
+            heroCols: getComputedStyle(document.querySelector('.hero')).gridTemplateColumns.split(' ').length,
+            over: document.documentElement.scrollWidth - vw, demoIn: (() => { const d = document.querySelector('.demo-input'); if (!d) return false; const b = d.getBoundingClientRect(); return b.left >= 0 && b.right <= vw; })() };
+        }, ORDER);
+        if (r.kinds.join('>') !== ORDER.join('>')) fail(L + '구역 순서가 달라요 (' + r.kinds.join(' > ') + ')');
+        if (r.kinds.indexOf('gallery-sec') > r.kinds.indexOf('strengths-sec')) fail(L + '예시 갤러리가 강점 카드보다 뒤에 있어요');
+        for (let i = 1; i < r.bg.length; i++) if (r.bg[i] === r.bg[i - 1]) fail(L + '이웃한 구역의 배경이 같아요 (' + r.kinds[i - 1] + ', ' + r.kinds[i] + ')');
+        if (r.eyebrow !== eyebrow) fail(L + 'eyebrow 문구가 달라요 (' + r.eyebrow + ')');
+        if (!r.ebBefore || !r.ebPill) fail(L + 'eyebrow가 제목 위의 알약 모양 라벨이 아니에요');
+        if (r.ebInH1) fail(L + 'eyebrow 문구가 제목과 겹쳐요');
+        if (r.heroImg.length !== 1 || !/amour\.png$/.test(r.heroImg[0].src) || !r.heroImg[0].ok) fail(L + '히어로 시연 그림이 amour 예시 이미지가 아니거나 안 보여요 (' + JSON.stringify(r.heroImg) + ')');
+        else { if (r.heroImg[0].lazy === 'lazy') fail(L + '히어로 이미지가 lazy로 되어 있어요'); if (!r.heroImg[0].alt) fail(L + '히어로 이미지에 alt가 없어요'); }
+        if (r.heroArtRadius < 16 || r.heroArtShadow === 'none') fail(L + '히어로 그림이 둥근 모서리·그림자 카드로 보이지 않아요');
+        if (!r.demoIn) fail(L + '"글자 → 도안" 입력 표시가 화면 밖으로 나가요');
+        if (r.noAlt.length) fail(L + 'alt가 없는 이미지: ' + r.noAlt.join(', '));
+        if (r.notLazy.length) fail(L + '아래쪽 이미지인데 loading="lazy"가 없어요: ' + r.notLazy.join(', '));
+        r.thumbs.forEach((t, i) => {
+          if (!t.loaded) fail(L + '예시 ' + (i + 1) + '번 그림이 안 불러와져요');
+          else if (Math.abs(t.natural - t.shown) / t.natural > 0.03 && t.contain !== 'contain') fail(L + '예시 ' + (i + 1) + '번 그림 비율이 깨졌어요');
+        });
+        if (r.over > 1) fail(L + '가로로 ' + r.over + 'px 넘쳐요');
+        if (w === 1440) {
+          if (r.heroCols !== 2 || r.exCols !== 3 || r.stCols !== 2 || r.tcCols !== 2) fail(L + 'PC 배치가 달라요 (히어로 ' + r.heroCols + '열, 예시 ' + r.exCols + '열, 강점 ' + r.stCols + '열, 도구 ' + r.tcCols + '열)');
+          if (r.thumbs.some(t => t.fillW < 0.98)) fail(L + '예시 그림이 그림 칸 너비를 꽉 채우지 않아요');
+        } else if (r.heroCols !== 1 || r.exCols !== 1 || r.stCols !== 1 || r.tcCols !== 1) fail(L + '휴대폰에서 1열로 쌓이지 않아요 (히어로 ' + r.heroCols + ', 예시 ' + r.exCols + ', 강점 ' + r.stCols + ', 도구 ' + r.tcCols + ')');
+        shapes[p] = r.shape;
+        errors.forEach(e => fail(L + e));
+      } finally { await ctx.close(); }
+    }
+  }
+  if (shapes['/'] !== shapes['/en/']) fail('한국어·영어 홈 구조가 달라요 (' + shapes['/'] + ' / ' + shapes['/en/'] + ')');
+  // 히어로 이미지는 파일에서도 lazy가 아님, 영어 "See examples"(#examples)가 갤러리로 감
+  for (const [file, label] of [['index.html', '홈'], ['en/index.html', '영어 홈']]) {
+    const html = fs.readFileSync(path.join(ROOT, file), 'utf8');
+    if (!/<section class="home-sec alt gallery-sec">[\s\S]*?id="examples"/.test(html)) fail(label + ': 예시 갤러리 제목에 id="examples"가 없어요');
+  }
+  note('한·영 × 1440·390·320px × 라이트·다크, 구조 ' + shapes['/']);
 });
 
 /* ---------- 실행 ---------- */
