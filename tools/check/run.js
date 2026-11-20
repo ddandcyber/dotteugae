@@ -1775,7 +1775,8 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
         await page.setViewport({ width: w, height: 900, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 1 });
         await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }]);
         await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 });
-        await page.evaluate(async () => { window.scrollTo(0, document.body.scrollHeight); await new Promise(r => setTimeout(r, 300)); window.scrollTo(0, 0); });
+        // 아래쪽(lazy) 그림을 하나씩 화면에 보여 줘서 다 불러온 뒤에 확인
+        await page.evaluate(async () => { for (const i of document.querySelectorAll('main img[loading="lazy"]')) { i.scrollIntoView({ block: 'center' }); await Promise.race([i.decode().catch(() => {}), new Promise(r => setTimeout(r, 3000))]); } window.scrollTo(0, 0); });
         await sleep(300);
         const L = p + ' ' + w + 'px ' + (scheme === 'dark' ? '어두운' : '밝은') + ' 화면: ';
         const r = await page.evaluate(ORDER => {
@@ -1794,7 +1795,8 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
           const tops = sel => [...document.querySelectorAll(sel)].map(e => Math.round(e.getBoundingClientRect().left));
           const heroArt = document.querySelector('.hero-art'), haCs = heroArt && getComputedStyle(heroArt);
           // 구조 모양(한·영 비교용): 구역 종류와 그 안의 카드·목록 개수
-          const shape = kinds.join('>') + '|ex' + galCards.length + '|st' + document.querySelectorAll('.strength-card').length + '|fl' + document.querySelectorAll('.feature-lines li').length + '|tc' + document.querySelectorAll('.tool-cards .tool-card').length + '|gd' + document.querySelectorAll('.guide-item').length + '|faq' + document.querySelectorAll('.faq details').length + '|more' + document.querySelectorAll('.gallery-sec .sec-more').length;
+          const shape = kinds.join('>') + '|ex' + galCards.length + '|st' + document.querySelectorAll('.strength-card').length + '|fl' + document.querySelectorAll('.feature-lines li').length + '|tc' + document.querySelectorAll('.tool-cards .tool-card').length + '|gd' + document.querySelectorAll('.guide-item').length + '|faq' + document.querySelectorAll('.faq details').length + '|more' + document.querySelectorAll('.gallery-sec .sec-more').length + '|stimg' + [...document.querySelectorAll('.strength-card')].map(c => c.querySelectorAll('.strength-img img').length).join('');
+          const sImgs = [...document.querySelectorAll('.strength-card .strength-img img')].map(i => { const b = i.getBoundingClientRect(), box = i.closest('.strength-img'), bc = getComputedStyle(box); return { src: i.getAttribute('src'), file: i.src.split('/').pop(), ok: i.complete && i.naturalWidth > 0, alt: (i.getAttribute('alt') || '').trim(), lazy: i.getAttribute('loading'), ratio: Math.abs(b.width / b.height - i.naturalWidth / i.naturalHeight), inCard: i.closest('.strength-card').querySelector('h3').textContent.trim(), radius: parseFloat(bc.borderTopLeftRadius), border: bc.borderTopStyle !== 'none' && parseFloat(bc.borderTopWidth) > 0, natW: i.naturalWidth, shownW: b.width }; });
           return { kinds, bg, shape,
             eyebrow: eb ? eb.textContent.trim() : null, ebBefore: !!(eb && h1 && (eb.compareDocumentPosition(h1) & Node.DOCUMENT_POSITION_FOLLOWING)), ebPill: ebCs ? parseFloat(ebCs.borderTopLeftRadius) >= 12 && parseFloat(ebCs.paddingLeft) > 0 : false,
             ebInH1: !!(eb && h1 && h1.textContent.includes(eb.textContent.trim())),
@@ -1803,7 +1805,7 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
             noAlt: imgs.filter(i => !(i.getAttribute('alt') || '').trim()).map(i => i.getAttribute('src')),
             notLazy: imgs.filter(i => !i.closest('.hero-sec') && i.getAttribute('loading') !== 'lazy').map(i => i.getAttribute('src')),
             thumbs, exCols: new Set(tops('.gallery-sec .ex-card')).size, stCols: new Set(tops('.strength-card')).size, tcCols: new Set(tops('.tool-cards .tool-card')).size,
-            heroCols: getComputedStyle(document.querySelector('.hero')).gridTemplateColumns.split(' ').length,
+            heroCols: getComputedStyle(document.querySelector('.hero')).gridTemplateColumns.split(' ').length, sImgs,
             over: document.documentElement.scrollWidth - vw, demoIn: (() => { const d = document.querySelector('.demo-input'); if (!d) return false; const b = d.getBoundingClientRect(); return b.left >= 0 && b.right <= vw; })() };
         }, ORDER);
         if (r.kinds.join('>') !== ORDER.join('>')) fail(L + '구역 순서가 달라요 (' + r.kinds.join(' > ') + ')');
@@ -1827,6 +1829,17 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
           if (r.heroCols !== 2 || r.exCols !== 3 || r.stCols !== 2 || r.tcCols !== 2) fail(L + 'PC 배치가 달라요 (히어로 ' + r.heroCols + '열, 예시 ' + r.exCols + '열, 강점 ' + r.stCols + '열, 도구 ' + r.tcCols + '열)');
           if (r.thumbs.some(t => t.fillW < 0.98)) fail(L + '예시 그림이 그림 칸 너비를 꽉 채우지 않아요');
         } else if (r.heroCols !== 1 || r.exCols !== 1 || r.stCols !== 1 || r.tcCols !== 1) fail(L + '휴대폰에서 1열로 쌓이지 않아요 (히어로 ' + r.heroCols + ', 예시 ' + r.exCols + ', 강점 ' + r.stCols + ', 도구 ' + r.tcCols + ')');
+        // 방안뜨기 강점 카드의 실제 기호도 그림 (한·영 같은 파일, 둘째 카드에만)
+        if (r.sImgs.length !== 1) fail(L + '강점 카드 그림이 1개가 아니에요 (' + r.sImgs.length + ')');
+        else {
+          const g = r.sImgs[0];
+          if (g.file !== 'filet-amour.webp' || !g.ok) fail(L + '방안뜨기 카드 그림(assets/filet-amour.webp)이 안 보여요 (' + g.src + ')');
+          if (!/방안뜨기|filet/i.test(g.inCard)) fail(L + '그림이 방안뜨기 카드가 아닌 곳에 있어요 (' + g.inCard + ')');
+          if (!g.alt || g.lazy !== 'lazy') fail(L + '방안뜨기 카드 그림에 alt나 loading="lazy"가 없어요');
+          if (g.ratio > 0.03) fail(L + '방안뜨기 카드 그림 비율이 깨졌어요');
+          if (g.radius < 8 || !g.border) fail(L + '방안뜨기 카드 그림에 둥근 모서리·테두리가 없어요');
+          if (g.natW < g.shownW * 1.5) fail(L + '방안뜨기 카드 그림 해상도가 표시 크기의 2배에 못 미쳐요 (' + g.natW + ' / ' + Math.round(g.shownW) + ')');
+        }
         shapes[p] = r.shape;
         errors.forEach(e => fail(L + e));
       } finally { await ctx.close(); }
@@ -1838,7 +1851,9 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
     const html = fs.readFileSync(path.join(ROOT, file), 'utf8');
     if (!/<section class="home-sec alt gallery-sec">[\s\S]*?id="examples"/.test(html)) fail(label + ': 예시 갤러리 제목에 id="examples"가 없어요');
   }
-  note('한·영 × 1440·390·320px × 라이트·다크, 구조 ' + shapes['/']);
+  const imgSize = fs.statSync(path.join(ROOT, 'assets/filet-amour.webp')).size;
+  if (imgSize > 150 * 1024) fail('assets/filet-amour.webp가 150KB를 넘어요 (' + Math.round(imgSize / 1024) + 'KB)');
+  note('한·영 × 1440·390·320px × 라이트·다크, 구조 ' + shapes['/'] + ', 방안뜨기 그림 ' + Math.round(imgSize / 1024) + 'KB');
 });
 
 test('소개 페이지 글꼴: 제목·로고 글꼴만 preload(모두 실제로 쓰임, 경로·crossorigin 맞음), 바깥 요청 없음, 대체 글꼴 크기 보정', async (fail, note) => {
