@@ -1505,6 +1505,122 @@ test('폰트 목록 한글/영문 표시와 영문 전용 폰트 안내: coverag
   note('폰트 ' + koSrc.length + '개 × 한·영 표시, coverage.json과 일치, 안내 4가지, 저장 값, 휴대폰 2곳');
 });
 
+test('좁은 화면 넘침: 색이 많은 팔레트(9·12·20·50개), 320·360·390px 라이트·다크, 배경색 팔레트, PC는 기존 모양 그대로', async (fail, note) => {
+  const BASE30 = ['#222222', '#D32F2F', '#FBC02D', '#1976D2', '#388E3C', '#8E24AA', '#00ACC1', '#F57C00', '#6D4C41', '#E91E63', '#009688', '#3F51B5', '#795548', '#607D8B', '#CDDC39', '#FF5722', '#9C27B0', '#03A9F4', '#8BC34A', '#FFC107', '#B71C1C', '#1B5E20', '#0D47A1', '#4A148C', '#BF360C', '#33691E', '#006064', '#311B92', '#880E4F', '#827717'];
+  const ALL = BASE30.concat(Array.from({ length: 20 }, (_, i) => '#' + ((i * 5130427 + 1118481) & 0xFFFFFF).toString(16).padStart(6, '0')));
+  const openMobile = async (p, w, dark) => {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    await page.setViewport({ width: w, height: 760, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+    await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: dark ? 'dark' : 'light' }]);
+    await page.evaluateOnNewDocument(d => { try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); if (d) localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {} }, dark);
+    await page.evaluateOnNewDocument(SKIP_START);
+    await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
+    return { ctx, page, errors };
+  };
+  const over = page => page.evaluate(() => { const vw = document.documentElement.clientWidth; return { over: document.documentElement.scrollWidth - vw, bad: [...document.querySelectorAll('body *')].filter(e => e.getClientRects().length && e.getBoundingClientRect().right > vw + 1).map(e => (e.id || e.className || e.tagName) + ':' + Math.round(e.getBoundingClientRect().right - vw)).slice(0, 4) }; });
+  // 1) 칠할 색 팔레트 (작업창을 펼친 상태): 색 5·9·12·20·30개
+  for (const dark of [false, true]) for (const w of [320, 360, 390]) {
+    const { ctx, page, errors } = await openMobile('/pattern/', w, dark);
+    try {
+      const label = '/pattern/ ' + w + 'px ' + (dark ? '어두운 화면' : '밝은 화면');
+      await page.evaluate(() => setRibbonFolded(false)); await sleep(250);
+      for (const n of [5, 9, 12, 20, 50]) {
+        await page.evaluate((cs, n) => {
+          PRESET_COLORS.length = 0; cs.slice(0, n).forEach(c => PRESET_COLORS.push(c)); activeColor = PRESET_COLORS[0]; buildPalette();
+          [1, 2, 3].forEach(i => pickPaintColor(PRESET_COLORS[i % PRESET_COLORS.length]));
+        }, ALL, n);
+        await sleep(350);
+        const o = await over(page);
+        const m = await page.evaluate(() => {
+          const vw = document.documentElement.clientWidth, pal = document.getElementById('palette'), pr = pal.getBoundingClientRect();
+          const grp = document.querySelector('.grp-color'), body = grp.querySelector('.rgroup-body').getBoundingClientRect();
+          const last = [...pal.querySelectorAll('.swatch, .add-color')].pop().getBoundingClientRect();
+          const sel = pal.querySelector('.swatch.selected');
+          const rr = document.getElementById('recentRow'), ch = [...document.querySelectorAll('#recentChips .recent-chip')];
+          return { palIn: pr.left >= 0 && pr.right <= vw + 0.5, palH: Math.round(pr.height), scrollable: pal.scrollHeight > pal.clientHeight + 1, wrap: grp.classList.contains('pal-wrap'), bodyH: Math.round(body.height),
+            addReach: pal.scrollWidth <= pal.clientWidth + 1, sel: !!sel, recent: !rr.hidden && ch.length >= 2, recentSel: ch.some(c => c.classList.contains('selected')), flexWrap: getComputedStyle(pal).flexWrap };
+        });
+        if (o.over > 1) fail(label + ': 색 ' + n + '개일 때 가로로 ' + o.over + 'px 넘쳐요 (' + o.bad.join(', ') + ')');
+        if (!m.palIn) fail(label + ': 색 ' + n + '개일 때 팔레트가 화면 밖으로 나가요');
+        if (!m.addReach) fail(label + ': 색 ' + n + '개일 때 팔레트가 옆으로 스크롤돼야 하는 모양이에요 (줄바꿈이 안 됨)');
+        if (m.palH > 104) fail(label + ': 색 ' + n + '개일 때 팔레트 높이가 너무 커요 (' + m.palH + 'px, 최대 약 102px)');
+        if (n === 50 && !m.scrollable) fail(label + ': 색 50개인데 최대 높이 안에서 세로로 스크롤되지 않아요');
+        if (n === 5 && (m.wrap || m.bodyH > 52)) fail(label + ': 색 5개(한 줄)인데 묶음 높이가 늘어났어요 (pal-wrap ' + m.wrap + ', ' + m.bodyH + 'px)');
+        if (!m.sel) fail(label + ': 색 ' + n + '개일 때 선택 표시가 없어요');
+        if (!m.recent || !m.recentSel) fail(label + ': 색 ' + n + '개일 때 최근 색 줄이나 선택 표시가 사라졌어요');
+      }
+      // 색 추가(+) 버튼이 눈에 보이고 눌림
+      await page.evaluate((cs) => { PRESET_COLORS.length = 0; cs.slice(0, 12).forEach(c => PRESET_COLORS.push(c)); buildPalette(); }, ALL);
+      await sleep(250);
+      const add = await page.evaluate(() => { const b = document.querySelector('#palette .add-color').getBoundingClientRect(), vw = document.documentElement.clientWidth; return { in: b.left >= 0 && b.right <= vw && b.width >= 24 }; });
+      if (!add.in) fail(label + ': 색 12개일 때 색 추가(+) 버튼이 화면 안에 보이지 않아요');
+      await page.evaluate(() => document.querySelector('#palette .add-color').click()); await sleep(250);
+      if (!(await page.evaluate(() => document.getElementById('hexModal').classList.contains('show')))) fail(label + ': 색 추가(+) 버튼을 눌러도 색 추가 창이 안 열려요');
+      // 배경색 팔레트(격자 탭): 색 30개여도 안 넘침
+      await page.evaluate(() => { document.getElementById('hexCancel').click(); });
+      await page.click('.insp-tab[data-pane="grid"]').catch(() => {}); await sleep(200);
+      const o2 = await over(page);
+      if (o2.over > 1) fail(label + ': 배경색 팔레트 때문에 가로로 ' + o2.over + 'px 넘쳐요 (' + o2.bad.join(', ') + ')');
+      errors.forEach(e => fail(label + ': ' + e));
+    } finally { await ctx.close(); }
+  }
+  // PC 폭은 기존 모양 그대로: 한 줄(줄바꿈 없음), 묶음 높이 늘리는 표시 없음
+  {
+    const t = await openPage('/pattern/');
+    try {
+      await t.page.evaluate(cs => { PRESET_COLORS.length = 0; cs.slice(0, 12).forEach(c => PRESET_COLORS.push(c)); buildPalette(); }, ALL);
+      await sleep(250);
+      const r = await t.page.evaluate(() => ({ flexWrap: getComputedStyle(document.getElementById('palette')).flexWrap, wrap: document.querySelector('.grp-color').classList.contains('pal-wrap'), h: Math.round(document.getElementById('palette').getBoundingClientRect().height) }));
+      if (r.flexWrap !== 'nowrap' || r.wrap || r.h > 32) fail('PC(1440px)의 팔레트 모양이 바뀌었어요 (' + JSON.stringify(r) + ')');
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); }
+  }
+  note('팔레트 색 5·9·12·20·50개 × 320·360·390px × 라이트·다크, 배경색 팔레트, 색 추가(+), 최근 색 줄, PC 그대로');
+});
+
+test('미리보기 글자 막대: 영어·한국어, 320·360·390px 라이트·다크에서 넘침 없음, 버튼은 모두 화면 안에 보이고 누르기 쉬운 크기', async (fail, note) => {
+  const openMobile = async (p, w, dark) => {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    await page.setViewport({ width: w, height: 760, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+    await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: dark ? 'dark' : 'light' }]);
+    await page.evaluateOnNewDocument(d => { try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); if (d) localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {} }, dark);
+    await page.evaluateOnNewDocument(SKIP_START);
+    await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
+    return { ctx, page, errors };
+  };
+  const over = page => page.evaluate(() => { const vw = document.documentElement.clientWidth; return { over: document.documentElement.scrollWidth - vw, bad: [...document.querySelectorAll('body *')].filter(e => e.getClientRects().length && e.getBoundingClientRect().right > vw + 1).map(e => (e.id || e.className || e.tagName) + ':' + Math.round(e.getBoundingClientRect().right - vw)).slice(0, 4) }; });
+  for (const dark of [false, true]) for (const w of [320, 360, 390]) for (const p of ['/en/pattern/', '/pattern/']) {
+    const { ctx, page, errors } = await openMobile(p, w, dark);
+    try {
+      const label = p + ' ' + w + 'px ' + (dark ? '어두운 화면' : '밝은 화면') + ' 글자 막대';
+      await page.click('.insp-tab[data-pane="text"]'); await sleep(150);
+      await page.click('#textInput', { clickCount: 3 });
+      await page.type('#textInput', p.startsWith('/en/') ? 'Hello' : '뜨개');
+      if (!await waitFor(page, () => !!stamp, 8000)) { fail(label + ': 글자를 입력해도 미리보기 글자 막대가 안 떠요'); continue; }
+      await sleep(400);
+      const o = await over(page);
+      const b = await page.evaluate(() => {
+        const vw = document.documentElement.clientWidth;
+        return [...document.querySelectorAll('#stampBar button')].filter(e => e.getClientRects().length).map(e => { const r = e.getBoundingClientRect(); return { id: e.id, in: r.left >= -0.5 && r.right <= vw + 0.5, w: Math.round(r.width), h: Math.round(r.height), act: e.matches('.btn-stamp-cancel, .btn-stamp-place, .nudge button') }; });
+      });
+      if (o.over > 1) fail(label + ': 가로로 ' + o.over + 'px 넘쳐요 (' + o.bad.join(', ') + ')');
+      const out = b.filter(x => !x.in).map(x => x.id);
+      if (out.length) fail(label + ': 막대의 버튼이 화면 밖으로 나가요 (' + out.join(', ') + ')');
+      const small = b.filter(x => x.act && (x.h < 40 || x.w < 40)).map(x => x.id + ' ' + x.w + 'x' + x.h);
+      if (small.length) fail(label + ': 막대의 버튼이 누르기에 너무 작아요 (' + small.join(', ') + ')');
+      if (!b.some(x => x.id === 'stampPlaceBtn') || !b.some(x => x.id === 'stampCancelBtn')) fail(label + ': 완료·취소 버튼이 안 보여요');
+      errors.forEach(e => fail(label + ': ' + e));
+    } finally { await ctx.close(); }
+  }
+  note('글자 막대 한·영 × 320·360·390px × 라이트·다크');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();

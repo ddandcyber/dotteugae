@@ -440,7 +440,7 @@
   .smode-row.hide{ display:none; }
   .smode-btn{ flex:1; border:none; background:transparent; border-radius:var(--r); min-height:36px; font-size:var(--fs); font-weight:600; color:var(--ink-soft); }
   .smode-btn.active{ background:var(--card); color:var(--ink); box-shadow:0 1px 3px rgba(36,38,31,0.15); }
-  .stamp-actions{ display:flex; gap:8px; margin-left:auto; }
+  .stamp-actions{ display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-left:auto; min-width:0; max-width:100%; }
   .btn-stamp-cancel{
     min-height:var(--h-lg); padding:0 14px; border-radius:var(--r);
     background:var(--card); border:1px solid var(--line-strong);
@@ -1111,6 +1111,16 @@
     .start-choices{ grid-template-columns:1fr; }
     .start-card{ flex-direction:row; align-items:center; min-height:0; padding:var(--s3); }
     .start-card.main{ padding-top:calc(var(--s3) + 18px); }
+  }
+
+  /* 좁은 화면(900px 미만)의 칠할 색 팔레트: 색이 많으면 줄바꿈하고, 3줄(94px)을 넘으면 그 안에서 세로로 스크롤.
+     선택 고리(바깥 그림자)가 잘리지 않게 안쪽 여백 4px을 주고 같은 만큼 바깥 여백을 빼서 한 줄일 때의 크기는 그대로 */
+  @media (max-width: 899px){
+    .grp-color{ flex-shrink:1; min-width:0; max-width:100%; }
+    .grp-color .rgroup-body{ min-width:0; max-width:100%; }
+    .grp-color.pal-wrap .rgroup-body{ height:auto; min-height:var(--h-lg); } /* 팔레트가 여러 줄이 될 때만 묶음 높이를 같이 늘림 (한 줄이면 기존 높이 그대로) */
+    .ribbon .palette{ flex-wrap:wrap; align-content:flex-start; max-width:calc(100% + 8px); max-height:calc(28px * 3 + 5px * 2 + 8px);
+                      padding:4px; margin:-4px; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
   }
 
   /* ===== 최근 색 줄: 칠할 색 팔레트 바로 아래 (작업창 높이는 그대로) ===== */

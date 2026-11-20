@@ -354,12 +354,20 @@
     }));
     paletteEl.appendChild(addBtn);
     renderRecentColors();
+    updatePaletteWrap();
     if(typeof refreshReplaceUI === 'function') refreshReplaceUI(true);
     renderBgPalette();
     if(typeof buildDecorRow === 'function' && document.getElementById('decorRow')) { try{ buildDecorRow(); }catch(e){} }
     if(typeof buildUserDecors === 'function') { try{ buildUserDecors(); }catch(e){} }
     if(typeof renderShadowUI === 'function' && document.getElementById('shadowPalette')) { try{ renderShadowUI(); }catch(e){} }
   }
+
+  // 좁은 화면에서 팔레트가 여러 줄로 줄바꿈되면 묶음에 pal-wrap 표시 (CSS가 그때만 높이를 늘림). 작업창을 펼치거나 크기가 바뀔 때도 다시 확인
+  function updatePaletteWrap(){
+    const g = paletteEl.closest('.grp-color');
+    if(g) g.classList.toggle('pal-wrap', paletteEl.scrollHeight > 50);
+  }
+  if(window.ResizeObserver) new ResizeObserver(updatePaletteWrap).observe(paletteEl);
 
   let undoStack = [];
   const MAX_UNDO = 30;
