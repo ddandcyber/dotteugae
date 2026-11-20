@@ -1113,6 +1113,18 @@
     .start-card.main{ padding-top:calc(var(--s3) + 18px); }
   }
 
+  /* ===== 색이 많을 때 안내 (한 줄, 부드러운 안내색) ===== */
+  .color-note{ display:flex; align-items:flex-start; gap:var(--s1); padding:var(--s1) var(--s3); background:var(--stamp-bg); color:var(--ink); border-bottom:1px solid var(--line); font-size:var(--fs); line-height:1.4; }
+  .color-note[hidden]{ display:none; }
+  .cn-ic{ flex-shrink:0; color:var(--teal); display:flex; padding-top:1px; }
+  .cn-ic svg{ width:18px; height:18px; }
+  .cn-text{ flex:1; min-width:0; }
+  .cn-x{ flex-shrink:0; width:28px; height:28px; margin:-3px -6px -3px 0; display:flex; align-items:center; justify-content:center; border:0; border-radius:var(--r-sm); background:transparent; color:var(--ink-soft); cursor:pointer; }
+  .cn-x:hover{ background:var(--paper-2); }
+  .cn-x svg{ width:16px; height:16px; }
+  .app.filet-mode .color-note, .app.start-mode .color-note, .knit-mode .color-note{ display:none !important; }
+  @media (max-width: 899px){ .color-note{ padding-left:var(--s1); padding-right:var(--s1); } }
+
   /* ===== 모양 통일 (단계 1) =====
      - 맨 위 막대·작업창·탭 줄은 같은 카드색이라 사이의 선을 없애고, 탭 줄 아래 선 하나만 남김
      - 작업창 묶음 사이 세로선은 없애고(묶음 이름이 구분), 왼쪽 가장자리를 맨 위 막대와 맞춤 */

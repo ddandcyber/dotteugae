@@ -1045,6 +1045,143 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
   note('빈 도안·글자로 시작·예시(한·영)·#p= 링크·재방문·파일 열기·360px');
 });
 
+test('색이 많을 때 안내: 5색 없음·6색 나옴·닫기·색이 줄면 사라짐, 방안뜨기 탭에서는 없음, 파일 열기·글자 넣기, 영어, 휴대폰', async (fail, note) => {
+  const KO6 = '색이 6개예요. 색이 많으면 실을 갈아 끼우는 횟수가 늘어 뜨기 어려울 수 있어요.';
+  const COLORS = ['#222222', '#D32F2F', '#FBC02D', '#1976D2', '#388E3C', '#8E24AA', '#00ACC1', '#F57C00'];
+  const noteOf = page => page.evaluate(() => { const e = document.getElementById('colorNote'); return { shown: e.getClientRects().length > 0, text: document.getElementById('colorNoteText').textContent, n: usedColorCount() }; });
+  const settleNote = () => sleep(350);
+  // 1) 사람처럼 칠하기·되돌리기·다시하기·닫기 (한국어)
+  {
+    const t = await openPage('/pattern/');
+    try {
+      const { page } = t;
+      await page.evaluate(cs => { PRESET_COLORS.length = 0; cs.forEach(c => PRESET_COLORS.push(c)); buildPalette(); }, COLORS);
+      await settleNote();
+      const paint = async (k) => { await pickColor(page, COLORS[k]); await clickCell(page, 0, k); await settleNote(); };
+      const gd0 = await page.evaluate(() => JSON.stringify(gridData));
+      for (let k = 0; k < 5; k++) await paint(k);
+      let s = await noteOf(page);
+      if (s.shown || s.n !== 5) fail(`5색인데 안내가 보여요 (색 ${s.n}개, 보임 ${s.shown})`);
+      // 배경색으로 칠한 칸과, 팔레트에만 있고 칠하지 않은 색(6~8번째)은 세지 않음
+      await page.evaluate(() => { gridData[10] = bgColor; drawGrid(); }); await settleNote();
+      s = await noteOf(page);
+      if (s.shown || s.n !== 5) fail(`배경색 칸이나 칠하지 않은 팔레트 색을 센 것 같아요 (색 ${s.n}개, 보임 ${s.shown})`);
+      await page.evaluate(() => { gridData[10] = null; drawGrid(); });
+      await paint(5);
+      s = await noteOf(page);
+      if (!s.shown || s.n !== 6) fail(`6색을 칠했는데 안내가 안 나와요 (색 ${s.n}개, 보임 ${s.shown})`);
+      if (s.text !== KO6) fail(`안내 문구가 달라요 (${s.text})`);
+      await paint(6);
+      s = await noteOf(page);
+      if (!s.shown || !s.text.startsWith('색이 7개예요.')) fail(`7색인데 안내 문구의 개수가 7이 아니에요 (${s.text})`);
+      await clickId(page, 'undoBtn'); await settleNote();
+      s = await noteOf(page);
+      if (!s.shown || s.n !== 6 || !s.text.startsWith('색이 6개예요.')) fail(`되돌리기 뒤 색 개수(6)와 안내가 다시 계산되지 않았어요 (색 ${s.n}개, ${s.text})`);
+      await clickId(page, 'undoBtn'); await settleNote();
+      s = await noteOf(page);
+      if (s.shown || s.n !== 5) fail(`색이 5개로 줄었는데 안내가 안 사라졌어요 (색 ${s.n}개, 보임 ${s.shown})`);
+      await clickId(page, 'redoBtn'); await settleNote();
+      s = await noteOf(page);
+      if (!s.shown || s.n !== 6) fail(`다시하기 뒤 안내가 다시 나오지 않았어요 (색 ${s.n}개)`);
+      // 닫기: 닫으면 사라지고, 색이 더 늘어도 안 나옴. 5개 이하로 줄었다가 다시 6개가 되면 또 나옴
+      await clickId(page, 'colorNoteClose');
+      if ((await noteOf(page)).shown) fail('닫기(x)를 눌러도 안내가 사라지지 않아요');
+      await clickId(page, 'redoBtn'); await settleNote();
+      s = await noteOf(page);
+      if (s.shown || s.n !== 7) fail(`닫은 뒤 색이 더 늘었는데 안내가 다시 나와요 (색 ${s.n}개, 보임 ${s.shown})`);
+      await clickId(page, 'undoBtn'); await clickId(page, 'undoBtn'); await settleNote();
+      await clickId(page, 'redoBtn'); await settleNote();
+      s = await noteOf(page);
+      if (!s.shown || s.n !== 6) fail(`5색 이하로 줄었다가 다시 6색이 됐는데 안내가 다시 나오지 않아요 (색 ${s.n}개, 보임 ${s.shown})`);
+      // 방안뜨기 탭에서는 안 보이고, 도안 탭으로 돌아오면 다시 보임
+      await clickId(page, 'tabFilet');
+      if ((await noteOf(page)).shown) fail('방안뜨기 탭인데 색이 많다는 안내가 보여요');
+      await clickId(page, 'tabDesign'); await settleNote();
+      if (!(await noteOf(page)).shown) fail('방안뜨기 탭에서 도안 탭으로 돌아왔는데 안내가 다시 보이지 않아요');
+      // 안내는 보이기만 함: 저장된 내용에 안내 관련 항목이 없음
+      const store = await page.evaluate(() => localStorage.getItem('crochet-tool-v1') || '');
+      if (/colorNote|dismiss/i.test(store)) fail('안내 상태가 자동 저장(crochet-tool-v1)에 들어갔어요');
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); }
+  }
+  // 2) 글자 넣기 뒤 개수 다시 계산 + 파일 열기
+  {
+    const t = await openPage('/pattern/');
+    const tmp = path.join(os.tmpdir(), 'dotteugae-colors-' + process.pid + '.json');
+    try {
+      const { page } = t;
+      await page.evaluate(cs => { PRESET_COLORS.length = 0; cs.forEach(c => PRESET_COLORS.push(c)); buildPalette(); }, COLORS);
+      for (let k = 0; k < 5; k++) { await pickColor(page, COLORS[k]); await clickCell(page, 0, k); }
+      await pickColor(page, COLORS[5]);
+      await page.click('.insp-tab[data-pane="text"]'); await sleep(150);
+      await page.click('#textInput', { clickCount: 3 });
+      await page.type('#textInput', '뜨');
+      if (!await waitFor(page, () => !!stamp, 10000)) fail('글자 넣기: 문구를 넣었는데 미리보기 글자가 나타나지 않았어요');
+      await clickId(page, 'convertBtn'); await sleep(900);
+      if (await page.evaluate(() => !!(stamp && stamp.isText))) await clickId(page, 'stampPlaceBtn');
+      await settleNote();
+      const s = await noteOf(page);
+      if (s.n < 6 || !s.shown) fail(`6번째 색으로 글자를 넣었는데 색 개수가 다시 계산되지 않았어요 (색 ${s.n}개, 보임 ${s.shown})`);
+      // 파일 열기: 색 7개짜리 도안 파일
+      const colors = COLORS.slice(0, 7);
+      fs.writeFileSync(tmp, JSON.stringify({ app: 'crochet-pattern-tool', version: 1, cols: 7, rows: 1, bg: '#FFFFFF', colors, cells: colors.map((c, i) => [i + 1, 1]) }));
+      await (await page.$('#openFileInput')).uploadFile(tmp);
+      if (!await waitFor(page, () => cols === 7 && rows === 1, 5000)) fail('색이 7개인 도안 파일이 열리지 않았어요');
+      await settleNote();
+      const f = await noteOf(page);
+      if (!f.shown || !f.text.startsWith('색이 7개예요.')) fail(`파일을 열었는데 7색 안내가 나오지 않아요 (색 ${f.n}개, ${f.text})`);
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); try { fs.unlinkSync(tmp); } catch (e) {} }
+  }
+  // 3) 영어 페이지
+  {
+    const t = await openPage('/en/pattern/');
+    try {
+      const { page } = t;
+      const setN = n => page.evaluate((n, cs) => { rows = 2; cols = 8; gridData = new Array(16).fill(null); cs.slice(0, n).forEach((c, i) => { gridData[i] = c; }); sizeCanvas(); drawGrid(); }, n, COLORS);
+      await setN(5); await settleNote();
+      if ((await noteOf(page)).shown) fail('/en/pattern/: 5색인데 안내가 보여요');
+      await setN(6); await settleNote();
+      let s = await noteOf(page);
+      if (!s.shown || s.text !== 'This pattern uses 6 colors. More colors mean more yarn changes, which can make it harder to crochet.') fail(`/en/pattern/: 6색 영어 안내가 달라요 (${s.shown}, ${s.text})`);
+      await setN(8); await settleNote();
+      s = await noteOf(page);
+      if (!s.text.startsWith('This pattern uses 8 colors.')) fail(`/en/pattern/: 영어 안내의 개수가 8이 아니에요 (${s.text})`);
+      if (/[가-힣]/.test(s.text)) fail('/en/pattern/: 영어 안내에 한국어가 섞였어요');
+      await setN(3); await settleNote();
+      if ((await noteOf(page)).shown) fail('/en/pattern/: 색이 3개로 줄었는데 안내가 안 사라졌어요');
+      t.errors.forEach(e => fail(`/en/pattern/: ${e}`));
+    } finally { await t.close(); }
+  }
+  // 4) 휴대폰 폭(320·360·390): 안내가 넘치거나 잘리지 않음 (어두운 화면, 한국어·영어)
+  for (const [p, w, dark] of [['/pattern/', 320, true], ['/pattern/', 360, true], ['/en/pattern/', 390, true], ['/pattern/', 390, false]]) {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    try {
+      await page.setViewport({ width: w, height: 740, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+      await page.evaluateOnNewDocument(d => { try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); if (d) localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {} }, dark);
+      await page.evaluateOnNewDocument(SKIP_START);
+      await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
+      await page.evaluate(cs => { rows = 3; cols = 8; gridData = new Array(24).fill(null); cs.forEach((c, i) => { gridData[i] = c; }); sizeCanvas(); drawGrid(); }, COLORS);
+      await settleNote();
+      const r = await page.evaluate(() => {
+        const e = document.getElementById('colorNote'), b = document.getElementById('colorNoteClose'), tx = document.getElementById('colorNoteText'), vw = document.documentElement.clientWidth;
+        const er = e.getBoundingClientRect(), br = b.getBoundingClientRect(), tr = tx.getBoundingClientRect();
+        return { shown: e.getClientRects().length > 0, inView: er.left >= -0.5 && er.right <= vw + 0.5, btnIn: br.left >= 0 && br.right <= vw && br.width > 0, textIn: tr.right <= br.left + 1, clipped: tx.scrollWidth > tx.clientWidth + 1, over: document.documentElement.scrollWidth - vw, h: Math.round(er.height), theme: document.documentElement.getAttribute('data-theme') };
+      });
+      const label = `${p} ${w}px${dark ? ' 어두운 화면' : ''}`;
+      if (!r.shown) { fail(`${label}: 8색인데 안내가 보이지 않아요`); continue; }
+      if (dark && r.theme !== 'dark') fail(`${label}: 어두운 화면이 적용되지 않았어요 (${r.theme})`);
+      if (!r.inView || !r.btnIn || !r.textIn || r.clipped) fail(`${label}: 안내가 화면 밖으로 넘치거나 글자가 잘려요 (${JSON.stringify(r)})`);
+      if (r.over > 1) fail(`${label}: 안내 때문에 가로로 ${r.over}px 넘쳐요`);
+      errors.forEach(e => fail(`${label}: ${e}`));
+    } finally { await ctx.close(); }
+  }
+  note('칠하기·되돌리기·다시하기·닫기·글자 넣기·파일 열기, 방안뜨기 탭, 영어, 휴대폰 4곳');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();
