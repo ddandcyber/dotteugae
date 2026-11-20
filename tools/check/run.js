@@ -686,13 +686,17 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
       await expect(33, '처음 열었을 때 (빨강·파랑 = 막힌 칸)');
       const ui = await page.evaluate(() => {
         const vis = id => { const e = document.getElementById(id); return !!e && e.getClientRects().length > 0; };
+        const rowParts = li => { if (!li) return null; const q = c => li.querySelector(c), cs = e => getComputedStyle(e);
+          return { n: q('.fr-n').textContent, dir: q('.fr-dir').textContent, runs: q('.fr-runs').textContent, tail: q('.fr-tail').textContent,
+            nPx: parseFloat(cs(q('.fr-n')).fontSize), nWeight: parseInt(cs(q('.fr-n')).fontWeight, 10), rPx: parseFloat(cs(q('.fr-runs')).fontSize), dPx: parseFloat(cs(q('.fr-dir')).fontSize) }; };
         return {
           colors: document.querySelectorAll('#filetColors input[type=checkbox]').length,
           note: !document.getElementById('filetColorNote').hidden,
           guide: [...document.querySelectorAll('#filetGuideList li')].map(l => l.textContent),
           startLines: document.querySelectorAll('#filetStart p').length,
-          row9: (document.querySelector('#filetRows li:nth-child(9)') || {}).textContent,
-          row1: (document.querySelector('#filetRows li:nth-child(1)') || {}).textContent,
+          row9: rowParts(document.querySelector('#filetRows li:nth-child(9)')),
+          row1: rowParts(document.querySelector('#filetRows li:nth-child(1)')),
+          row2: rowParts(document.querySelector('#filetRows li:nth-child(2)')),
           rowLines: document.querySelectorAll('#filetRows li').length,
           ribbonOn: ['filetVerSel', 'filetInvertBtn', 'filetSaveImgBtn'].every(vis),
           editOff: ['toolPaintBtn', 'undoBtn', 'clearGridBtn', 'rot90Btn'].every(id => !vis(id)) && !document.querySelector('.inspector').getClientRects().length,
@@ -706,8 +710,11 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
       if (JSON.stringify(ui.guide) !== JSON.stringify(wantGuide)) fail(`보는 법 카드가 짧은 3줄이 아니에요 (${JSON.stringify(ui.guide)})`);
       if (ui.startLines !== 2) fail(`시작 안내가 두 줄이어야 하는데 ${ui.startLines}줄이에요`);
       if (ui.rowLines !== 12) fail(`줄별 설명이 한 단에 한 줄(12줄)이어야 하는데 ${ui.rowLines}줄이에요`);
-      if (ui.row9 !== '9단 ← 빈 7 · 막 2 · 빈 1 (세우는 사슬 5)') fail(`줄별 설명 9단이 다르게 나와요 (${ui.row9})`);
-      if (ui.row1 !== '1단 ← 막 1 · 빈 9 (시작 사슬 33코)') fail(`줄별 설명 1단이 다르게 나와요 (${ui.row1})`);
+      const rp = r => r && [r.n, r.dir, r.runs, r.tail].join(' | ');
+      if (rp(ui.row9) !== '9단 | ← 오른쪽에서 왼쪽 | 빈 7 · 막 2 · 빈 1 | (세우는 사슬 5)') fail(`줄별 설명 9단이 다르게 나와요 (${rp(ui.row9)})`);
+      if (rp(ui.row1) !== '1단 | ← 오른쪽에서 왼쪽 | 막 1 · 빈 9 | (시작 사슬 33코)') fail(`줄별 설명 1단이 다르게 나와요 (${rp(ui.row1)})`);
+      if (!ui.row2 || ui.row2.dir !== '→ 왼쪽에서 오른쪽') fail(`줄별 설명 2단의 방향이 → 왼쪽에서 오른쪽이 아니에요 (${ui.row2 && ui.row2.dir})`);
+      if (ui.row9 && !(ui.row9.nPx >= ui.row9.rPx * 1.4 && ui.row9.nWeight >= 700 && ui.row9.dPx < ui.row9.rPx)) fail(`줄별 설명의 단 번호가 본문보다 크고 굵지 않아요 (번호 ${ui.row9.nPx}px/${ui.row9.nWeight}, 본문 ${ui.row9.rPx}px, 방향 ${ui.row9.dPx}px)`);
       if (!ui.ribbonOn) fail('방안뜨기 탭인데 작업창에 버전·뒤집기·저장이 보이지 않아요');
       if (!ui.editOff) fail('방안뜨기 탭인데 칠하기·되돌리기 같은 편집 도구나 오른쪽 패널이 아직 보여요');
       if (!ui.canvasOff) fail('방안뜨기 탭인데 도안 캔버스가 가려지지 않았어요');
@@ -773,6 +780,23 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
         const buf = fs.readFileSync(path.join(dl, file));
         if (buf.length < 100 || buf.readUInt32BE(0) !== 0x89504E47) fail(`내려받은 방안뜨기 도안 파일이 PNG가 아니에요 (${file})`);
         if (!/^방안뜨기도안_10x12_\d{8}\.png$/.test(file)) fail(`방안뜨기 도안 파일 이름 형식이 달라요 (${file})`);
+        // 인쇄용: 바탕이 흰색, 맨 위에 글자(시작 안내)가 있고, 아래에 범례가 있음
+        const png = await page.evaluate(async b64 => {
+          const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
+          const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
+          const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+          const w = c.width, h = c.height, at = (a, b) => [...x.getImageData(a, b, 1, 1).data].slice(0, 3);
+          const darkIn = (y0, hh) => { const d = x.getImageData(0, y0, w, hh).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] < 80 && d[i + 1] < 80 && d[i + 2] < 80) n++; return n; };
+          return { w, h, corners: [at(1, 1), at(w - 2, 1), at(1, h - 2), at(w - 2, h - 2)], darkTop: darkIn(0, Math.min(h, 170)), darkBottom: darkIn(Math.max(0, h - 150), Math.min(h, 150)), meta: filetLastImage };
+        }, buf.toString('base64'));
+        if (!png.corners.every(c => c.join() === '255,255,255')) fail(`저장한 이미지의 바탕이 흰색이 아니에요 (네 모서리 ${JSON.stringify(png.corners)})`);
+        if (png.darkTop < 200) fail(`저장한 이미지 맨 위에 시작 안내 글자가 보이지 않아요 (검은 점 ${png.darkTop}개)`);
+        if (png.darkBottom < 80) fail(`저장한 이미지 아래쪽에 범례가 보이지 않아요 (검은 점 ${png.darkBottom}개)`);
+        const head = (png.meta && png.meta.head || []).join(' / ');
+        if (!png.meta || png.meta.head[0] !== '방안뜨기 도안' || !/가로 10칸 × 세로 12단/.test(head) || !/방식 c: 사슬 2 \+ 두길긴뜨기/.test(head)) fail(`저장 이미지 제목·크기·방식이 맞지 않아요 (${head})`);
+        if (!/1단 시작: 사슬 34코를 뜨고, 바늘에서 5번째 사슬에 첫 두길긴뜨기/.test(head)) fail(`저장 이미지에 시작 안내가 없거나 계산과 달라요 (${head})`);
+        if (!png.meta || !png.meta.legend.includes('기호 설명') || !png.meta.legend.includes('두길긴뜨기') || !png.meta.legend.includes('사슬')) fail(`저장 이미지 범례가 맞지 않아요 (${png.meta && png.meta.legend.join(' / ')})`);
+        if (png.meta && png.meta.px < 18) fail(`저장 이미지의 줄 번호가 너무 작아요 (${png.meta.px}px)`);
       }
       // 보는 법 카드: 오늘은 보지 않기 → Esc로 도안 탭 → 다시 방안뜨기 탭이면 접혀 있음 → "보는 법"으로 펼침
       await clickId(page, 'filetGuideToday');
@@ -833,6 +857,20 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
           text: document.getElementById('filetView').innerText + '\n' + [...document.querySelectorAll('.view-tabs')].map(e => e.innerText).join('\n') };
       });
       const label = `${p} ${w}px${dark ? ' 어두운 화면' : ''}`;
+      {
+        const pr = await page.evaluate(() => new Promise(res => makeFiletImage(async blob => {
+          const bmp = await createImageBitmap(blob), c = document.createElement('canvas'); c.width = bmp.width; c.height = bmp.height;
+          const x = c.getContext('2d'); x.drawImage(bmp, 0, 0); const at = (a, b) => [...x.getImageData(a, b, 1, 1).data].slice(0, 3);
+          res({ corners: [at(1, 1), at(c.width - 2, 1), at(1, c.height - 2), at(c.width - 2, c.height - 2)], meta: filetLastImage, theme: document.documentElement.getAttribute('data-theme') });
+        })));
+        if (dark && pr.theme !== 'dark') fail(`${label}: 어두운 화면 설정이 적용되지 않았어요 (${pr.theme})`);
+        if (!pr.corners.every(c => c.join() === '255,255,255')) fail(`${label}: 저장 이미지 바탕이 흰색이 아니에요 (화면 모드와 상관없이 흰색이어야 해요: ${JSON.stringify(pr.corners)})`);
+        const hd = pr.meta.head.join(' / ');
+        if (p.startsWith('/en/')) {
+          if (!/Crochet|Filet chart/.test(pr.meta.head[0]) || !/10 squares × 12 rows/.test(hd) || !/Style b: Ch 2 \+ dc/.test(hd) || !/Row 1: Chain 35, then work the first double crochet \(dc\) in the 8th chain/.test(hd)) fail(`${label}: 저장 이미지 머리말이 영어로 나오지 않아요 (${hd})`);
+          if (!pr.meta.legend.includes('Symbols') || !pr.meta.legend.some(l => /chain \(ch\)/.test(l)) || (pr.meta.head.concat(pr.meta.legend).join(' ').match(/[가-힣]+/g) || []).length) fail(`${label}: 저장 이미지 범례가 영어가 아니거나 한국어가 섞였어요 (${pr.meta.legend.join(' / ')})`);
+        } else if (pr.meta.head[0] !== '방안뜨기 도안' || !/1단 시작: 사슬 35코/.test(hd) || !/방식 b: 사슬 2 \+ 한길긴뜨기/.test(hd)) fail(`${label}: 저장 이미지 머리말이 맞지 않아요 (${hd})`);
+      }
       if (!r.open) { fail(`${label}: 방안뜨기 탭이 열리지 않아요`); continue; }
       const lay = await page.evaluate(filetLayout);
       if (!lay.stacked) fail(`${label}: 좁은 화면인데 미리보기 격자와 기호도가 위아래로 놓이지 않았어요`);
@@ -848,7 +886,7 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
         const en = () => page.evaluate(() => ({
           legend: document.getElementById('filetLegend').innerText, start: document.getElementById('filetStart').innerText,
           guide: [...document.querySelectorAll('#filetGuideList li')].map(l => l.textContent),
-          row9: (document.querySelector('#filetRows li:nth-child(9)') || {}).textContent,
+          row9: (li => li ? ['.fr-n', '.fr-dir', '.fr-runs', '.fr-tail'].map(c => li.querySelector(c).textContent).join(' | ') : null)(document.querySelector('#filetRows li:nth-child(9)')),
           all: document.getElementById('filetView').innerText + '\n' + [...document.querySelectorAll('.filet-tools')].map(e => e.innerText).join('\n') }));
         let e = await en();
         if (!/Foundation chain 35/.test(await page.evaluate(() => document.getElementById('filetChart').textContent))) fail(`${label}: 기호도 맨 아래에 "Foundation chain 35" 글자가 없어요`);
@@ -856,7 +894,7 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
         if (!e.legend.includes('counts as first dc')) fail(`${label}: 한길긴뜨기 버전 기호 설명에 "counts as first dc"가 없어요`);
         if (!e.start.includes('35 ch = turning chain (3 ch) on the right + 2 ch for the first space + 30 ch along the bottom')) fail(`${label}: 시작 사슬 설명이 새 문구가 아니에요 (${e.start.split('\n')[1]})`);
         if (e.guide.length !== 3 || e.guide[0] !== 'Black = block (3 dc), white = space (ch 2 + 1 dc)' || e.guide[1] !== 'Odd rows ←, even rows →' || e.guide[2] !== 'Turning chain: 3 if the next row starts with a block, 5 if with a space') fail(`${label}: 보는 법 영어가 달라요 (${JSON.stringify(e.guide)})`);
-        if (e.row9 !== 'Row 9 ← sp 7 · bl 2 · sp 1 (turn ch 5)') fail(`${label}: 줄별 설명 영어가 달라요 (${e.row9})`);
+        if (e.row9 !== 'Row 9 | ← right to left | sp 7 · bl 2 · sp 1 | (turn ch 5)') fail(`${label}: 줄별 설명 영어가 달라요 (${e.row9})`);
         if (/\bposts?\b|upright/i.test(e.all)) fail(`${label}: 방안뜨기 탭 영어에 "post"나 "upright"가 남아 있어요`);
         await page.select('#filetVerSel', 'c'); await sleep(200);
         e = await en();

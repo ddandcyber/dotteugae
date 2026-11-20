@@ -614,8 +614,13 @@
   .filet-legend{ display:flex; flex-wrap:wrap; gap:6px 16px; margin-bottom:8px; font-size:var(--fs); color:var(--ink-soft); }
   .filet-legend span{ display:inline-flex; align-items:center; gap:6px; }
   .filet-legend svg{ width:24px; height:30px; background:#FFFFFF; border-radius:var(--r-sm); border:1px solid var(--line); flex-shrink:0; }
-  .filet-rows{ margin:0; padding:0; list-style:none; font-size:var(--fs); line-height:1.4; font-family:var(--mono); }
-  .filet-rows li{ padding:4px 0; border-top:1px solid var(--line); color:var(--ink); overflow-wrap:anywhere; }
+  /* 줄별 설명: 단 번호는 크고 굵게, 방향은 번호 옆 작은 글씨, 한 줄 설명은 그대로. 좁은 화면에서는 번호·방향 아래 줄로 설명이 내려감 */
+  .filet-rows{ margin:0; padding:0; list-style:none; font-size:var(--fs); line-height:1.4; }
+  .filet-rows li{ display:flex; flex-wrap:wrap; align-items:baseline; column-gap:var(--s2); row-gap:2px; padding:var(--s1) 0; border-top:1px solid var(--line); color:var(--ink); overflow-wrap:anywhere; }
+  .fr-n{ font-family:var(--display); font-size:calc(var(--fs-xl) * 1.25); font-weight:800; line-height:1.2; color:var(--ink); }
+  .fr-dir{ font-size:var(--fs-xs); font-weight:600; color:var(--ink-faint); white-space:nowrap; }
+  .fr-runs, .fr-tail{ font-family:var(--mono); }
+  .fr-tail{ color:var(--ink-soft); }
   @media (max-width: 899px){
     .app.filet-mode .stage{ height:72vh; min-height:420px; }
     .filet-start p{ font-size:var(--fs-lg); }
