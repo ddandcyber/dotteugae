@@ -882,7 +882,18 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
       const cards = await Promise.all(['#startBlank', '#startText', '#startExample'].map(s => vis(page, s)));
       if (!cards.every(Boolean)) fail(`시작 화면의 카드 세 개가 다 보이지 않아요 (${cards.join(',')})`);
       const textCard = await page.evaluate(() => document.querySelector('#startText .start-t span').textContent);
-      if (textCard !== '문구를 쓰면 바로 도안이 돼요. 방안뜨기로도 바꿀 수 있어요.') fail(`"글자로 시작" 카드 설명이 새 문구가 아니에요 (${textCard})`);
+      const ord = await page.evaluate(() => {
+        const ids = [...document.querySelectorAll('.start-choices > .start-card')].map(e => e.id);
+        const r = ids.map(id => document.getElementById(id).getBoundingClientRect().left);
+        const t = document.getElementById('startText'), b = t.querySelector('.start-badge'), tr = t.getBoundingClientRect(), br = b ? b.getBoundingClientRect() : null;
+        return { ids, leftToRight: r[0] < r[1] && r[1] < r[2], main: t.classList.contains('main') && !document.getElementById('startBlank').classList.contains('main'),
+          badge: b ? b.textContent.trim() : null, badgeIn: !!br && br.left >= tr.left && br.right <= tr.right && br.top >= tr.top, blank: document.querySelector('#startBlank .start-t span').textContent };
+      });
+      if (ord.ids.join() !== 'startText,startBlank,startExample' || !ord.leftToRight) fail(`시작 화면 카드 순서가 "글자로 시작 → 빈 격자로 시작 → 예시 도안 열기"가 아니에요 (${ord.ids.join(', ')})`);
+      if (!ord.main) fail('"글자로 시작" 카드만 강조되어 있어야 해요');
+      if (ord.badge !== '추천' || !ord.badgeIn) fail(`"글자로 시작" 카드에 "추천" 뱃지가 카드 안에 없어요 (${ord.badge})`);
+      if (ord.blank !== '칸을 하나씩 칠해서 직접 그려요.') fail(`"빈 격자로 시작" 카드 설명이 새 문구가 아니에요 (${ord.blank})`);
+      if (textCard !== '이름이나 문구를 넣으면 바로 도안이 돼요. 방안뜨기(filet)로도 바꿀 수 있어요.') fail(`"글자로 시작" 카드 설명이 새 문구가 아니에요 (${textCard})`);
       if (await vis(page, '.ribbon') || await vis(page, '#gridCanvas')) fail('시작 화면인데 작업창이나 격자가 함께 보여요');
       if (!await vis(page, '#langBtn') || !await vis(page, '#themeBtn') || !(await vis(page, '.tool-nav') || await vis(page, '.tool-menu'))) fail('시작 화면에서 맨 위 메뉴·EN·화면 모드 버튼이 안 보여요');
       const HIDE = ['saveFileBtn', 'undoBtn', 'redoBtn', 'saveImgBtn', 'shareImgBtn'];
@@ -932,7 +943,8 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
       if (!await isStart(page)) { fail(`${p}: 빈 도안인데 시작 화면이 보이지 않아요`); continue; }
       if (p.startsWith('/en/')) {
         const en = await page.evaluate(() => ({ title: document.getElementById('startTitle').textContent, text: document.getElementById('startScreen').innerText }));
-        if (!en.text.includes('Type a phrase and it becomes a chart. You can switch it to filet, too.')) fail(`${p}: "Start with text" 카드 설명이 새 영어 문구가 아니에요`);
+        if (!en.text.includes('Recommended') || !en.text.includes('Paint the grid square by square.')) fail(`${p}: 영어 시작 화면의 뱃지나 "Start with a blank grid" 설명이 새 문구가 아니에요`);
+        if (!en.text.includes('Type a name or phrase and it becomes a chart right away. You can switch it to filet, too.')) fail(`${p}: "Start with text" 카드 설명이 새 영어 문구가 아니에요`);
         if (en.title !== 'How would you like to start?') fail(`${p}: 시작 화면 제목이 영어가 아니에요 (${en.title})`);
         const ko = en.text.match(/[가-힣]+/g);
         if (ko) fail(`${p}: 시작 화면에 한국어가 남아 있어요 (${[...new Set(ko)].slice(0, 5).join(', ')})`);
@@ -975,12 +987,14 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
     const t = await openPage('/pattern/', { keepStart: true, width: 360, height: 740, mobile: true });
     try {
       const r = await t.page.evaluate(() => {
-        const rs = ['startBlank', 'startText', 'startExample'].map(id => document.getElementById(id).getBoundingClientRect());
+        const rs = ['startText', 'startBlank', 'startExample'].map(id => document.getElementById(id).getBoundingClientRect());
+        const bd = document.querySelector('#startText .start-badge').getBoundingClientRect(), tt = document.querySelector('#startText .start-t').getBoundingClientRect();
         const v = id => { const e = document.getElementById(id); return !!e && e.getClientRects().length > 0; };
-        return { hid: ['saveFileBtn', 'undoBtn', 'redoBtn', 'saveImgBtn', 'shareImgBtn'].filter(v), open: v('openFileBtn'), theme: v('themeBtn'), stacked: rs[1].top >= rs[0].bottom - 1 && rs[2].top >= rs[1].bottom - 1 && Math.abs(rs[0].left - rs[2].left) < 2, over: document.documentElement.scrollWidth - document.documentElement.clientWidth, lang: document.getElementById('langBtn').getClientRects().length > 0 };
+        return { badgeOk: bd.right <= rs[0].right && bd.left >= rs[0].left && bd.top >= rs[0].top && (bd.bottom <= tt.top || bd.left >= tt.right), hid: ['saveFileBtn', 'undoBtn', 'redoBtn', 'saveImgBtn', 'shareImgBtn'].filter(v), open: v('openFileBtn'), theme: v('themeBtn'), stacked: rs[1].top >= rs[0].bottom - 1 && rs[2].top >= rs[1].bottom - 1 && Math.abs(rs[0].left - rs[2].left) < 2, over: document.documentElement.scrollWidth - document.documentElement.clientWidth, lang: document.getElementById('langBtn').getClientRects().length > 0 };
       });
       if (!await isStart(t.page)) fail('360px: 빈 도안인데 시작 화면이 보이지 않아요');
-      if (!r.stacked) fail('360px: 시작 화면 카드가 세로로 쌓이지 않았어요');
+      if (!r.stacked) fail('360px: 시작 화면 카드가 "글자로 시작"부터 세로로 쌓이지 않았어요');
+      if (!r.badgeOk) fail('360px: "추천" 뱃지가 카드 밖으로 넘치거나 글자와 겹쳐요');
       if (r.over > 1) fail(`360px: 시작 화면이 옆으로 ${r.over}px 넘쳐요`);
       if (!r.lang) fail('360px: 시작 화면에서 EN 버튼이 안 보여요');
       if (r.hid.length) fail(`360px: 시작 화면인데 맨 위 막대에 ${r.hid.join(', ')}가 보여요`);
