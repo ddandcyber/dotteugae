@@ -1621,6 +1621,142 @@ test('미리보기 글자 막대: 영어·한국어, 320·360·390px 라이트·
   note('글자 막대 한·영 × 320·360·390px × 라이트·다크');
 });
 
+test('소개 페이지 가로 넘침: 홈·영어 홈·예시·가이드·소개·개인정보·폰트 출처·코수 세기, 320·360·390·768·1440px 라이트·다크', async (fail, note) => {
+  const PAGES = ['/', '/en/', '/examples/', '/guides/', '/guides/reading-charts/', '/guides/lettering-size/', '/about/', '/privacy/', '/credits/', '/counter/'];
+  const WIDTHS = [320, 360, 390, 768, 1440];
+  const openSite = async (p, w, scheme, mobile, extra) => {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    await page.setViewport({ width: w, height: 900, isMobile: !!mobile, hasTouch: !!mobile, deviceScaleFactor: 1 });
+    await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }].concat(extra || []));
+    await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 });
+    await sleep(150);
+    return { ctx, page, errors };
+  };
+  // 1) 모든 페이지 × 5가지 폭 × 라이트·다크: 가로 넘침 없음
+  for (const scheme of ['light', 'dark']) for (const p of PAGES) {
+    const { ctx, page, errors } = await openSite(p, 1440, scheme, false);
+    try {
+      for (const w of WIDTHS) {
+        await page.setViewport({ width: w, height: 900, deviceScaleFactor: 1 }); await sleep(80);
+        const r = await page.evaluate(() => { const vw = document.documentElement.clientWidth; return { over: document.documentElement.scrollWidth - vw, bad: [...document.querySelectorAll('body *')].filter(e => e.getClientRects().length && e.getBoundingClientRect().right > vw + 1).map(e => (e.id || e.className || e.tagName) + ':' + Math.round(e.getBoundingClientRect().right - vw)).slice(0, 3) }; });
+        if (r.over > 1) fail(p + ' ' + w + 'px ' + (scheme === 'dark' ? '어두운' : '밝은') + ' 화면: 가로로 ' + r.over + 'px 넘쳐요 (' + r.bad.join(', ') + ')');
+      }
+      errors.forEach(e => fail(p + ': ' + e));
+    } finally { await ctx.close(); }
+  }
+  note('소개 페이지 ' + PAGES.length + '개 × 5가지 폭 × 라이트·다크 넘침 없음');
+});
+
+test('소개 페이지 디자인 값: 제목이 낱말 중간에서 안 끊김, 타이포·여백·카드·버튼 값, 호버는 마우스에서만(터치·움직임 줄이기에서는 없음)', async (fail, note) => {
+  const PAGES = ['/', '/en/', '/examples/', '/guides/', '/guides/reading-charts/', '/guides/lettering-size/', '/about/', '/privacy/', '/credits/', '/counter/'];
+  const WIDTHS = [320, 360, 390, 768, 1440];
+  const openSite = async (p, w, scheme, mobile, extra) => {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    await page.setViewport({ width: w, height: 900, isMobile: !!mobile, hasTouch: !!mobile, deviceScaleFactor: 1 });
+    await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }].concat(extra || []));
+    await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 });
+    await sleep(150);
+    return { ctx, page, errors };
+  };
+  // 2) 홈(한·영): 제목이 낱말 중간에서 안 끊김 + 값 확인
+  for (const p of ['/', '/en/']) {
+    const { ctx, page } = await openSite(p, 1440, 'light', false);
+    try {
+      for (const w of WIDTHS) {
+        await page.setViewport({ width: w, height: 900, deviceScaleFactor: 1 }); await sleep(100);
+        const r = await page.evaluate(() => {
+          const out = [];
+          const breaks = el => { // 줄이 바뀌는 자리가 낱말 중간이면 목록에 넣음
+            const bad = []; const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT); let prevTop = null, prevCh = null;
+            while (walker.nextNode()) { const n = walker.currentNode; for (let i = 0; i < n.nodeValue.length; i++) { const ch = n.nodeValue[i]; if (/\s/.test(ch)) { prevCh = ch; continue; } const rg = document.createRange(); rg.setStart(n, i); rg.setEnd(n, i + 1); const t = Math.round(rg.getBoundingClientRect().top); if (prevTop !== null && t > prevTop + 5 && prevCh && !/\s/.test(prevCh)) bad.push(n.nodeValue.slice(Math.max(0, i - 3), i + 3)); prevTop = t; prevCh = ch; } }
+            return bad;
+          };
+          document.querySelectorAll('h1, h2').forEach(h => { const b = breaks(h); if (b.length) out.push(h.tagName + ':' + h.textContent.trim().slice(0, 20) + ' → ' + b.join('|')); });
+          return out;
+        });
+        if (r.length) fail(p + ' ' + w + 'px: 제목이 낱말 중간에서 끊겨요 (' + r.join(', ') + ')');
+      }
+    } finally { await ctx.close(); }
+  }
+  // 3) 값 확인 (PC 1440px, 휴대폰 390px)
+  for (const [w, mobile] of [[1440, false], [390, true]]) {
+    const { ctx, page } = await openSite('/', w, 'light', mobile);
+    try {
+      const v = await page.evaluate(() => {
+        const cs = (sel) => getComputedStyle(document.querySelector(sel)), px = x => parseFloat(x);
+        const wrap = document.querySelector('.wrap'), main = cs('.site-main'), hero = cs('.hero'), h1 = cs('.hero h1'), lead = cs('.hero .lead'), h2 = cs('main h2'), card = cs('.card'), btn = cs('.btn');
+        return { wrapMax: cs('.wrap').maxWidth, mainTop: px(main.paddingTop), mainBottom: px(main.paddingBottom), cols: hero.gridTemplateColumns.split(' ').length, gap: px(hero.columnGap), h1Size: px(h1.fontSize), h1Lh: px(h1.lineHeight) / px(h1.fontSize), h1LS: px(h1.letterSpacing) / px(h1.fontSize), h1Weight: parseInt(h1.fontWeight, 10), h1Break: h1.wordBreak,
+          leadSize: px(lead.fontSize), leadLh: px(lead.lineHeight) / px(lead.fontSize), leadMax: px(lead.maxWidth), h2Size: px(h2.fontSize), h2Break: h2.wordBreak, h2LS: px(h2.letterSpacing) / px(h2.fontSize), radius: px(card.borderTopLeftRadius),
+          btnH: document.querySelector('.btn').getBoundingClientRect().height, btnPad: px(btn.paddingLeft), btnR: px(btn.borderTopLeftRadius), btnW: parseInt(btn.fontWeight, 10), wrapW: Math.round(wrap.getBoundingClientRect().width) };
+      });
+      const L = w + 'px: ';
+      if (w === 1440) {
+        if (v.wrapMax !== '1120px' || v.wrapW > 1120) fail(L + '컨테이너 최대 폭이 1120px이 아니에요 (' + v.wrapMax + ', ' + v.wrapW + ')');
+        if (v.mainTop !== 56 || v.mainBottom !== 88) fail(L + '본문 위아래 여백이 56/88px이 아니에요 (' + v.mainTop + '/' + v.mainBottom + ')');
+        if (v.cols !== 2 || v.gap < 64 || v.gap > 80) fail(L + '히어로가 2열에 열 간격 64~80px이어야 해요 (' + v.cols + '열, ' + v.gap + 'px)');
+        if (Math.round(v.h1Size) !== 60) fail(L + '히어로 제목 크기가 60px이 아니에요 (' + v.h1Size + ')');
+        if (Math.round(v.h2Size) !== 40) fail(L + '섹션 제목 크기가 40px이 아니에요 (' + v.h2Size + ')');
+      } else {
+        if (v.mainTop !== 28 || v.mainBottom !== 44) fail(L + '휴대폰 본문 위아래 여백이 28/44px(절반)이 아니에요 (' + v.mainTop + '/' + v.mainBottom + ')');
+        if (v.cols !== 1) fail(L + '휴대폰에서 히어로가 1열이어야 해요 (' + v.cols + '열)');
+        if (Math.round(v.h1Size) !== 38) fail(L + '히어로 제목 최소 크기가 38px이 아니에요 (' + v.h1Size + ')');
+        if (Math.round(v.h2Size) !== 28) fail(L + '섹션 제목 최소 크기가 28px이 아니에요 (' + v.h2Size + ')');
+      }
+      if (Math.abs(v.h1Lh - 1.15) > 0.01 || Math.abs(v.h1LS + 0.02) > 0.003 || v.h1Weight < 600 || v.h1Weight > 700 || v.h1Break !== 'keep-all') fail(L + '히어로 제목 줄간격·자간·굵기·줄바꿈이 맞지 않아요 (' + JSON.stringify([v.h1Lh, v.h1LS, v.h1Weight, v.h1Break]) + ')');
+      if (v.leadSize !== 17 || Math.abs(v.leadLh - 1.75) > 0.01 || v.leadMax < 480 || v.leadMax > 520) fail(L + '히어로 설명 글(17px, 줄간격 1.75, 최대 폭 480~520px)이 맞지 않아요 (' + JSON.stringify([v.leadSize, v.leadLh, v.leadMax]) + ')');
+      if (v.h2Break !== 'keep-all' || Math.abs(v.h2LS + 0.02) > 0.003) fail(L + '섹션 제목 자간·줄바꿈이 맞지 않아요');
+      if (v.radius < 18 || v.radius > 20) fail(L + '카드 모서리가 18~20px이 아니에요 (' + v.radius + ')');
+      if (v.btnH < 48 || v.btnH > 50 || v.btnPad !== 24 || v.btnR !== 14 || v.btnW !== 600) fail(L + '버튼(높이 48~50, 좌우 24, 둥글기 14, 굵기 600)이 맞지 않아요 (' + JSON.stringify([v.btnH, v.btnPad, v.btnR, v.btnW]) + ')');
+    } finally { await ctx.close(); }
+  }
+  // 4) 호버: 마우스(PC)에서만 떠오름, 터치에서는 효과 없음, 움직임 줄이기에서는 색만 바뀜
+  const hoverInfo = async (page, sel) => {
+    const before = await page.evaluate(sel => { const e = document.querySelector(sel), c = getComputedStyle(e); return { b: c.borderTopColor, sh: c.boxShadow }; }, sel);
+    await page.hover(sel); await sleep(450);
+    const after = await page.evaluate(sel => { const e = document.querySelector(sel), c = getComputedStyle(e); const m = c.transform === 'none' ? 0 : parseFloat(c.transform.replace(/matrix\(|\)/g, '').split(',')[5]); return { ty: m, b: c.borderTopColor, sh: c.boxShadow }; }, sel);
+    return { before, after };
+  };
+  {
+    const { ctx, page } = await openSite('/', 1440, 'light', false);
+    try {
+      await page.evaluate(() => document.querySelector('.tool-card').scrollIntoView({ block: 'center' }));
+      const c = await hoverInfo(page, '.tool-card');
+      if (Math.abs(c.after.ty + 3) > 0.2) fail('PC: 도구 카드에 마우스를 올려도 3px 떠오르지 않아요 (' + c.after.ty + ')');
+      if (c.after.sh === c.before.sh || c.after.b === c.before.b) fail('PC: 카드 호버에 그림자·테두리색 변화가 없어요');
+      await page.mouse.move(5, 5); await sleep(300);
+      const b = await hoverInfo(page, '.hero .btn');
+      if (Math.abs(b.after.ty + 1) > 0.2) fail('PC: 버튼에 마우스를 올려도 1px 떠오르지 않아요 (' + b.after.ty + ')');
+    } finally { await ctx.close(); }
+  }
+  {
+    const { ctx, page } = await openSite('/', 390, 'light', true);
+    try {
+      await page.evaluate(() => document.querySelector('.tool-card').scrollIntoView({ block: 'center' }));
+      const c = await hoverInfo(page, '.tool-card');
+      if (c.after.ty !== 0) fail('휴대폰(터치): 카드에 호버 움직임이 생겨요 (' + c.after.ty + ')');
+      if (await page.evaluate(() => matchMedia('(hover: hover)').matches)) fail('휴대폰 모의 환경인데 호버가 가능한 장치로 인식돼요');
+    } finally { await ctx.close(); }
+  }
+  {
+    const { ctx, page } = await openSite('/', 1440, 'light', false, [{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+    try {
+      await page.evaluate(() => document.querySelector('.tool-card').scrollIntoView({ block: 'center' }));
+      const c = await hoverInfo(page, '.tool-card');
+      if (c.after.ty !== 0) fail('움직임 줄이기: 카드가 움직여요 (' + c.after.ty + ')');
+      if (c.after.b === c.before.b) fail('움직임 줄이기: 카드 호버에서 테두리 색은 바뀌어야 해요');
+      const b = await hoverInfo(page, '.hero .btn');
+      if (b.after.ty !== 0) fail('움직임 줄이기: 버튼이 움직여요 (' + b.after.ty + ')');
+    } finally { await ctx.close(); }
+  }
+  note('제목 어절, 타이포·여백·카드·버튼 값, 호버 3가지 환경');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();
