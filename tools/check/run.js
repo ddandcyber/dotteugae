@@ -1905,6 +1905,23 @@ test('소개 페이지 글꼴: 제목·로고 글꼴만 preload(모두 실제로
   }
 });
 
+test('소개 페이지 CSS 캐시 값: site.css를 쓰는 모든 HTML이 같은 ?v= 값', async (fail, note) => {
+  const walk = d => fs.readdirSync(d, { withFileTypes: true }).flatMap(e => e.name === 'node_modules' || e.name.startsWith('.') || e.name === 'tools' ? [] : e.isDirectory() ? walk(path.join(d, e.name)) : e.name.endsWith('.html') ? [path.join(d, e.name)] : []);
+  const vals = {};
+  for (const file of walk(ROOT)) {
+    const html = fs.readFileSync(file, 'utf8');
+    for (const m of html.matchAll(/href="([^"]*site\.css[^"]*)"/g)) {
+      const v = (m[1].match(/\?v=(\d+)$/) || [])[1];
+      const rel = path.relative(ROOT, file).split(path.sep).join('/');
+      if (!v) fail(rel + ': site.css에 ?v= 값이 없어요 (' + m[1] + ')');
+      else (vals[v] = vals[v] || []).push(rel);
+    }
+  }
+  const keys = Object.keys(vals);
+  if (keys.length > 1) fail('site.css ?v= 값이 페이지마다 달라요: ' + keys.map(k => 'v=' + k + ' (' + vals[k].length + '곳)').join(', '));
+  note('site.css ?v=' + keys.join(',') + ' · ' + Object.values(vals).flat().length + '개 페이지');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();
