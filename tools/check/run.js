@@ -1845,7 +1845,7 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
             if (g.shownH > 301) fail(L + name + ' 그림 높이가 300px을 넘어요 (' + Math.round(g.shownH) + ')');
           });
           const [a, h] = r.sImgs;
-          // 하트 기호도: 기호가 뭉개지지 않게 충분히 크게 (도안 20단이 이 높이 안에 들어감)
+          // 하트 기호도: 기호가 뭉개지지 않게 충분히 크게 (도안 12단이 이 높이 안에 들어감)
           if (h.shownH < (w === 1440 ? 280 : 200)) fail(L + '하트 기호도가 너무 작게 보여요 (높이 ' + Math.round(h.shownH) + 'px)');
           if (w === 1440 && (a.boxTop !== h.boxTop || a.boxH !== h.boxH)) fail(L + 'PC에서 두 카드 그림 칸의 위치·높이가 달라요 (' + a.boxTop + '/' + a.boxH + ', ' + h.boxTop + '/' + h.boxH + ')');
         }
@@ -1863,6 +1863,15 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
   const imgSize = fs.statSync(path.join(ROOT, 'assets/filet-heart.webp')).size;
   if (imgSize > 100 * 1024) fail('assets/filet-heart.webp가 100KB를 넘어요 (' + Math.round(imgSize / 1024) + 'KB)');
   if (fs.existsSync(path.join(ROOT, 'assets/filet-amour.webp'))) fail('더 이상 쓰지 않는 assets/filet-amour.webp가 남아 있어요');
+  // 하트 예시(방안뜨기 그림의 원본): 13코 × 12단, 흰 바탕 + 빨강 #FF0000, 예시 페이지 링크 = 도안 파일
+  const heart = JSON.parse(fs.readFileSync(path.join(ROOT, 'examples/img/heart-coaster.json'), 'utf8'));
+  if (heart.cols !== 13 || heart.rows !== 12 || heart.bg.toUpperCase() !== '#FFFFFF' || heart.colors.join() !== '#FF0000') fail('하트 예시 도안이 13×12, 흰 바탕 + #FF0000이 아니에요 (' + heart.cols + '×' + heart.rows + ', ' + heart.bg + ', ' + heart.colors.join(' ') + ')');
+  const exHtml = fs.readFileSync(path.join(ROOT, 'examples/index.html'), 'utf8');
+  const hCard = (exHtml.match(/<article class="card ex-card">(?:(?!<\/article>)[\s\S])*heart-coaster\.png[\s\S]*?<\/article>/) || [''])[0];
+  const hLink = (hCard.match(/#p=([A-Za-z0-9_-]+)/) || [])[1];
+  if (!hLink) fail('예시 페이지에서 하트 링크를 찾지 못했어요');
+  else if (diffCells(decodePattern(fromHash(hLink)).data, decodePattern(heart).data) || fromHash(hLink).cols !== 13 || fromHash(hLink).rows !== 12) fail('예시 페이지의 하트 링크가 heart-coaster.json과 달라요');
+  if (!/13코 × 12단 · 2색/.test(hCard) || /20코/.test(hCard)) fail('예시 페이지 하트 카드의 크기 표기가 13코 × 12단이 아니에요');
   note('한·영 × 1440·390·320px × 라이트·다크, 구조 ' + shapes['/'] + ', 방안뜨기 그림 ' + Math.round(imgSize / 1024) + 'KB');
 });
 
