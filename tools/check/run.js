@@ -1418,6 +1418,93 @@ test('버튼 툴팁에 단축키 표시: 한국어·영어·맥(⌘), 접근성 
   note('툴팁 ' + TIPS.length + '개 × 한·영, 맥 ⌘, 접근성 이름, Ctrl+Z/Y, 휴대폰 2곳');
 });
 
+test('폰트 목록 한글/영문 표시와 영문 전용 폰트 안내: coverage.json과 일치, 이름·값·순서 그대로, 영어, 휴대폰', async (fail, note) => {
+  // 폰트 파일 정보(coverage.json)에서 폰트마다 한글 글자(가~힣)가 몇 개 들어 있는지 셈
+  const cov = JSON.parse(fs.readFileSync(path.join(ROOT, 'assets', 'fonts', 'coverage.json'), 'utf8'));
+  const syllables = fam => {
+    const a = String(cov[fam]).split(',').map(Number); let end = 0, n = 0;
+    for (let i = 0; i + 1 < a.length; i += 2) { const s = end + a[i]; end = s + a[i + 1]; n += Math.max(0, Math.min(end, 0xD7A4) - Math.max(s, 0xAC00)); }
+    return n;
+  };
+  // HTML 파일에 적힌 원래 옵션 (값, 이름, 순서)
+  const htmlOpts = file => [...fs.readFileSync(path.join(ROOT, file), 'utf8').match(/<select class="font-select" id="fontSelect"[\s\S]*?<\/select>/)[0].matchAll(/<option value="([^"]+)"[^>]*>([^<]+)<\/option>/g)].map(m => ({ value: m[1], text: m[2].trim() }));
+  const koSrc = htmlOpts('pattern/index.html');
+  for (const [p, file, korean, latin] of [['/pattern/', 'pattern/index.html', '한글', '영문'], ['/en/pattern/', 'en/pattern/index.html', 'Korean', 'Latin only']]) {
+    const t = await openPage(p);
+    try {
+      const { page } = t;
+      const opts = await page.evaluate(() => [...document.querySelectorAll('#fontSelect option')].map(o => ({ value: o.value, text: o.textContent.trim(), label: o.label })));
+      const src = htmlOpts(file);
+      if (opts.length !== src.length || opts.length < 25) fail(p + ': 폰트 개수가 이상해요 (' + opts.length + ' / ' + src.length + ')');
+      opts.forEach((o, i) => {
+        const fam = o.value.split('|')[0];
+        if (!src[i] || o.value !== src[i].value) fail(p + ': ' + (i + 1) + '번째 폰트 값·순서가 바뀌었어요 (' + o.value + ')');
+        if (p === '/pattern/' && src[i] && o.text !== src[i].text) fail(p + ': 폰트 이름이 바뀌었어요 (' + o.text + ')');
+        const isLatin = syllables(fam) === 0;
+        const flagged = /영문 전용|Latin only/.test(o.text);
+        const wantTag = ' · ' + (isLatin ? latin : korean);
+        if (isLatin && !(flagged || o.label.endsWith(wantTag))) fail(p + ': 영문 전용 폰트인데 표시가 없어요 (' + fam + ': ' + o.label + ')');
+        if (!isLatin && (flagged || !o.label.endsWith(wantTag))) fail(p + ': 한글 지원 폰트인데 "' + wantTag.trim() + '" 표시가 없어요 (' + fam + ': ' + o.label + ')');
+        if (!isLatin && /영문 전용|Latin only/.test(o.label)) fail(p + ': 한글을 지원하는 폰트가 영문 전용으로 표시됐어요 (' + o.label + ')');
+      });
+      if (!opts.some(o => /영문 전용|Latin only/.test(o.label) || o.label.endsWith(' · ' + latin)) || !opts.some(o => o.label.endsWith(' · ' + korean))) fail(p + ': 한글/영문 표시가 둘 다 나오지 않아요');
+      // 영문 전용 폰트 + 한글 문구 → 짧은 안내. 영문만 쓰거나 한글 지원 폰트면 안내 없음
+      const NOTE = p === '/pattern/' ? '이 폰트는 영문만 지원해서 한글은 다른 글꼴로 나와요.' : 'This font only supports Latin letters, so Korean text is drawn in another font.';
+      await page.click('.insp-tab[data-pane="text"]'); await sleep(150);
+      const note1 = async (font, text) => {
+        await page.select('#fontSelect', font);
+        await page.click('#textInput', { clickCount: 3 });
+        await page.evaluate(() => { document.getElementById('textInput').value = ''; });
+        if (text) await page.type('#textInput', text);
+        await sleep(450);
+        return page.evaluate(() => { const e = document.getElementById('glyphNote'); return { shown: e.style.display !== 'none' && e.getClientRects().length > 0, text: e.textContent }; });
+      };
+      let g = await note1('LeckerliOne|v', '뜨개');
+      if (!g.shown || g.text !== NOTE) fail(p + ': 영문 전용 폰트로 한글을 쓰면 짧은 안내가 나와야 해요 (' + g.shown + ', ' + g.text + ')');
+      g = await note1('LeckerliOne|v', 'Hello');
+      if (g.shown && g.text === NOTE) fail(p + ': 영문만 썼는데 한글 안내가 나와요');
+      g = await note1('DungGeunMo|16', '뜨개');
+      if (g.shown && g.text === NOTE) fail(p + ': 한글 지원 폰트인데 영문 전용 안내가 나와요');
+      g = await note1('DepartureMono|11', 'ㄱㅏ');
+      if (!g.shown || g.text !== NOTE) fail(p + ': 자음·모음만 써도 영문 전용 폰트에서는 안내가 나와야 해요 (' + g.text + ')');
+      // 저장된 폰트 값은 표시 글자가 아니라 원래 값 그대로
+      await page.select('#fontSelect', 'PirataOne|v'); await settle();
+      const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('crochet-tool-v1') || '{}').font);
+      if (saved !== 'PirataOne|v') fail(p + ': 저장된 폰트 값이 원래 값이 아니에요 (' + saved + ')');
+      t.errors.forEach(e => fail(p + ': ' + e));
+    } finally { await t.close(); }
+  }
+  // 휴대폰 360px 어두운 화면: 글자 탭의 폰트 줄과 안내가 넘치거나 잘리지 않음
+  for (const [p, w] of [['/pattern/', 360], ['/en/pattern/', 390]]) {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    try {
+      await page.setViewport({ width: w, height: 740, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+      await page.evaluateOnNewDocument(() => { try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {} });
+      await page.evaluateOnNewDocument(SKIP_START);
+      await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
+      await page.click('.insp-tab[data-pane="text"]'); await sleep(200);
+      await page.select('#fontSelect', 'DancingScript|v');
+      // 글자를 입력하면 뜨는 미리보기 글자 막대(영어 390px에서 원래 50px 넘침, 이번 작업과 상관없음)를 피해, 입력칸 값만 넣고 안내를 직접 갱신
+      await page.evaluate(() => { document.getElementById('textInput').value = '뜨개'; return updateGlyphNote(); }); await sleep(500);
+      await page.evaluate(() => { if (stamp) cancelStamp(); }); await sleep(200);
+      const m = await page.evaluate(() => {
+        const vw = document.documentElement.clientWidth, s = document.getElementById('fontSelect').getBoundingClientRect(), n = document.getElementById('glyphNote'), nr = n.getBoundingClientRect();
+        return { selIn: s.left >= 0 && s.right <= vw, noteShown: n.getClientRects().length > 0, noteIn: nr.left >= 0 && nr.right <= vw, clipped: n.scrollWidth > n.clientWidth + 1, over: document.documentElement.scrollWidth - vw, theme: document.documentElement.getAttribute('data-theme') };
+      });
+      const label = p + ' ' + w + 'px 어두운 화면';
+      if (!m.noteShown) fail(label + ': 영문 전용 폰트 안내가 안 보여요');
+      if (m.theme !== 'dark') fail(label + ': 어두운 화면이 적용되지 않았어요');
+      if (!m.selIn || !m.noteIn || m.clipped) fail(label + ': 폰트 선택이나 안내가 화면 밖으로 넘치거나 잘려요 (' + JSON.stringify(m) + ')');
+      if (m.over > 1) fail(label + ': 가로로 ' + m.over + 'px 넘쳐요');
+      errors.forEach(e => fail(label + ': ' + e));
+    } finally { await ctx.close(); }
+  }
+  note('폰트 ' + koSrc.length + '개 × 한·영 표시, coverage.json과 일치, 안내 4가지, 저장 값, 휴대폰 2곳');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();
