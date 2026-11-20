@@ -1319,6 +1319,105 @@ test('최근에 쓴 색: 순서·중복·6개 한도·새로고침 유지·누�
   note('순서·중복·6개·새로고침·누르면 선택·지우면 빠짐, 저장소 오류, 영어, 휴대폰 3곳');
 });
 
+test('버튼 툴팁에 단축키 표시: 한국어·영어·맥(⌘), 접근성 이름은 그대로, 단축키가 실제로 동작, 휴대폰', async (fail, note) => {
+  // [버튼 id, 한국어 툴팁, 영어 툴팁, 접근성 이름(있으면, 단축키 없이 그대로) 한국어/영어]
+  const TIPS = [
+    ['openFileBtn', '도안 파일 열기 (Ctrl+O)', 'Open pattern file (Ctrl+O)'],
+    ['saveFileBtn', '도안 파일로 저장 (Ctrl+S)', 'Save pattern file (Ctrl+S)'],
+    ['undoBtn', '되돌리기 (Ctrl+Z)', 'Undo (Ctrl+Z)', '되돌리기', 'Undo'],
+    ['redoBtn', '다시하기 (Ctrl+Shift+Z / Ctrl+Y)', 'Redo (Ctrl+Shift+Z / Ctrl+Y)', '다시하기', 'Redo'],
+    ['copyBtn', '떠 있는 글자·장식·선택 영역 복사 (Ctrl+C)', 'Copy floating item (Ctrl+C)'],
+    ['pasteBtn', '붙여넣기 (Ctrl+V)', 'Paste (Ctrl+V)'],
+    ['stampCopyBtn', '복사 (Ctrl+C)', 'Copy (Ctrl+C)'],
+    ['stampDeleteBtn', '삭제 (Delete)', 'Delete (Del)'],
+    ['stampCancelBtn', '취소 (Esc)', 'Cancel (Esc)'],
+    ['stampPlaceBtn', '완료 (Enter)', 'Done (Enter)'],
+    ['nudgeL', '왼쪽으로 (←)', 'Left (←)', '왼쪽으로', 'Left'],
+    ['nudgeU', '위로 (↑)', 'Up (↑)', '위로', 'Up'],
+    ['nudgeD', '아래로 (↓)', 'Down (↓)', '아래로', 'Down'],
+    ['nudgeR', '오른쪽으로 (→)', 'Right (→)', '오른쪽으로', 'Right'],
+    ['knitMinusBtn', '아래 단 (↓)', 'Row below (↓)', '아래 단', 'Row below'],
+    ['knitPlusBtn', '위 단 (↑)', 'Row above (↑)', '위 단', 'Row above'],
+    ['knitExitBtn', '도안 수정으로 (Esc)', 'Back to editing (Esc)'],
+    ['hexCancel', '취소 (Esc)', 'Cancel (Esc)'],
+    ['hexOk', '추가 (Enter)', 'Add (Enter)'],
+    ['deCancel', '취소 (Esc)', 'Cancel (Esc)'],
+    ['askCancel', '취소 (Esc)', 'Cancel (Esc)'],
+    ['swatchCancel', '닫기 (Esc)', 'Close (Esc)'],
+    ['ribbonFoldBtn', '작업창 접기 (Ctrl+\\)', 'Collapse toolbar (Ctrl+\\)', '작업창 접기', 'Collapse toolbar'],
+  ];
+  const read = (page, ids) => page.evaluate(ids => ids.map(id => { const e = document.getElementById(id); return e ? { id, title: e.getAttribute('title'), aria: e.getAttribute('aria-label') } : { id, title: null, aria: null }; }), ids);
+  const ids = TIPS.map(r => r[0]);
+  // 1) 한국어·영어 (윈도우: Ctrl 표기)
+  for (const [p, li] of [['/pattern/', 1], ['/en/pattern/', 2]]) {
+    const t = await openPage(p);
+    try {
+      const { page } = t;
+      const got = await read(page, ids);
+      TIPS.forEach((row, i) => {
+        const g = got[i], want = row[li];
+        if (g.title !== want) fail(p + ': ' + row[0] + ' 툴팁이 "' + want + '"이어야 하는데 "' + g.title + '"이에요');
+        if (row[3] && g.aria !== row[li + 2]) fail(p + ': ' + row[0] + ' 접근성 이름이 단축키 없이 "' + row[li + 2] + '"여야 하는데 "' + g.aria + '"이에요');
+      });
+      const bad = await page.evaluate(() => [...document.querySelectorAll('[title]')].filter(e => e.title.includes('⌘')).map(e => e.id || e.className));
+      if (bad.length) fail(p + ': 맥이 아닌데 ⌘ 표기가 있어요 (' + bad.join(', ') + ')');
+      t.errors.forEach(e => fail(p + ': ' + e));
+    } finally { await t.close(); }
+  }
+  // 2) 맥: Ctrl 대신 ⌘ (navigator 정보로 판단)
+  {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    try {
+      await page.setViewport({ width: 1440, height: 900 });
+      await page.evaluateOnNewDocument(() => {
+        try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); } catch (e) {}
+        Object.defineProperty(navigator, 'userAgentData', { get: () => ({ platform: 'macOS' }) });
+        Object.defineProperty(navigator, 'platform', { get: () => 'MacIntel' });
+      });
+      await page.evaluateOnNewDocument(SKIP_START);
+      await page.goto(BASE + '/pattern/', { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(250);
+      const got = Object.fromEntries((await read(page, ids)).map(g => [g.id, g]));
+      const want = { undoBtn: '되돌리기 (⌘Z)', redoBtn: '다시하기 (⌘⇧Z / ⌘Y)', saveFileBtn: '도안 파일로 저장 (⌘S)', openFileBtn: '도안 파일 열기 (⌘O)', pasteBtn: '붙여넣기 (⌘V)', ribbonFoldBtn: '작업창 접기 (⌘\\)', stampCancelBtn: '취소 (Esc)' };
+      Object.keys(want).forEach(id => { if (got[id].title !== want[id]) fail('맥: ' + id + ' 툴팁이 "' + want[id] + '"이어야 하는데 "' + got[id].title + '"이에요'); });
+      if (got.undoBtn.aria !== '되돌리기') fail('맥: 접근성 이름에 단축키가 섞였어요 (' + got.undoBtn.aria + ')');
+      const left = await page.evaluate(() => [...document.querySelectorAll('[title]')].filter(e => /Ctrl\+/.test(e.title)).map(e => e.id || e.className));
+      if (left.length) fail('맥인데 Ctrl 표기가 남아 있어요 (' + left.join(', ') + ')');
+      errors.forEach(e => fail('맥: ' + e));
+    } finally { await ctx.close(); }
+  }
+  // 3) 단축키가 실제로 동작 (툴팁에 적은 것만): Ctrl+Z, Ctrl+Y
+  {
+    const t = await openPage('/pattern/');
+    try {
+      const { page } = t;
+      await pickColor(page, RED);
+      await clickCell(page, 0, 0);
+      if (!(await page.evaluate(() => !!gridData[0]))) fail('칠하기가 안 돼서 단축키를 확인하지 못했어요');
+      await page.keyboard.down('Control'); await page.keyboard.press('KeyZ'); await page.keyboard.up('Control'); await sleep(150);
+      if (await page.evaluate(() => !!gridData[0])) fail('툴팁에 적힌 Ctrl+Z가 되돌리기로 동작하지 않아요');
+      await page.keyboard.down('Control'); await page.keyboard.press('KeyY'); await page.keyboard.up('Control'); await sleep(150);
+      if (!(await page.evaluate(() => !!gridData[0]))) fail('툴팁에 적힌 Ctrl+Y가 다시하기로 동작하지 않아요');
+      t.errors.forEach(e => fail(e));
+    } finally { await t.close(); }
+  }
+  // 4) 휴대폰 폭: 툴팁 추가가 화면에 영향 없음 (한국어·영어)
+  for (const [p, w] of [['/pattern/', 360], ['/en/pattern/', 390]]) {
+    const t = await openPage(p, { width: w, height: 740, mobile: true });
+    try {
+      const { page } = t;
+      const got = await read(page, ['undoBtn', 'saveFileBtn']);
+      if (got[0].title !== (p.startsWith('/en/') ? 'Undo (Ctrl+Z)' : '되돌리기 (Ctrl+Z)')) fail(p + ' ' + w + 'px: 되돌리기 툴팁이 달라요 (' + got[0].title + ')');
+      const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      if (over > 1) fail(p + ' ' + w + 'px: 가로로 ' + over + 'px 넘쳐요');
+      t.errors.forEach(e => fail(p + ' ' + w + 'px: ' + e));
+    } finally { await t.close(); }
+  }
+  note('툴팁 ' + TIPS.length + '개 × 한·영, 맥 ⌘, 접근성 이름, Ctrl+Z/Y, 휴대폰 2곳');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();

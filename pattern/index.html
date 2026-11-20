@@ -152,10 +152,10 @@
             <div class="stamp-msg"><b id="stampTitle" data-dyn>글자 위치 옮기기</b> <span id="stampDesc" data-dyn>· 격자를 손가락으로 끌면 손을 뗀 자리에 고정돼요. 화살표로 한 칸씩 맞춘 뒤엔 완료를 눌러요. 칠할 색을 누르면 글자 색이 바뀌어요.</span></div>
             <div class="stamp-ctrls">
               <div class="nudge">
-                <button id="nudgeL" aria-label="왼쪽으로">←</button>
-                <button id="nudgeU" aria-label="위로">↑</button>
-                <button id="nudgeD" aria-label="아래로">↓</button>
-                <button id="nudgeR" aria-label="오른쪽으로">→</button>
+                <button id="nudgeL" aria-label="왼쪽으로" title="왼쪽으로 (←)">←</button>
+                <button id="nudgeU" aria-label="위로" title="위로 (↑)">↑</button>
+                <button id="nudgeD" aria-label="아래로" title="아래로 (↓)">↓</button>
+                <button id="nudgeR" aria-label="오른쪽으로" title="오른쪽으로 (→)">→</button>
               </div>
               <div class="nudge center-btns">
                 <button id="centerH" class="wide" aria-label="가로 가운데 정렬" title="가로 가운데 정렬">↔ 가운데</button>
@@ -166,8 +166,8 @@
                 <button class="btn-stamp-cancel" id="stampSaveDecorBtn" title="지금 떠 있는 모양을 내 장식으로 저장">내 장식에 추가</button>
                 <button class="btn-stamp-cancel" id="stampCopyBtn" title="복사 (Ctrl+C)">복사</button>
                 <button class="btn-stamp-cancel danger-text" id="stampDeleteBtn" title="삭제 (Delete)">삭제</button>
-                <button class="btn-stamp-cancel" id="stampCancelBtn">취소</button>
-                <button class="btn-stamp-place" id="stampPlaceBtn">완료</button>
+                <button class="btn-stamp-cancel" id="stampCancelBtn" title="취소 (Esc)">취소</button>
+                <button class="btn-stamp-place" id="stampPlaceBtn" title="완료 (Enter)">완료</button>
               </div>
             </div>
           </div>
@@ -176,9 +176,9 @@
       <div class="knit-bar" id="knitBar">
         <div class="knit-main">
           <div class="knit-row">
-            <button class="knit-step" id="knitMinusBtn" aria-label="아래 단">−</button>
+            <button class="knit-step" id="knitMinusBtn" aria-label="아래 단" title="아래 단 (↓)">−</button>
             <div class="knit-row-num"><b id="knitRowNum" data-dyn>1단</b><small id="knitRowOf" data-dyn>총 20단</small></div>
-            <button class="knit-step" id="knitPlusBtn" aria-label="위 단">＋</button>
+            <button class="knit-step" id="knitPlusBtn" aria-label="위 단" title="위 단 (↑)">＋</button>
           </div>
           <div class="knit-seq">
             <span class="knit-dir" id="knitDir" data-dyn></span>
@@ -187,7 +187,7 @@
           <button class="knit-fold" id="knitFoldBtn" aria-expanded="true" title="위쪽 막대 접기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg><span id="knitFoldLabel" data-dyn>접기</span></button>
         </div>
         <div class="knit-tools">
-        <button class="knit-exit" id="knitExitBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>도안 수정으로</span></button>
+        <button class="knit-exit" id="knitExitBtn" title="도안 수정으로 (Esc)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg><span>도안 수정으로</span></button>
         <label class="knit-read">
           <span>읽는 방향</span>
           <select id="knitDirSelect">
@@ -602,8 +602,8 @@
       <div class="hex-help">헥스코드를 입력하거나, 왼쪽 네모를 눌러 색상표에서 골라요.</div>
       <div class="hex-err" id="hexErr" data-dyn></div>
       <div class="hex-btns">
-        <button type="button" class="hex-cancel" id="hexCancel">취소</button>
-        <button type="button" class="hex-ok" id="hexOk">추가</button>
+        <button type="button" class="hex-cancel" id="hexCancel" title="취소 (Esc)">취소</button>
+        <button type="button" class="hex-ok" id="hexOk" title="추가 (Enter)">추가</button>
       </div>
     </div>
   </div>
@@ -628,7 +628,7 @@
       </div>
       <div class="hex-help">칸을 누르거나 끌어서 그려요. 넣을 때는 '칠할 색'으로 칠해져요.</div>
       <div class="hex-btns">
-        <button type="button" class="hex-cancel" id="deCancel">취소</button>
+        <button type="button" class="hex-cancel" id="deCancel" title="취소 (Esc)">취소</button>
         <button type="button" class="hex-ok" id="deSave">저장</button>
       </div>
     </div>
@@ -640,7 +640,7 @@
       <div class="ask-msg" id="askMsg" data-dyn></div>
       <input class="de-name" id="askInput" type="text" maxlength="200" spellcheck="false">
       <div class="hex-btns">
-        <button type="button" class="hex-cancel" id="askCancel">취소</button>
+        <button type="button" class="hex-cancel" id="askCancel" title="취소 (Esc)">취소</button>
         <button type="button" class="hex-ok" id="askOk">확인</button>
       </div>
     </div>
@@ -655,7 +655,7 @@
       </div>
       <div class="hex-help" id="swatchNote" data-dyn></div>
       <div class="hex-btns">
-        <button type="button" class="hex-cancel" id="swatchCancel">닫기</button>
+        <button type="button" class="hex-cancel" id="swatchCancel" title="닫기 (Esc)">닫기</button>
       </div>
     </div>
   </div>
@@ -663,6 +663,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="../assets/pattern.js?v=18"></script>
+<script src="../assets/pattern.js?v=19"></script>
 </body>
 </html>
