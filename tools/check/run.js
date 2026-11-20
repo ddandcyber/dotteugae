@@ -1841,6 +1841,70 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
   note('한·영 × 1440·390·320px × 라이트·다크, 구조 ' + shapes['/']);
 });
 
+test('소개 페이지 글꼴: 제목·로고 글꼴만 preload(모두 실제로 쓰임, 경로·crossorigin 맞음), 바깥 요청 없음, 대체 글꼴 크기 보정', async (fail, note) => {
+  const PAGES = ['/', '/en/', '/examples/', '/guides/', '/guides/reading-charts/', '/guides/lettering-size/', '/about/', '/privacy/', '/credits/', '/counter/', '/404.html'];
+  // 본고딕 묶음 파일 → unicode-range 첫 구간 (브라우저의 FontFace와 맞춰 보려고)
+  const fcss = fs.readFileSync(path.join(ROOT, 'assets/fonts/noto-sans-kr.css'), 'utf8');
+  const rangeOf = {};
+  for (const m of fcss.matchAll(/src: url\(([^)]+)\)[^;]*;\s*unicode-range: ([^;]+);/g)) rangeOf[m[1].split('/').pop()] = m[2].split(',')[0].trim().toUpperCase();
+  let total = 0;
+  for (const p of PAGES) for (const [w, mobile] of (p === '/' || p === '/en/' ? [[360, true], [1440, false]] : [[360, true]])) {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const outside = [], bad = [], warn = [];
+    page.on('request', r => { const u = r.url(); if (/^https?:/.test(u) && !u.startsWith(BASE)) outside.push(u); });
+    page.on('requestfinished', r => { if (/\.woff2/.test(r.url()) && r.response() && r.response().status() >= 400) bad.push(r.url()); });
+    page.on('requestfailed', r => { if (/\.woff2/.test(r.url())) bad.push(r.url()); });
+    page.on('console', m => { if (/preload/i.test(m.text())) warn.push(m.text().slice(0, 140)); });
+    try {
+      await page.setViewport({ width: w, height: 800, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 1 });
+      await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 });
+      await page.evaluate(() => document.fonts.ready);
+      const r = await page.evaluate(() => {
+        const pre = [...document.querySelectorAll('link[rel="preload"][as="font"]')].map(l => ({ href: l.href, file: l.getAttribute('href').split('/').pop(), co: l.hasAttribute('crossorigin'), type: l.getAttribute('type') }));
+        const faces = []; document.fonts.forEach(ff => { if (ff.family.replace(/["']/g, '') === 'Noto Sans KR') faces.push({ r: ff.unicodeRange.split(',')[0].trim().toUpperCase(), st: ff.status }); });
+        const fam = getComputedStyle(document.body).fontFamily;
+        const sheetPos = (() => { const links = [...document.head.querySelectorAll('link')]; const iCss = links.findIndex(l => /noto-sans-kr\.css/.test(l.href)); return links.findIndex(l => l.rel === 'preload') < iCss; })();
+        return { pre, faces, fam, sheetPos };
+      });
+      const L = p + ' ' + w + 'px: ';
+      if (!r.pre.length) fail(L + '글꼴 preload가 없어요');
+      if (r.pre.length > 10) fail(L + '글꼴 preload가 너무 많아요 (' + r.pre.length + '개)');
+      if (!r.sheetPos) fail(L + 'preload가 글꼴 CSS보다 뒤에 있어요');
+      for (const x of r.pre) {
+        total++;
+        if (!x.co || x.type !== 'font/woff2') fail(L + x.file + ': crossorigin이나 type이 빠졌어요 (빠지면 두 번 받아요)');
+        if (!rangeOf[x.file]) { fail(L + x.file + ': 글꼴 CSS에 없는 파일이에요'); continue; }
+        const face = r.faces.find(ff => ff.r === rangeOf[x.file]);
+        if (!face || face.st !== 'loaded') fail(L + x.file + ': preload했는데 이 화면에서 쓰이지 않아요 (' + (face ? face.st : '없음') + ')');
+      }
+      if (!/^"?Noto Sans KR"?, "?Noto Sans KR Fallback"?/.test(r.fam)) fail(L + '글꼴 순서가 본고딕 → 보정된 대체 글꼴이 아니에요 (' + r.fam.slice(0, 60) + ')');
+      if (bad.length) fail(L + '글꼴 파일을 못 받았어요: ' + bad.join(', '));
+      if (outside.length) fail(L + '바깥 사이트 요청이 있어요: ' + outside.slice(0, 3).join(', '));
+      if (warn.length) fail(L + 'preload 경고: ' + warn.join(' / '));
+    } finally { await ctx.close(); }
+  }
+  // 대체 글꼴(맑은 고딕을 본고딕 크기로 맞춘 것)의 글자 폭이 본고딕과 2% 안으로 같은지 (맑은 고딕이 있는 윈도우에서만)
+  {
+    const t = await BROWSER.createBrowserContext(); const page = await t.newPage();
+    try {
+      await page.goto(BASE + '/', { waitUntil: 'networkidle0' });
+      const r = await page.evaluate(async () => {
+        if (!(await document.fonts.load('16px "Malgun Gothic"', '가')).length && !document.fonts.check('16px "Malgun Gothic"')) {}
+        const out = [];
+        for (const [txt, wgt] of [['글자로 만드는 코바늘 도안', 700], ['이름이나 기념 문구를 입력하면 배색 도안이 바로 만들어지고', 400], ['Turn words into crochet charts', 700], ['Turn any name or phrase into an alpha pattern', 400]]) {
+          const wOf = async fam => { const sp = document.createElement('span'); sp.style.cssText = 'position:absolute;white-space:nowrap;font:' + wgt + ' 40px ' + fam; sp.textContent = txt; document.body.appendChild(sp); await document.fonts.load(wgt + ' 40px ' + fam, txt); const x = sp.getBoundingClientRect().width; sp.remove(); return x; };
+          const noto = await wOf('"Noto Sans KR"'), fb = await wOf('"Noto Sans KR Fallback", serif'), malgun = await wOf('"Malgun Gothic", serif'), serif = await wOf('serif');
+          out.push({ txt: txt.slice(0, 8), wgt, noto, fb, hasMalgun: Math.abs(malgun - serif) > 0.5 });
+        }
+        return out;
+      });
+      if (r[0].hasMalgun) for (const x of r) if (Math.abs(x.fb - x.noto) / x.noto > 0.02) fail('대체 글꼴 폭이 본고딕과 2% 넘게 달라요 (' + x.txt + ' ' + x.wgt + ': ' + Math.round(x.fb) + ' / ' + Math.round(x.noto) + ')');
+      note('preload ' + total + '곳 확인' + (r[0].hasMalgun ? ', 대체 글꼴 폭 차이 ' + r.map(x => (100 * (x.fb - x.noto) / x.noto).toFixed(1) + '%').join(' ') : ', 맑은 고딕 없음(폭 비교 건너뜀)'));
+    } finally { await t.close(); }
+  }
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();

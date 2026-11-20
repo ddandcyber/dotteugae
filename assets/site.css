@@ -6,7 +6,7 @@
   --teal:#1F5C52; --teal-dark:#164941; --mustard:#DFA53C; --berry:#9C3848;
   --line:rgba(36,38,31,0.14); --line-strong:rgba(36,38,31,0.24);
   --shadow:0 1px 2px rgba(36,38,31,0.05), 0 6px 18px rgba(36,38,31,0.06);
-  --sans:'Noto Sans KR', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  --sans:'Noto Sans KR', 'Noto Sans KR Fallback', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   --mono:ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   color-scheme:light;
 }
@@ -28,6 +28,21 @@
   --shadow:0 1px 2px rgba(0,0,0,0.3), 0 6px 18px rgba(0,0,0,0.25);
   color-scheme:dark;
 }
+/* 글꼴 교체 깜빡임 줄이기: 본고딕이 늦게 오는 동안 쓰는 맑은 고딕(윈도우)을 본고딕 크기에 맞춤.
+   새 파일·외부 요청 없음(local). 맑은 고딕이 없는 기기(맥·휴대폰)는 이 글꼴을 건너뛰고 원래 순서대로.
+   한글은 본고딕이 맑은 고딕보다 약 10% 좁아서 89.6%, 영문은 본고딕이 약 3% 넓어서 102.6%(보통)·103.4%(굵게). 위아래 높이는 본고딕 값(116%/29%)을 size-adjust로 나눈 값(size-adjust가 이 값에도 곱해져서) */
+@font-face{ font-family:'Noto Sans KR Fallback'; src:local('Malgun Gothic'), local('MalgunGothic'); font-weight:100 500;
+            size-adjust:89.6%; ascent-override:129.5%; descent-override:32.4%; line-gap-override:0%;
+            unicode-range:U+1100-11FF, U+3000-303F, U+3130-318F, U+A960-A97F, U+AC00-D7AF, U+D7B0-D7FF, U+FF00-FFEF; }
+@font-face{ font-family:'Noto Sans KR Fallback'; src:local('Malgun Gothic Bold'), local('MalgunGothicBold'); font-weight:600 900;
+            size-adjust:89.6%; ascent-override:129.5%; descent-override:32.4%; line-gap-override:0%;
+            unicode-range:U+1100-11FF, U+3000-303F, U+3130-318F, U+A960-A97F, U+AC00-D7AF, U+D7B0-D7FF, U+FF00-FFEF; }
+@font-face{ font-family:'Noto Sans KR Fallback'; src:local('Malgun Gothic'), local('MalgunGothic'); font-weight:100 500;
+            size-adjust:102.6%; ascent-override:113.1%; descent-override:28.3%; line-gap-override:0%;
+            unicode-range:U+0000-10FF, U+2000-2BFF; }
+@font-face{ font-family:'Noto Sans KR Fallback'; src:local('Malgun Gothic Bold'), local('MalgunGothicBold'); font-weight:600 900;
+            size-adjust:103.4%; ascent-override:112.2%; descent-override:28.0%; line-gap-override:0%;
+            unicode-range:U+0000-10FF, U+2000-2BFF; }
 *{ box-sizing:border-box; }
 html,body{ margin:0; }
 body{ background:var(--paper); color:var(--ink); font-family:var(--sans); line-height:1.65;
