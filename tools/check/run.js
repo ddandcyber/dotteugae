@@ -1548,7 +1548,8 @@ test('좁은 화면 넘침: 색이 많은 팔레트(9·12·20·50개), 320·360�
         if (!m.addReach) fail(label + ': 색 ' + n + '개일 때 팔레트가 옆으로 스크롤돼야 하는 모양이에요 (줄바꿈이 안 됨)');
         if (m.palH > 104) fail(label + ': 색 ' + n + '개일 때 팔레트 높이가 너무 커요 (' + m.palH + 'px, 최대 약 102px)');
         if (n === 50 && !m.scrollable) fail(label + ': 색 50개인데 최대 높이 안에서 세로로 스크롤되지 않아요');
-        if (n === 5 && (m.wrap || m.bodyH > 52)) fail(label + ': 색 5개(한 줄)인데 묶음 높이가 늘어났어요 (pal-wrap ' + m.wrap + ', ' + m.bodyH + 'px)');
+        // 한 줄 + 최근 색 줄(터치 22px): 팔레트 28 + 간격 6 + 22 = 56px까지 (최근 줄이 없으면 44px 그대로)
+        if (n === 5 && (m.wrap || m.bodyH > 56)) fail(label + ': 색 5개(한 줄)인데 묶음 높이가 늘어났어요 (pal-wrap ' + m.wrap + ', ' + m.bodyH + 'px)');
         if (!m.sel) fail(label + ': 색 ' + n + '개일 때 선택 표시가 없어요');
         if (!m.recent || !m.recentSel) fail(label + ': 색 ' + n + '개일 때 최근 색 줄이나 선택 표시가 사라졌어요');
       }
@@ -1954,6 +1955,101 @@ test('소개 페이지 CSS 캐시 값: site.css를 쓰는 모든 HTML이 같은 
   const keys = Object.keys(vals);
   if (keys.length > 1) fail('site.css ?v= 값이 페이지마다 달라요: ' + keys.map(k => 'v=' + k + ' (' + vals[k].length + '곳)').join(', '));
   note('site.css ?v=' + keys.join(',') + ' · ' + Object.values(vals).flat().length + '개 페이지');
+});
+
+test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄·팔레트·라벨 안 겹침, 같은 색 개수면 같은 높이, 추가·삭제·교체·파일 열기·새로고침·회전·접기 뒤, 320·360·390px 라이트·다크', async (fail, note) => {
+  const COLS = ['#222222', '#D32F2F', '#FBC02D', '#1976D2', '#388E3C', '#8E24AA', '#00ACC1', '#F57C00', '#6D4C41', '#E91E63', '#009688', '#3F51B5'];
+  // 파일 열기용 도안: 팔레트 12색 (열면 내 팔레트에 없는 색이 더해짐)
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'dotteugae-pal-'));
+  const file12 = path.join(tmp, 'pal12.json');
+  fs.writeFileSync(file12, JSON.stringify({ app: 'crochet-pattern-tool', version: 1, cols: 2, rows: 2, bg: '#FFFFFF', colors: ['#222222'], cells: [[1, 1], [0, 3]], palette: COLS }));
+  let steps = 0;
+  try {
+    for (const dark of [false, true]) for (const w of [320, 360, 390]) {
+      const ctx = await BROWSER.createBrowserContext();
+      const page = await ctx.newPage();
+      const errors = [];
+      page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+      const L = '/pattern/ ' + w + 'px ' + (dark ? '어두운' : '밝은') + ' 화면';
+      try {
+        await page.setViewport({ width: w, height: 760, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+        await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: dark ? 'dark' : 'light' }]);
+        await page.evaluateOnNewDocument(d => { try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); if (d) localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {} }, dark);
+        await page.evaluateOnNewDocument(SKIP_START);
+        await page.goto(BASE + '/pattern/', { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
+        await page.evaluate(() => setRibbonFolded(false)); await sleep(250);
+        // 평소 상태(처음 연 5색 한 줄, 최근 줄 없음)는 기존 높이 44px 그대로
+        const first = await page.evaluate(() => ({ recent: !document.getElementById('recentRow').hidden, h: Math.round(document.querySelector('.grp-color .rgroup-body').getBoundingClientRect().height) }));
+        if (!first.recent && first.h !== 44) fail(L + ': 처음 연 상태(한 줄, 최근 줄 없음)의 묶음 높이가 44px이 아니에요 (' + first.h + 'px)');
+        const heights = {}; // 색 개수 → 묶음 높이 (같은 개수면 언제나 같아야 함)
+        const check = async (why) => {
+          steps++;
+          // 최근 색 줄이 보이게 앞쪽 색 세 개를 차례로 고름 (마지막에 고른 첫 색이 선택됨)
+          await page.evaluate(() => [2, 1, 0].forEach(i => pickPaintColor(PRESET_COLORS[i]))); await sleep(300);
+          const m = await page.evaluate(() => {
+            const R = e => e.getBoundingClientRect();
+            const hit = (a, b, pad = 0) => a.left - pad < b.right && b.left < a.right + pad && a.top - pad < b.bottom && b.top < a.bottom + pad;
+            const pal = document.getElementById('palette'), grp = document.querySelector('.grp-color'), body = grp.querySelector('.rgroup-body'), cap = grp.querySelector('.rgroup-cap');
+            const items = [...pal.querySelectorAll('.swatch, .add-color')], rr = document.getElementById('recentRow'), sel = pal.querySelector('.swatch.selected');
+            const rrR = rr.hidden ? null : R(rr);
+            return { n: PRESET_COLORS.length, recent: !!rrR, rows: new Set(items.map(i => Math.round(R(i).top))).size, bodyH: Math.round(R(body).height),
+              swHit: !!rrR && items.some(i => hit(R(i), rrR)),              // 팔레트 칸과 최근 줄 상자
+              ringHit: !!(rrR && sel && hit(R(sel), rrR, 3.5)),            // 선택 고리(바깥 4px)와 최근 줄
+              capHit: !!rrR && hit(rrR, R(cap)),                            // 최근 줄과 "칠할 색" 라벨
+              clipped: pal.scrollHeight > pal.clientHeight + 1,             // 12색까지는 팔레트 안에서 잘리거나 스크롤되면 안 됨
+              inBody: items.every(i => R(i).bottom <= R(body).bottom + 0.5) && (!rrR || rrR.bottom <= R(body).bottom + 0.5) };
+          });
+          const S = L + ' · ' + why + ' (색 ' + m.n + '개, ' + m.rows + '줄): ';
+          if (!m.recent) { fail(S + '최근 색 줄이 안 보여요'); return; }
+          if (m.swHit) fail(S + '최근 색 줄이 팔레트 칸과 겹쳐요');
+          if (m.ringHit) fail(S + '선택한 색의 고리가 최근 색 줄에 닿아요');
+          if (m.capHit) fail(S + '"칠할 색" 라벨이 최근 색 줄과 겹쳐요');
+          if (m.clipped) fail(S + '팔레트 칸이 잘리거나 안에서 스크롤돼요');
+          if (!m.inBody) fail(S + '팔레트나 최근 줄이 묶음 밖으로 삐져나가요');
+          if (heights[m.n] === undefined) heights[m.n] = m.bodyH;
+          else if (heights[m.n] !== m.bodyH) fail(S + '같은 색 개수인데 묶음 높이가 달라요 (' + heights[m.n] + 'px → ' + m.bodyH + 'px)');
+        };
+        const replace = async n => { await page.evaluate((cs, n) => { PRESET_COLORS.length = 0; cs.slice(0, n).forEach(c => PRESET_COLORS.push(c)); activeColor = PRESET_COLORS[0]; buildPalette(); }, COLS, n); await sleep(250); };
+        const add = async c => {
+          await page.evaluate(() => document.querySelector('#palette .add-color').click()); await sleep(150);
+          await page.evaluate(c => { const t = document.getElementById('hexText'); t.value = c; t.dispatchEvent(new Event('input')); document.getElementById('hexOk').click(); }, c); await sleep(200);
+        };
+        const del = async () => { await page.evaluate(() => { openSwatchMenu(PRESET_COLORS.length - 1); document.getElementById('swatchDelete').click(); }); await sleep(200); };
+        // 7 → 12 → 7 → 5 (교체 · 추가 · 삭제 · 교체)
+        await replace(7); await check('팔레트 교체로 7개');
+        for (const c of COLS.slice(7)) await add(c); await check('색 추가로 12개');
+        for (let k = 0; k < 5; k++) await del(); await check('색 삭제로 다시 7개');
+        await replace(5); await check('팔레트 교체로 5개');
+        // 파일 열기 (팔레트 12색이 더해짐) → 삭제로 7개
+        const input = await page.$('#openFileInput');
+        await input.uploadFile(file12); await sleep(500); await check('파일 열기 뒤');
+        for (let k = 0; k < 5; k++) await del(); await check('파일 연 뒤 삭제로 7개');
+        // 작업창 접기 → 펼치기
+        await page.evaluate(() => setRibbonFolded(true)); await sleep(200); await page.evaluate(() => setRibbonFolded(false)); await sleep(250); await check('작업창 접었다 펼친 뒤');
+        // 화면 돌리기(가로 → 세로)
+        await page.setViewport({ width: 760, height: w, isMobile: true, hasTouch: true, deviceScaleFactor: 1 }); await sleep(300);
+        await page.setViewport({ width: w, height: 760, isMobile: true, hasTouch: true, deviceScaleFactor: 1 }); await sleep(300); await check('화면 돌린 뒤');
+        // 12개로 늘린 채 새로고침 → 다시 7개
+        for (const c of COLS.slice(7)) await add(c); await check('다시 12개');
+        await page.reload({ waitUntil: 'networkidle0', timeout: 30000 }); await sleep(400);
+        await page.evaluate(() => setRibbonFolded(false)); await sleep(250); await check('새로고침 뒤');
+        for (let k = 0; k < 5; k++) await del(); await check('새로고침 뒤 삭제로 7개');
+        errors.forEach(e => fail(L + ': ' + e));
+      } finally { await ctx.close(); }
+    }
+  } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
+  // PC(1440px, 마우스): 묶음 높이 44px·한 줄 그대로 (최근 줄이 있어도)
+  {
+    const t = await openPage('/pattern/');
+    try {
+      await t.page.evaluate(cs => { PRESET_COLORS.length = 0; cs.forEach(c => PRESET_COLORS.push(c)); buildPalette(); [2, 1, 0].forEach(i => pickPaintColor(PRESET_COLORS[i])); }, COLS);
+      await sleep(300);
+      const r = await t.page.evaluate(() => ({ h: Math.round(document.querySelector('.grp-color .rgroup-body').getBoundingClientRect().height), wrap: getComputedStyle(document.getElementById('palette')).flexWrap, recent: !document.getElementById('recentRow').hidden }));
+      if (r.h !== 44 || r.wrap !== 'nowrap' || !r.recent) fail('PC(1440px) 칠할 색 묶음이 바뀌었어요 (' + JSON.stringify(r) + ')');
+      t.errors.forEach(e => fail('PC: ' + e));
+    } finally { await t.close(); }
+  }
+  note('320·360·390px × 라이트·다크, 단계 ' + steps + '번 (교체·추가·삭제·파일 열기·접기·회전·새로고침), PC 그대로');
 });
 
 /* ---------- 실행 ---------- */

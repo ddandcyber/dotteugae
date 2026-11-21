@@ -354,7 +354,6 @@
     }));
     paletteEl.appendChild(addBtn);
     renderRecentColors();
-    updatePaletteWrap();
     if(typeof refreshReplaceUI === 'function') refreshReplaceUI(true);
     renderBgPalette();
     if(typeof buildDecorRow === 'function' && document.getElementById('decorRow')) { try{ buildDecorRow(); }catch(e){} }
@@ -362,12 +361,8 @@
     if(typeof renderShadowUI === 'function' && document.getElementById('shadowPalette')) { try{ renderShadowUI(); }catch(e){} }
   }
 
-  // 좁은 화면에서 팔레트가 여러 줄로 줄바꿈되면 묶음에 pal-wrap 표시 (CSS가 그때만 높이를 늘림). 작업창을 펼치거나 크기가 바뀔 때도 다시 확인
-  function updatePaletteWrap(){
-    const g = paletteEl.closest('.grp-color');
-    if(g) g.classList.toggle('pal-wrap', paletteEl.scrollHeight > 50);
-  }
-  if(window.ResizeObserver) new ResizeObserver(updatePaletteWrap).observe(paletteEl);
+  // (좁은 화면의 칠할 색 묶음 높이는 CSS가 팔레트 줄 수·최근 색 줄에 맞춰 정함. 여러 줄일 때만 붙이던 pal-wrap 표시는 없앰:
+  //  한 줄일 때 묶음이 44px로 고정돼 터치 화면의 최근 색 줄(22px)과 겹쳤음)
 
   let undoStack = [];
   const MAX_UNDO = 30;

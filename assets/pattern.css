@@ -1117,8 +1117,9 @@
      선택 고리(바깥 그림자)가 잘리지 않게 안쪽 여백 4px을 주고 같은 만큼 바깥 여백을 빼서 한 줄일 때의 크기는 그대로 */
   @media (max-width: 899px){
     .grp-color{ flex-shrink:1; min-width:0; max-width:100%; }
-    .grp-color .rgroup-body{ min-width:0; max-width:100%; }
-    .grp-color.pal-wrap .rgroup-body{ height:auto; min-height:var(--h-lg); } /* 팔레트가 여러 줄이 될 때만 묶음 높이를 같이 늘림 (한 줄이면 기존 높이 그대로) */
+    /* 묶음 높이는 고정하지 않고 내용(팔레트 줄 수 + 최근 색 줄)에 맞춤. 최소 44px이라 팔레트 한 줄·최근 줄 없음이면 기존 높이 그대로.
+       (고정 44px이면 터치 화면에서 팔레트 28 + 간격 2 + 최근 줄 22 = 52px이 안 들어가 팔레트가 눌리고 최근 줄과 겹쳤음) */
+    .grp-color .rgroup-body{ min-width:0; max-width:100%; height:auto; min-height:var(--h-lg); }
     .ribbon .palette{ flex-wrap:wrap; align-content:flex-start; max-width:calc(100% + 8px); max-height:calc(28px * 3 + 5px * 2 + 8px);
                       padding:4px; margin:-4px; overflow-x:hidden; overflow-y:auto; overscroll-behavior:contain; }
   }
@@ -1137,6 +1138,10 @@
     .recent-row{ height:22px; }
     .recent-chip{ width:22px; height:22px; }
     .recent-chip::before{ inset:-3px; }
+  }
+  /* 좁은 터치 화면: 팔레트와 최근 줄 사이를 넓혀서 선택한 색의 고리(바깥 4px)가 최근 줄에 닿지 않게 (최근 줄이 없으면 높이 그대로) */
+  @media (max-width: 899px) and (pointer: coarse){
+    .grp-color .rgroup-body{ gap:6px; }
   }
 
   /* ===== 색이 많을 때 안내 (한 줄, 부드러운 안내색) ===== */
