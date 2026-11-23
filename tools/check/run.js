@@ -153,7 +153,7 @@ const cellPixel = (page, i, j) => page.evaluate((i, j) => {
 async function clickCell(page, i, j) { const p = await cellPoint(page, i, j); await page.mouse.click(p.x, p.y); await sleep(150); }
 async function pickColor(page, hex) {
   const ok = await page.evaluate(rgb => {
-    const sw = [...document.querySelectorAll('#palette .swatch')].find(s => getComputedStyle(s).backgroundColor === rgb);
+    const sw = [...document.querySelectorAll('#qbPalette .swatch')].find(s => getComputedStyle(s).backgroundColor === rgb); // 새 도구 막대의 칠할 색 (4단계부터 화면에 보이는 곳)
     if (!sw) return false;
     if (!sw.classList.contains('selected')) sw.click();
     return true;
@@ -161,7 +161,19 @@ async function pickColor(page, hex) {
   if (!ok) throw new Error(`팔레트에서 ${hex} 색을 찾지 못했어요`);
   await sleep(100);
 }
-const clickId = async (page, id) => { await page.click('#' + id); await sleep(200); };
+// 4단계부터 옛 작업창·맨 위 막대의 버튼은 화면에서 숨겨져 있음(id·기능은 그대로). 숨은 버튼을 누르라고 하면
+// 사람처럼 새 도구 막대의 같은 버튼을 누르거나, 저장·더보기 메뉴를 열고 그 항목(data-click = 옛 id)을 누름
+const NEW_PLACE = { toolPaintBtn: 'qbPaint', toolFillBtn: 'qbFill', undoBtn: 'qbUndo', redoBtn: 'qbRedo', openFileBtn: 'qbOpen', knitStartBtn: 'qbKnit' };
+const clickId = async (page, id) => {
+  const shown = await page.evaluate(i => { const e = document.getElementById(i); return !!e && e.getClientRects().length > 0; }, id);
+  if (shown || !await page.evaluate(i => !!document.getElementById(i), id)) { await page.click('#' + id); await sleep(200); return; }
+  if (NEW_PLACE[id]) { await page.click('#' + NEW_PLACE[id]); await sleep(200); return; }
+  const menu = await page.evaluate(i => { const it = document.querySelector('.qb-menu .qb-mi[data-click="' + i + '"]'); return it ? it.closest('.qb-menu').id : null; }, id);
+  if (!menu) { await page.click('#' + id); await sleep(200); return; } // 새 자리가 없으면 그대로 (점검이 실패로 알려 줌)
+  const btn = menu === 'qbSaveMenu' ? 'qbSave' : 'qbMore';
+  if (await page.evaluate(m => document.getElementById(m).hidden, menu)) { await page.click('#' + btn); await sleep(150); }
+  await page.click('#' + menu + ' .qb-mi[data-click="' + id + '"]'); await sleep(200);
+};
 
 /* ---------- 점검 항목 ---------- */
 const RED = '#D32F2F', BLUE = '#1976D2', BLACK = '#222222';
@@ -386,33 +398,49 @@ test('글자 넣기, 영어로 바꿨다가 한국어로 돌아오기', async (f
   } finally { await t.close(); }
 });
 
-test('작업창 접기·펼치기, 새로고침 뒤 유지', async (fail) => {
-  const t = await openPage('/pattern/');
-  try {
-    const { page } = t;
-    const state = () => page.evaluate(() => ({
-      folded: document.querySelector('.app').classList.contains('ribbon-folded'),
-      ribbonH: document.getElementById('ribbon').offsetHeight,
-      handle: [...document.querySelectorAll('.ribbon-handle')].some(b => b.offsetParent !== null),
-    }));
-    let s = await state();
-    if (s.folded || !s.ribbonH) fail('PC 화면 첫 방문인데 작업창이 펼쳐져 있지 않아요');
-    await clickId(page, 'ribbonFoldBtn');
-    s = await state();
-    if (!s.folded || s.ribbonH !== 0) fail('접기 버튼을 눌렀는데 작업창이 접히지 않았어요');
-    if (!s.handle) fail('작업창을 접었는데 펼치기 손잡이가 보이지 않아요');
-    await page.reload({ waitUntil: 'networkidle0' }); await sleep(300);
-    s = await state();
-    if (!s.folded) fail('접은 뒤 새로고침했더니 다시 펼쳐졌어요');
-    await page.evaluate(() => [...document.querySelectorAll('.ribbon-handle')].find(b => b.offsetParent !== null).click());
-    await sleep(300);
-    s = await state();
-    if (s.folded || !s.ribbonH) fail('손잡이를 눌렀는데 작업창이 펼쳐지지 않았어요');
-    await page.reload({ waitUntil: 'networkidle0' }); await sleep(300);
-    s = await state();
-    if (s.folded) fail('펼친 뒤 새로고침했더니 다시 접혔어요');
-    t.errors.forEach(e => fail(e));
-  } finally { await t.close(); }
+// (4단계에서 다시 씀) 예전: 작업창 접기·펼치기와 새로고침 뒤 유지. 지금은 옛 작업창·접기 버튼·손잡이가 화면에 없으므로
+// 그것들이 안 보이는지, 칠할 색이 막대에 항상 있는지, 예전에 저장된 접기 값(접힘·펼침)과 Ctrl+\가 있어도 화면이 같고 저장 이름이 그대로인지 확인
+test('옛 작업창 정리: 작업창·접기 버튼·손잡이·말풍선이 화면에 없음, 칠할 색은 막대에 항상, 예전 접기 저장값(접힘·펼침)·Ctrl+\\·새로고침 뒤에도 같은 화면 (PC·휴대폰)', async (fail) => {
+  const state = page => page.evaluate(() => {
+    const shown = s => [...document.querySelectorAll(s)].some(e => e.getClientRects().length > 0);
+    const r = document.querySelector('.workspace').getBoundingClientRect();
+    return { ribbon: shown('#ribbon'), fold: shown('#ribbonFoldBtn'), handle: shown('.ribbon-handle'), hint: shown('#ribbonHint.show'),
+      colors: shown('#qbColors') && shown('#qbPalette .swatch'), top: Math.round(r.top), pad: getComputedStyle(document.querySelector('.stage .canvas-wrap')).paddingTop,
+      tabsPad: getComputedStyle(document.querySelector('.insp-tabs')).paddingRight };
+  });
+  for (const [label, w, h, mobile] of [['PC', 1440, 900, false], ['휴대폰 360px', 360, 740, true]]) {
+    let base = null;
+    for (const saved of [null, '1', '0']) {
+      const ctx = await BROWSER.createBrowserContext();
+      const page = await ctx.newPage();
+      const errors = [];
+      page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+      const L = label + (saved === null ? ' 처음 방문' : saved === '1' ? ' 예전 "접힘" 저장값' : ' 예전 "펼침" 저장값');
+      try {
+        await page.setViewport({ width: w, height: h, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 1 });
+        await page.evaluateOnNewDocument(v => { try { if (v !== null) localStorage.setItem('crochet-ribbon-folded', v); } catch (e) {} }, saved);
+        await page.evaluateOnNewDocument(SKIP_START);
+        await page.goto(BASE + '/pattern/', { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(900);
+        let s = await state(page);
+        if (s.ribbon || s.fold || s.handle) fail(L + ': 옛 작업창이나 접기 버튼·손잡이가 화면에 보여요 (' + JSON.stringify(s) + ')');
+        if (s.hint) fail(L + ': "여기를 누르면 도구가 펼쳐져요" 말풍선이 떠요');
+        if (!s.colors) fail(L + ': 새 도구 막대에 칠할 색이 보이지 않아요');
+        if (base && (s.top !== base.top || s.pad !== base.pad || s.tabsPad !== base.tabsPad)) fail(L + ': 처음 방문과 화면 배치가 달라요 (' + JSON.stringify([base, s]) + ')');
+        if (!base) base = s;
+        // Ctrl+\ (예전 접기 단축키)를 눌러도 화면이 그대로이고 오류가 없음
+        await page.keyboard.down('Control'); await page.keyboard.press('Backslash'); await page.keyboard.up('Control'); await sleep(300);
+        s = await state(page);
+        if (s.ribbon || s.handle || !s.colors || s.top !== base.top) fail(L + ': Ctrl+\\를 누른 뒤 화면이 바뀌었어요 (' + JSON.stringify(s) + ')');
+        await page.reload({ waitUntil: 'networkidle0' }); await sleep(600);
+        s = await state(page);
+        if (s.ribbon || s.handle || !s.colors || s.top !== base.top) fail(L + ': 새로고침 뒤 화면이 바뀌었어요 (' + JSON.stringify(s) + ')');
+        // 저장 이름은 그대로 (지우거나 다른 값으로 바꾸지 않음)
+        const v = await page.evaluate(() => localStorage.getItem('crochet-ribbon-folded'));
+        if (saved !== null && v === null) fail(L + ': 예전 저장값 crochet-ribbon-folded가 지워졌어요');
+        errors.forEach(e => fail(L + ': ' + e));
+      } finally { await ctx.close(); }
+    }
+  }
 });
 
 test('휴대폰(320·360·390)·태블릿(1280)·PC(1440) 화면: 가로 넘침, 잘린 버튼, 오류', async (fail) => {
@@ -552,7 +580,7 @@ test('이미지 저장은 PNG 내려받기, 공유 버튼은 터치 기기에서
       const cdp = await page.createCDPSession();
       try { await cdp.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: dl, browserContextId: ctx.id }); }
       catch (e) { await cdp.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dl }); }
-      const shareShown = await page.evaluate(() => !document.getElementById('shareImgBtn').hidden && document.getElementById('shareImgBtn').offsetWidth > 0);
+      const shareShown = await page.evaluate(() => !document.getElementById('shareImgBtn').hidden || !document.getElementById('qbShareItem').hidden); // 4단계: 공유는 저장 메뉴 안
       if (shareShown) fail(`${p}: 마우스를 쓰는 PC인데 공유 버튼이 보여요`);
       await clickId(page, 'saveImgBtn');
       let file = null;
@@ -586,10 +614,11 @@ test('이미지 저장은 PNG 내려받기, 공유 버튼은 터치 기기에서
       await page.evaluateOnNewDocument(SKIP_START);
       await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
       const st = await page.evaluate(() => {
-        const b = document.getElementById('shareImgBtn'), r = b.getBoundingClientRect();
+        document.getElementById('qbSave').click(); // 4단계: 공유는 저장 메뉴 안의 항목
+        const b = document.getElementById('qbShareItem'), r = b.getBoundingClientRect();
         const bar = document.querySelector('.appbar');
-        const out = [...bar.querySelectorAll('button, a, summary')].filter(e => { const q = e.getBoundingClientRect(); return q.width > 0 && (q.right > window.innerWidth + 1 || q.left < -1); }).map(e => e.id || e.textContent.trim());
-        return { coarse: matchMedia('(pointer: coarse)').matches, shown: !b.hidden && r.width > 0, label: b.getAttribute('aria-label'), out, wide: document.documentElement.scrollWidth > document.documentElement.clientWidth };
+        const out = [...bar.querySelectorAll('button, a, summary'), ...document.querySelectorAll('#qbar > button')].filter(e => { const q = e.getBoundingClientRect(); return q.width > 0 && (q.right > window.innerWidth + 1 || q.left < -1); }).map(e => e.id || e.textContent.trim());
+        return { coarse: matchMedia('(pointer: coarse)').matches, shown: !b.hidden && r.width > 0, label: b.textContent.trim(), out, wide: document.documentElement.scrollWidth > document.documentElement.clientWidth };
       });
       if (!st.coarse) { note(`${p}: 이 브라우저는 터치 흉내가 안 돼서 휴대폰 확인은 건너뜀`); continue; }
       coarseSeen = true;
@@ -597,7 +626,7 @@ test('이미지 저장은 PNG 내려받기, 공유 버튼은 터치 기기에서
       const expectLabel = p.startsWith('/en/') ? 'Share' : '공유';
       if (st.label !== expectLabel) fail(`${p}: 공유 버튼 이름이 "${expectLabel}"가 아니라 "${st.label}"이에요`);
       if (st.out.length || st.wide) fail(`${p}: ${w}px 폭에서 맨 위 막대가 화면 밖으로 넘쳐요 (${st.out.join(', ') || '가로 스크롤'})`);
-      await page.click('#shareImgBtn');
+      await page.click('#qbShareItem');
       if (!await waitFor(page, () => !!window.__shared, 5000)) fail(`${p}: 공유 버튼을 눌렀는데 공유 시트로 넘기지 않았어요`);
       else {
         const s = await page.evaluate(() => window.__shared);
@@ -699,7 +728,7 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
           row2: rowParts(document.querySelector('#filetRows li:nth-child(2)')),
           rowLines: document.querySelectorAll('#filetRows li').length,
           ribbonOn: ['filetVerSel', 'filetInvertBtn', 'filetSaveImgBtn'].every(vis),
-          editOff: ['toolPaintBtn', 'undoBtn', 'clearGridBtn', 'rot90Btn'].every(id => !vis(id)) && !document.querySelector('.inspector').getClientRects().length,
+          editOff: ['qbar', 'qbPaint', 'qbUndo', 'qbSave', 'qbMore', 'toolPaintBtn', 'undoBtn', 'clearGridBtn', 'rot90Btn'].every(id => !vis(id)) && !document.querySelector('.inspector').getClientRects().length,
           canvasOff: getComputedStyle(document.querySelector('.canvas-wrap')).visibility === 'hidden',
           tabs: ['tabDesign', 'tabFilet'].map(id => document.getElementById(id).getAttribute('aria-selected')).join(),
         };
@@ -803,7 +832,7 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
       await page.keyboard.press('Escape'); await sleep(200);
       if (await mode()) fail('Esc를 눌러도 도안 탭으로 돌아가지 않아요');
       if (await page.evaluate(() => getComputedStyle(document.querySelector('.canvas-wrap')).visibility === 'hidden')) fail('도안 탭으로 돌아왔는데 캔버스가 안 보여요');
-      if (await page.evaluate(() => !document.getElementById('toolPaintBtn').getClientRects().length)) fail('도안 탭으로 돌아왔는데 편집 도구가 다시 보이지 않아요');
+      if (await page.evaluate(() => !document.getElementById('qbPaint').getClientRects().length)) fail('도안 탭으로 돌아왔는데 편집 도구(새 도구 막대)가 다시 보이지 않아요');
       await clickId(page, 'tabFilet');
       if (!await mode()) fail('방안뜨기 탭을 눌러도 방안뜨기 보기로 바뀌지 않아요');
       const g = await page.evaluate(() => ({ key: localStorage.getItem('crochet-filet-guide-hide'), guide: !document.getElementById('filetGuide').hidden, link: !document.getElementById('filetGuideOpen').hidden }));
@@ -932,7 +961,7 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
       if (ord.badge !== '추천' || !ord.badgeIn) fail(`"글자로 시작" 카드에 "추천" 뱃지가 카드 안에 없어요 (${ord.badge})`);
       if (ord.blank !== '칸을 하나씩 칠해서 직접 그려요.') fail(`"빈 격자로 시작" 카드 설명이 새 문구가 아니에요 (${ord.blank})`);
       if (textCard !== '이름이나 문구를 넣으면 바로 도안이 돼요. 방안뜨기(filet)로도 바꿀 수 있어요.') fail(`"글자로 시작" 카드 설명이 새 문구가 아니에요 (${textCard})`);
-      if (await vis(page, '.ribbon') || await vis(page, '#gridCanvas')) fail('시작 화면인데 작업창이나 격자가 함께 보여요');
+      if (await vis(page, '.ribbon') || await vis(page, '#qbar') || await vis(page, '#gridCanvas')) fail('시작 화면인데 도구 막대나 격자가 함께 보여요');
       if (!await vis(page, '#langBtn') || !await vis(page, '#themeBtn') || !(await vis(page, '.tool-nav') || await vis(page, '.tool-menu'))) fail('시작 화면에서 맨 위 메뉴·EN·화면 모드 버튼이 안 보여요');
       const HIDE = ['saveFileBtn', 'undoBtn', 'redoBtn', 'saveImgBtn', 'shareImgBtn'];
       const shown = ids => Promise.all(ids.map(id => vis(page, '#' + id)));
@@ -946,9 +975,11 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
       if (!await isStart(page)) fail('화면 모드를 바꾸자 시작 화면이 닫혔어요');
       await clickId(page, 'startBlank');
       if (await isStart(page)) fail('"빈 격자로 시작"을 눌러도 시작 화면이 닫히지 않아요');
-      const g = await page.evaluate(() => ({ w: document.getElementById('gridCanvas').getBoundingClientRect().width, empty: !gridData.some(Boolean), rows, cols, ribbon: document.querySelector('.ribbon').getClientRects().length > 0 }));
-      const back = await shown(['saveFileBtn', 'undoBtn', 'redoBtn', 'saveImgBtn']);
-      if (!back.every(Boolean)) fail(`시작 화면을 닫았는데 저장·되돌리기·다시하기·이미지 저장이 다시 보이지 않아요 (${back.join(',')})`);
+      const g = await page.evaluate(() => ({ w: document.getElementById('gridCanvas').getBoundingClientRect().width, empty: !gridData.some(Boolean), rows, cols, ribbon: document.getElementById('qbar').getClientRects().length > 0 }));
+      // 4단계: 저장(도안 파일·이미지)·되돌리기·다시하기는 새 도구 막대에 있음
+      const back = await shown(['qbSave', 'qbUndo', 'qbRedo', 'qbOpen']);
+      if (!back.every(Boolean)) fail(`시작 화면을 닫았는데 저장·되돌리기·다시하기·열기가 다시 보이지 않아요 (${back.join(',')})`);
+      if (!(await page.evaluate(() => ['saveFileBtn', 'saveImgBtn'].every(id => !!document.querySelector('#qbSaveMenu .qb-mi[data-click="' + id + '"]'))))) fail('시작 화면을 닫았는데 저장 메뉴에 도안 파일 저장·이미지로 저장이 없어요');
       if (!(g.w > 100) || !g.ribbon) fail('"빈 격자로 시작" 뒤에 격자나 작업창이 보이지 않아요');
       if (!g.empty || g.rows !== 20 || g.cols !== 20) fail(`"빈 격자로 시작" 뒤의 격자가 지금 격자(20×20 빈 격자)가 아니에요 (${g.cols}×${g.rows})`);
       await clickCell(page, 0, 0);
@@ -1038,7 +1069,7 @@ test('시작 화면: 빈 도안에서만 보임, 카드 세 개 동작, 링크·
       if (r.hid.length) fail(`360px: 시작 화면인데 맨 위 막대에 ${r.hid.join(', ')}가 보여요`);
       if (!r.open || !r.theme) fail('360px: 시작 화면에서 열기나 화면 모드 버튼이 안 보여요');
       await clickId(t.page, 'startBlank');
-      if (!(await t.page.evaluate(() => document.getElementById('saveImgBtn').getClientRects().length > 0))) fail('360px: 시작 화면을 닫았는데 이미지 저장(내려받기) 버튼이 다시 보이지 않아요');
+      if (!(await t.page.evaluate(() => document.getElementById('qbSave').getClientRects().length > 0))) fail('360px: 시작 화면을 닫았는데 저장(이미지 내려받기가 든 메뉴) 버튼이 다시 보이지 않아요');
       t.errors.forEach(e => fail(`360px: ${e}`));
     } finally { await t.close(); }
   }
@@ -1185,11 +1216,11 @@ test('색이 많을 때 안내: 5색 없음·6색 나옴·닫기·색이 줄면 
 test('최근에 쓴 색: 순서·중복·6개 한도·새로고침 유지·누르면 선택·팔레트에서 지우면 빠짐, 저장소 오류, 영어, 휴대폰', async (fail, note) => {
   const COLORS = ['#222222', '#D32F2F', '#FBC02D', '#1976D2', '#388E3C', '#8E24AA', '#00ACC1', '#F57C00'];
   const recent = page => page.evaluate(() => {
-    const row = document.getElementById('recentRow');
-    return { chips: [...document.querySelectorAll('#recentChips .recent-chip')].map(b => b.dataset.color), shown: !row.hidden && row.getClientRects().length > 0,
-      active: activeColor, sel: [...document.querySelectorAll('#recentChips .recent-chip.selected')].map(b => b.dataset.color),
+    const row = document.getElementById('qbRecentRow'); // 4단계: 화면에 보이는 최근 줄은 새 도구 막대에 있음
+    return { chips: [...document.querySelectorAll('#qbRecentChips .recent-chip')].map(b => b.dataset.color), shown: !row.hidden && row.getClientRects().length > 0,
+      active: activeColor, sel: [...document.querySelectorAll('#qbRecentChips .recent-chip.selected')].map(b => b.dataset.color),
       store: (() => { try { return localStorage.getItem('crochet-recent-colors'); } catch (e) { return null; } })(), label: document.querySelector('.recent-label').textContent,
-      names: [...document.querySelectorAll('#recentChips .recent-chip')].map(b => b.getAttribute('aria-label')) };
+      names: [...document.querySelectorAll('#qbRecentChips .recent-chip')].map(b => b.getAttribute('aria-label')) };
   });
   const setPalette = page => page.evaluate(cs => { PRESET_COLORS.length = 0; cs.forEach(c => PRESET_COLORS.push(c)); activeColor = PRESET_COLORS[0]; buildPalette(); }, COLORS);
   const eq = (got, want, what) => { if (JSON.stringify(got) !== JSON.stringify(want)) fail(what + ': ' + JSON.stringify(want) + '이어야 하는데 ' + JSON.stringify(got) + '이에요'); };
@@ -1217,7 +1248,7 @@ test('최근에 쓴 색: 순서·중복·6개 한도·새로고침 유지·누�
       const h1 = await ribbonH();
       if (Math.abs(h1 - h0) > 1) fail('"최근" 줄이 생기면서 작업창이 두꺼워졌어요 (' + h0 + 'px → ' + h1 + 'px)');
       // 최근 색을 누르면 그 색이 칠할 색이 됨 + 맨 앞으로, 중복 없음
-      await page.click('#recentChips .recent-chip[data-color="' + COLORS[1] + '"]'); await sleep(150);
+      await page.click('#qbRecentChips .recent-chip[data-color="' + COLORS[1] + '"]'); await sleep(150);
       r = await recent(page);
       eq(r.chips, [COLORS[1], COLORS[3], COLORS[2], COLORS[0]], '같은 색을 다시 고른 뒤(맨 앞으로, 중복 없음)');
       if (r.active !== COLORS[1]) fail('최근 색을 눌렀는데 칠할 색이 바뀌지 않았어요 (' + r.active + ')');
@@ -1239,7 +1270,7 @@ test('최근에 쓴 색: 순서·중복·6개 한도·새로고침 유지·누�
       eq(r.chips, [COLORS[6], COLORS[5], COLORS[4], COLORS[1], COLORS[3], COLORS[2]], '새로고침 뒤 최근 목록');
       if (!r.shown) fail('새로고침 뒤 "최근" 줄이 안 보여요');
       // 팔레트에서 지운 색, 바뀐 색은 목록에서 빠짐
-      await page.evaluate(c => { const sw = [...document.querySelectorAll('#palette .swatch')].find(s => getComputedStyle(s).backgroundColor === c); sw.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true })); }, hexToRgb(COLORS[6]));
+      await page.evaluate(c => { const sw = [...document.querySelectorAll('#qbPalette .swatch')].find(s => getComputedStyle(s).backgroundColor === c); sw.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true })); }, hexToRgb(COLORS[6]));
       await sleep(150);
       await clickId(page, 'swatchDelete'); await sleep(200);
       r = await recent(page);
@@ -1287,7 +1318,7 @@ test('최근에 쓴 색: 순서·중복·6개 한도·새로고침 유지·누�
       t.errors.forEach(e => fail('/en/pattern/: ' + e));
     } finally { await t.close(); }
   }
-  // 4) 휴대폰 폭 (작업창을 펼친 상태, 어두운 화면)
+  // 4) 휴대폰 폭 (어두운 화면). 4단계부터 칠할 색·최근 줄은 새 도구 막대에 있음(#qbRecentRow)
   for (const [p, w] of [['/pattern/', 320], ['/pattern/', 360], ['/en/pattern/', 390]]) {
     const ctx = await BROWSER.createBrowserContext();
     const page = await ctx.newPage();
@@ -1298,13 +1329,12 @@ test('최근에 쓴 색: 순서·중복·6개 한도·새로고침 유지·누�
       await page.evaluateOnNewDocument(() => { try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {} });
       await page.evaluateOnNewDocument(SKIP_START);
       await page.goto(BASE + p, { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
-      await page.evaluate(() => setRibbonFolded(false)); await sleep(300);
       // 팔레트가 아주 길면(색 9개 이상) 휴대폰 320px에서는 팔레트 자체가 넘치므로, 여기서는 색 6개로 "최근" 줄만 확인
       await page.evaluate(cs => { PRESET_COLORS.length = 0; cs.slice(0, 6).forEach(c => PRESET_COLORS.push(c)); activeColor = PRESET_COLORS[0]; buildPalette(); }, COLORS);
       await pick(page, 1, 2, 3, 4);
       const m = await page.evaluate(() => {
-        const vw = document.documentElement.clientWidth, row = document.getElementById('recentRow'), rr = row.getBoundingClientRect();
-        const chips = [...document.querySelectorAll('#recentChips .recent-chip')].map(b => b.getBoundingClientRect());
+        const vw = document.documentElement.clientWidth, row = document.getElementById('qbRecentRow'), rr = row.getBoundingClientRect();
+        const chips = [...document.querySelectorAll('#qbRecentChips .recent-chip')].map(b => b.getBoundingClientRect());
         return { shown: row.getClientRects().length > 0, rowIn: rr.left >= 0 && rr.right <= vw, chipsIn: chips.every(c => c.left >= 0 && c.right <= vw), minW: Math.min(...chips.map(c => c.width)), n: chips.length, over: document.documentElement.scrollWidth - vw, theme: document.documentElement.getAttribute('data-theme') };
       });
       const label = p + ' ' + w + 'px 어두운 화면';
@@ -1344,6 +1374,10 @@ test('버튼 툴팁에 단축키 표시: 한국어·영어·맥(⌘), 접근성 
     ['deCancel', '취소 (Esc)', 'Cancel (Esc)'],
     ['askCancel', '취소 (Esc)', 'Cancel (Esc)'],
     ['swatchCancel', '닫기 (Esc)', 'Close (Esc)'],
+    // 4단계: 화면에 보이는 새 도구 막대의 같은 버튼도 같은 툴팁·접근성 이름
+    ['qbUndo', '되돌리기 (Ctrl+Z)', 'Undo (Ctrl+Z)', '되돌리기', 'Undo'],
+    ['qbRedo', '다시하기 (Ctrl+Shift+Z / Ctrl+Y)', 'Redo (Ctrl+Shift+Z / Ctrl+Y)', '다시하기', 'Redo'],
+    ['qbOpen', '도안 파일 열기 (Ctrl+O)', 'Open pattern file (Ctrl+O)', '열기', 'Open'],
     ['ribbonFoldBtn', '작업창 접기 (Ctrl+\\)', 'Collapse toolbar (Ctrl+\\)', '작업창 접기', 'Collapse toolbar'],
   ];
   const read = (page, ids) => page.evaluate(ids => ids.map(id => { const e = document.getElementById(id); return e ? { id, title: e.getAttribute('title'), aria: e.getAttribute('aria-label') } : { id, title: null, aria: null }; }), ids);
@@ -1521,12 +1555,11 @@ test('좁은 화면 넘침: 색이 많은 팔레트(9·12·20·50개), 320·360�
     return { ctx, page, errors };
   };
   const over = page => page.evaluate(() => { const vw = document.documentElement.clientWidth; return { over: document.documentElement.scrollWidth - vw, bad: [...document.querySelectorAll('body *')].filter(e => e.getClientRects().length && e.getBoundingClientRect().right > vw + 1).map(e => (e.id || e.className || e.tagName) + ':' + Math.round(e.getBoundingClientRect().right - vw)).slice(0, 4) }; });
-  // 1) 칠할 색 팔레트 (작업창을 펼친 상태): 색 5·9·12·20·30개
+  // 1) 칠할 색 팔레트: 색 5·9·12·20·30개 (4단계부터 화면의 칠할 색은 새 도구 막대 #qbPalette·#qbRecentRow)
   for (const dark of [false, true]) for (const w of [320, 360, 390]) {
     const { ctx, page, errors } = await openMobile('/pattern/', w, dark);
     try {
       const label = '/pattern/ ' + w + 'px ' + (dark ? '어두운 화면' : '밝은 화면');
-      await page.evaluate(() => setRibbonFolded(false)); await sleep(250);
       for (const n of [5, 9, 12, 20, 50]) {
         await page.evaluate((cs, n) => {
           PRESET_COLORS.length = 0; cs.slice(0, n).forEach(c => PRESET_COLORS.push(c)); activeColor = PRESET_COLORS[0]; buildPalette();
@@ -1535,11 +1568,13 @@ test('좁은 화면 넘침: 색이 많은 팔레트(9·12·20·50개), 320·360�
         await sleep(350);
         const o = await over(page);
         const m = await page.evaluate(() => {
-          const vw = document.documentElement.clientWidth, pal = document.getElementById('palette'), pr = pal.getBoundingClientRect();
-          const grp = document.querySelector('.grp-color'), body = grp.querySelector('.rgroup-body').getBoundingClientRect();
+          const vw = document.documentElement.clientWidth, pal = document.getElementById('qbPalette'), pr = pal.getBoundingClientRect();
+          const grp = document.getElementById('qbColors');
           const last = [...pal.querySelectorAll('.swatch, .add-color')].pop().getBoundingClientRect();
           const sel = pal.querySelector('.swatch.selected');
-          const rr = document.getElementById('recentRow'), ch = [...document.querySelectorAll('#recentChips .recent-chip')];
+          const rr = document.getElementById('qbRecentRow'), ch = [...document.querySelectorAll('#qbRecentChips .recent-chip')];
+          // 묶음 높이 = 첫 색 칸 위 ~ 최근 줄(없으면 마지막 칸) 아래 (막대 안쪽 여백은 빼고 셈)
+          const top0 = pal.querySelector('.swatch').getBoundingClientRect().top, body = { height: (rr.hidden ? last.bottom : rr.getBoundingClientRect().bottom) - top0 };
           return { palIn: pr.left >= 0 && pr.right <= vw + 0.5, palH: Math.round(pr.height), scrollable: pal.scrollHeight > pal.clientHeight + 1, wrap: grp.classList.contains('pal-wrap'), bodyH: Math.round(body.height),
             addReach: pal.scrollWidth <= pal.clientWidth + 1, sel: !!sel, recent: !rr.hidden && ch.length >= 2, recentSel: ch.some(c => c.classList.contains('selected')), flexWrap: getComputedStyle(pal).flexWrap };
         });
@@ -1556,9 +1591,9 @@ test('좁은 화면 넘침: 색이 많은 팔레트(9·12·20·50개), 320·360�
       // 색 추가(+) 버튼이 눈에 보이고 눌림
       await page.evaluate((cs) => { PRESET_COLORS.length = 0; cs.slice(0, 12).forEach(c => PRESET_COLORS.push(c)); buildPalette(); }, ALL);
       await sleep(250);
-      const add = await page.evaluate(() => { const b = document.querySelector('#palette .add-color').getBoundingClientRect(), vw = document.documentElement.clientWidth; return { in: b.left >= 0 && b.right <= vw && b.width >= 24 }; });
+      const add = await page.evaluate(() => { const b = document.querySelector('#qbPalette .add-color').getBoundingClientRect(), vw = document.documentElement.clientWidth; return { in: b.left >= 0 && b.right <= vw && b.width >= 24 }; });
       if (!add.in) fail(label + ': 색 12개일 때 색 추가(+) 버튼이 화면 안에 보이지 않아요');
-      await page.evaluate(() => document.querySelector('#palette .add-color').click()); await sleep(250);
+      await page.evaluate(() => document.querySelector('#qbPalette .add-color').click()); await sleep(250);
       if (!(await page.evaluate(() => document.getElementById('hexModal').classList.contains('show')))) fail(label + ': 색 추가(+) 버튼을 눌러도 색 추가 창이 안 열려요');
       // 배경색 팔레트(격자 탭): 색 30개여도 안 넘침
       await page.evaluate(() => { document.getElementById('hexCancel').click(); });
@@ -1574,7 +1609,7 @@ test('좁은 화면 넘침: 색이 많은 팔레트(9·12·20·50개), 320·360�
     try {
       await t.page.evaluate(cs => { PRESET_COLORS.length = 0; cs.slice(0, 12).forEach(c => PRESET_COLORS.push(c)); buildPalette(); }, ALL);
       await sleep(250);
-      const r = await t.page.evaluate(() => ({ flexWrap: getComputedStyle(document.getElementById('palette')).flexWrap, wrap: document.querySelector('.grp-color').classList.contains('pal-wrap'), h: Math.round(document.getElementById('palette').getBoundingClientRect().height) }));
+      const r = await t.page.evaluate(() => { const sw = [...document.querySelectorAll('#qbPalette .swatch, #qbPalette .add-color')].map(e => e.getBoundingClientRect()); return { flexWrap: getComputedStyle(document.getElementById('qbPalette')).flexWrap, wrap: document.getElementById('qbColors').classList.contains('pal-wrap'), h: Math.round(Math.max(...sw.map(b => b.bottom)) - Math.min(...sw.map(b => b.top))) }; });
       if (r.flexWrap !== 'nowrap' || r.wrap || r.h > 32) fail('PC(1440px)의 팔레트 모양이 바뀌었어요 (' + JSON.stringify(r) + ')');
       t.errors.forEach(e => fail(e));
     } finally { await t.close(); }
@@ -1957,7 +1992,7 @@ test('소개 페이지 CSS 캐시 값: site.css를 쓰는 모든 HTML이 같은 
   note('site.css ?v=' + keys.join(',') + ' · ' + Object.values(vals).flat().length + '개 페이지');
 });
 
-test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄·팔레트·라벨 안 겹침, 같은 색 개수면 같은 높이, 추가·삭제·교체·파일 열기·새로고침·회전·접기 뒤, 320·360·390px 라이트·다크', async (fail, note) => {
+test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄·팔레트·옆 버튼 안 겹침, 같은 색 개수면 같은 높이, 추가·삭제·교체·파일 열기·새로고침·회전·예전 접기 단축키 뒤, 320·360·390px 라이트·다크', async (fail, note) => {
   const COLS = ['#222222', '#D32F2F', '#FBC02D', '#1976D2', '#388E3C', '#8E24AA', '#00ACC1', '#F57C00', '#6D4C41', '#E91E63', '#009688', '#3F51B5'];
   // 파일 열기용 도안: 팔레트 12색 (열면 내 팔레트에 없는 색이 더해짐)
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'dotteugae-pal-'));
@@ -1977,10 +2012,10 @@ test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄
         await page.evaluateOnNewDocument(d => { try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); if (d) localStorage.setItem('crochet-ui-theme', 'dark'); } catch (e) {} }, dark);
         await page.evaluateOnNewDocument(SKIP_START);
         await page.goto(BASE + '/pattern/', { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
-        await page.evaluate(() => setRibbonFolded(false)); await sleep(250);
-        // 평소 상태(처음 연 5색 한 줄, 최근 줄 없음)는 기존 높이 44px 그대로
-        const first = await page.evaluate(() => ({ recent: !document.getElementById('recentRow').hidden, h: Math.round(document.querySelector('.grp-color .rgroup-body').getBoundingClientRect().height) }));
-        if (!first.recent && first.h !== 44) fail(L + ': 처음 연 상태(한 줄, 최근 줄 없음)의 묶음 높이가 44px이 아니에요 (' + first.h + 'px)');
+        // 4단계부터 화면의 칠할 색은 새 도구 막대(#qbColors: #qbPalette + #qbRecentRow). 묶음 높이 = 첫 색 칸 위 ~ 최근 줄(없으면 마지막 칸) 아래
+        // 평소 상태(처음 연 5색 한 줄, 최근 줄 없음)는 칸 한 줄 높이 28px
+        const first = await page.evaluate(() => { const its = [...document.querySelectorAll('#qbPalette .swatch, #qbPalette .add-color')].map(e => e.getBoundingClientRect()), rr = document.getElementById('qbRecentRow'); return { recent: !rr.hidden, h: Math.round((rr.hidden ? Math.max(...its.map(b => b.bottom)) : rr.getBoundingClientRect().bottom) - Math.min(...its.map(b => b.top))) }; });
+        if (!first.recent && first.h !== 28) fail(L + ': 처음 연 상태(한 줄, 최근 줄 없음)의 묶음 높이가 28px(칸 한 줄)이 아니에요 (' + first.h + 'px)');
         const heights = {}; // 색 개수 → 묶음 높이 (같은 개수면 언제나 같아야 함)
         const check = async (why) => {
           steps++;
@@ -1989,13 +2024,13 @@ test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄
           const m = await page.evaluate(() => {
             const R = e => e.getBoundingClientRect();
             const hit = (a, b, pad = 0) => a.left - pad < b.right && b.left < a.right + pad && a.top - pad < b.bottom && b.top < a.bottom + pad;
-            const pal = document.getElementById('palette'), grp = document.querySelector('.grp-color'), body = grp.querySelector('.rgroup-body'), cap = grp.querySelector('.rgroup-cap');
-            const items = [...pal.querySelectorAll('.swatch, .add-color')], rr = document.getElementById('recentRow'), sel = pal.querySelector('.swatch.selected');
+            const pal = document.getElementById('qbPalette'), body = document.getElementById('qbColors'), cap = document.getElementById('qbUndo'); // 라벨 대신 바로 옆 되돌리기 버튼과 겹치는지
+            const items = [...pal.querySelectorAll('.swatch, .add-color')], rr = document.getElementById('qbRecentRow'), sel = pal.querySelector('.swatch.selected');
             const rrR = rr.hidden ? null : R(rr);
-            return { n: PRESET_COLORS.length, recent: !!rrR, rows: new Set(items.map(i => Math.round(R(i).top))).size, bodyH: Math.round(R(body).height),
+            return { n: PRESET_COLORS.length, recent: !!rrR, rows: new Set(items.map(i => Math.round(R(i).top))).size, bodyH: Math.round((rrR ? rrR.bottom : Math.max(...items.map(i => R(i).bottom))) - Math.min(...items.map(i => R(i).top))),
               swHit: !!rrR && items.some(i => hit(R(i), rrR)),              // 팔레트 칸과 최근 줄 상자
               ringHit: !!(rrR && sel && hit(R(sel), rrR, 3.5)),            // 선택 고리(바깥 4px)와 최근 줄
-              capHit: !!rrR && hit(rrR, R(cap)),                            // 최근 줄과 "칠할 색" 라벨
+              capHit: !!rrR && hit(rrR, R(cap)),                            // 최근 줄과 옆의 되돌리기 버튼
               clipped: pal.scrollHeight > pal.clientHeight + 1,             // 12색까지는 팔레트 안에서 잘리거나 스크롤되면 안 됨
               inBody: items.every(i => R(i).bottom <= R(body).bottom + 0.5) && (!rrR || rrR.bottom <= R(body).bottom + 0.5) };
           });
@@ -2003,7 +2038,7 @@ test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄
           if (!m.recent) { fail(S + '최근 색 줄이 안 보여요'); return; }
           if (m.swHit) fail(S + '최근 색 줄이 팔레트 칸과 겹쳐요');
           if (m.ringHit) fail(S + '선택한 색의 고리가 최근 색 줄에 닿아요');
-          if (m.capHit) fail(S + '"칠할 색" 라벨이 최근 색 줄과 겹쳐요');
+          if (m.capHit) fail(S + '최근 색 줄이 옆의 되돌리기 버튼과 겹쳐요');
           if (m.clipped) fail(S + '팔레트 칸이 잘리거나 안에서 스크롤돼요');
           if (!m.inBody) fail(S + '팔레트나 최근 줄이 묶음 밖으로 삐져나가요');
           if (heights[m.n] === undefined) heights[m.n] = m.bodyH;
@@ -2011,7 +2046,7 @@ test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄
         };
         const replace = async n => { await page.evaluate((cs, n) => { PRESET_COLORS.length = 0; cs.slice(0, n).forEach(c => PRESET_COLORS.push(c)); activeColor = PRESET_COLORS[0]; buildPalette(); }, COLS, n); await sleep(250); };
         const add = async c => {
-          await page.evaluate(() => document.querySelector('#palette .add-color').click()); await sleep(150);
+          await page.evaluate(() => document.querySelector('#qbPalette .add-color').click()); await sleep(150);
           await page.evaluate(c => { const t = document.getElementById('hexText'); t.value = c; t.dispatchEvent(new Event('input')); document.getElementById('hexOk').click(); }, c); await sleep(200);
         };
         const del = async () => { await page.evaluate(() => { openSwatchMenu(PRESET_COLORS.length - 1); document.getElementById('swatchDelete').click(); }); await sleep(200); };
@@ -2024,8 +2059,9 @@ test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄
         const input = await page.$('#openFileInput');
         await input.uploadFile(file12); await sleep(500); await check('파일 열기 뒤');
         for (let k = 0; k < 5; k++) await del(); await check('파일 연 뒤 삭제로 7개');
-        // 작업창 접기 → 펼치기
-        await page.evaluate(() => setRibbonFolded(true)); await sleep(200); await page.evaluate(() => setRibbonFolded(false)); await sleep(250); await check('작업창 접었다 펼친 뒤');
+        // 예전 작업창 접기 단축키(Ctrl+\) 두 번: 화면 배치가 그대로여야 함
+        for (let k = 0; k < 2; k++) { await page.keyboard.down('Control'); await page.keyboard.press('Backslash'); await page.keyboard.up('Control'); await sleep(200); }
+        await check('예전 접기 단축키 두 번 뒤');
         // 화면 돌리기(가로 → 세로)
         await page.setViewport({ width: 760, height: w, isMobile: true, hasTouch: true, deviceScaleFactor: 1 }); await sleep(300);
         await page.setViewport({ width: w, height: 760, isMobile: true, hasTouch: true, deviceScaleFactor: 1 }); await sleep(300); await check('화면 돌린 뒤');
@@ -2044,15 +2080,15 @@ test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄
     try {
       await t.page.evaluate(cs => { PRESET_COLORS.length = 0; cs.forEach(c => PRESET_COLORS.push(c)); buildPalette(); [2, 1, 0].forEach(i => pickPaintColor(PRESET_COLORS[i])); }, COLS);
       await sleep(300);
-      const r = await t.page.evaluate(() => ({ h: Math.round(document.querySelector('.grp-color .rgroup-body').getBoundingClientRect().height), wrap: getComputedStyle(document.getElementById('palette')).flexWrap, recent: !document.getElementById('recentRow').hidden }));
+      const r = await t.page.evaluate(() => { const its = [...document.querySelectorAll('#qbPalette .swatch')].map(e => e.getBoundingClientRect()), rr = document.getElementById('qbRecentRow'); return { h: Math.round(rr.getBoundingClientRect().bottom - Math.min(...its.map(b => b.top))), wrap: getComputedStyle(document.getElementById('qbPalette')).flexWrap, recent: !rr.hidden }; });
       if (r.h !== 44 || r.wrap !== 'nowrap' || !r.recent) fail('PC(1440px) 칠할 색 묶음이 바뀌었어요 (' + JSON.stringify(r) + ')');
       t.errors.forEach(e => fail('PC: ' + e));
     } finally { await t.close(); }
   }
-  note('320·360·390px × 라이트·다크, 단계 ' + steps + '번 (교체·추가·삭제·파일 열기·접기·회전·새로고침), PC 그대로');
+  note('320·360·390px × 라이트·다크, 단계 ' + steps + '번 (교체·추가·삭제·파일 열기·예전 접기 단축키·회전·새로고침), PC 그대로');
 });
 
-test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동작, 저장 메뉴·더보기 메뉴(키보드·바깥 누르기·Esc·Tab), 글자 버튼, 접힌 상태의 칠할 색·최근 색, 방안뜨기에서 숨김, 휴대폰 360px, 영어', async (fail, note) => {
+test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동작, 저장 메뉴·더보기 메뉴(키보드·바깥 누르기·Esc·Tab), 글자 버튼, 막대의 칠할 색·최근 색, 휴대폰 막대의 되돌리기·다시하기·작업 시작하기, 방안뜨기에서 숨김, 휴대폰 360px, 영어', async (fail, note) => {
   const vis = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); return !!e && !e.hidden && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden'; }, sel);
   const expanded = (page, id) => page.evaluate(i => document.getElementById(i).getAttribute('aria-expanded'), id);
   const focused = page => page.evaluate(() => { const a = document.activeElement; return a ? (a.id || (a.dataset && (a.dataset.click || a.dataset.pane)) || a.className) : ''; });
@@ -2075,7 +2111,7 @@ test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동�
     try {
       const { page } = t;
       if (!await vis(page, '#qbar')) fail('PC: 새 도구 막대가 보이지 않아요');
-      if (await vis(page, '#qbColors')) fail('PC: 작업창이 펼쳐져 있는데 막대에도 칠할 색 줄이 보여요');
+      if (!await vis(page, '#qbColors')) fail('PC: 새 도구 막대에 칠할 색 줄이 보이지 않아요'); // 4단계부터 항상 보임
       // 칠하기·채우기·지우개 = 작업창 버튼·지우개 칸과 같은 상태
       await clickId(page, 'qbFill');
       let s = await page.evaluate(() => ({ tool, fillOn: toolFillBtn.classList.contains('active'), qb: document.getElementById('qbFill').getAttribute('aria-pressed') }));
@@ -2201,9 +2237,7 @@ test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동�
       await clickId(page, 'qbText');
       s = await page.evaluate(() => ({ pane: document.getElementById('pane-text').classList.contains('active'), modal: !!document.querySelector('.hex-modal.show') }));
       if (!s.pane || s.modal) fail('PC: 글자 버튼을 눌렀는데 오른쪽 패널의 글자 탭이 열리지 않았어요');
-      // 작업창을 접으면 막대에 칠할 색 줄 (팔레트와 같은 색, 누르면 칠할 색이 바뀜)
-      await clickId(page, 'ribbonFoldBtn');
-      if (!await vis(page, '#qbColors')) fail('PC: 작업창을 접었는데 막대에 칠할 색 줄이 보이지 않아요');
+      // 막대의 칠할 색 줄 (팔레트와 같은 색, 누르면 칠할 색이 바뀜)
       s = await page.evaluate(() => ({ qb: [...document.querySelectorAll('#qbPalette .swatch')].map(b => b.dataset.color), pal: PRESET_COLORS.map(c => c.toUpperCase()) }));
       if (JSON.stringify(s.qb) !== JSON.stringify(s.pal)) fail('PC: 막대의 칠할 색이 팔레트와 달라요 (' + JSON.stringify(s) + ')');
       await page.click('#qbPalette .swatch[data-color="' + BLUE + '"]'); await sleep(150);
@@ -2213,7 +2247,7 @@ test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동�
       await page.click('#qbRecentChips .recent-chip[data-color="' + RED + '"]'); await sleep(150);
       if (await page.evaluate(() => activeColor) !== RED) fail('PC: 막대의 최근 색을 눌렀는데 그 색이 고르지 않았어요');
       await clickCell(page, 1, 1);
-      if (await page.evaluate(() => gridData[cols + 1]) !== RED) fail('PC: 접힌 상태에서 막대로 고른 색으로 칠해지지 않아요');
+      if (await page.evaluate(() => gridData[cols + 1]) !== RED) fail('PC: 막대로 고른 색으로 칠해지지 않아요');
       // 방안뜨기 탭에서는 막대가 숨음 (보기 전용)
       await clickId(page, 'tabFilet');
       if (await vis(page, '#qbar')) fail('PC: 방안뜨기 탭인데 새 도구 막대가 보여요');
@@ -2238,12 +2272,15 @@ test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동�
       });
       await page.evaluateOnNewDocument(SKIP_START);
       await page.goto(BASE + '/pattern/', { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
-      const s = await page.evaluate(() => ({ folded: document.querySelector('.app').classList.contains('ribbon-folded'), coarse: matchMedia('(pointer: coarse)').matches }));
-      if (!s.folded) fail('360px: 처음 열었는데 작업창이 접혀 있지 않아요');
+      const s = await page.evaluate(() => ({ ribbon: document.getElementById('ribbon').getClientRects().length > 0, coarse: matchMedia('(pointer: coarse)').matches,
+        // 4단계: 맨 위 막대에서 뺀 되돌리기·다시하기·작업 시작하기가 휴대폰 새 막대에 있음
+        moved: ['qbUndo', 'qbRedo', 'qbKnit', 'qbOpen', 'qbSave', 'qbMore'].filter(id => !document.getElementById(id).getClientRects().length) }));
+      if (s.ribbon) fail('360px: 옛 작업창이 화면에 보여요');
+      if (s.moved.length) fail('360px: 새 도구 막대에 ' + s.moved.join(', ') + ' 버튼이 보이지 않아요');
       if (!await vis(page, '#qbColors')) fail('360px: 작업창이 접혀 있는데 막대에 칠할 색 줄이 없어요');
       await page.tap('#qbPalette .swatch[data-color="' + RED + '"]'); await sleep(150);
-      if (await page.evaluate(() => activeColor) !== RED) fail('360px: 접힌 상태에서 막대의 칠할 색을 눌렀는데 바뀌지 않았어요');
-      if (!await vis(page, '#qbRecentRow')) fail('360px: 접힌 상태에서 최근 색 줄이 보이지 않아요');
+      if (await page.evaluate(() => activeColor) !== RED) fail('360px: 막대의 칠할 색을 눌렀는데 바뀌지 않았어요');
+      if (!await vis(page, '#qbRecentRow')) fail('360px: 막대에 최근 색 줄이 보이지 않아요');
       if (s.coarse) {
         await page.tap('#qbSave'); await sleep(150);
         if (!await vis(page, '#qbShareItem')) fail('360px: 파일 공유가 되는 터치 기기인데 저장 메뉴에 공유가 없어요');
@@ -2259,10 +2296,14 @@ test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동�
       const tx = await page.evaluate(() => ({ pane: document.getElementById('pane-text').classList.contains('active'), top: Math.round(document.querySelector('.inspector').getBoundingClientRect().top) }));
       if (!tx.pane) fail('360px: 글자 버튼을 눌렀는데 글자 탭이 열리지 않았어요');
       if (tx.top > 200) fail('360px: 글자 버튼을 눌렀는데 패널이 화면에 보이지 않아요 (위에서 ' + tx.top + 'px)');
-      // 작업창을 펼치면 막대의 색 줄은 숨고(작업창에 같은 줄), 다시 접으면 보임
-      await page.evaluate(() => window.scrollTo(0, 0));
-      await page.evaluate(() => [...document.querySelectorAll('.ribbon-handle')].find(b => b.offsetParent !== null).click()); await sleep(250);
-      if (await vis(page, '#qbColors')) fail('360px: 작업창을 펼쳤는데 막대의 칠할 색 줄이 남아 있어요');
+      // 맨 위로 돌아오면 막대의 칠할 색 줄이 그대로 보이고, 막대의 되돌리기가 동작 (휴대폰에서 새로 옮긴 버튼)
+      await page.evaluate(() => window.scrollTo(0, 0)); await sleep(200);
+      if (!await vis(page, '#qbColors')) fail('360px: 막대의 칠할 색 줄이 사라졌어요');
+      await page.tap('#qbPalette .swatch[data-color="' + BLUE + '"]'); await sleep(150);
+      const cp = await page.evaluate(() => { const r = canvas.getBoundingClientRect(); return { x: r.left + LABEL_SIZE + cellW / 2, y: r.top + LABEL_SIZE + cellH / 2 }; });
+      await page.touchscreen.tap(cp.x, cp.y); await sleep(200);
+      if (await page.evaluate(() => gridData[0]) !== BLUE) fail('360px: 막대에서 고른 색으로 칠해지지 않아요');
+      else { await page.tap('#qbUndo'); await sleep(200); if (await page.evaluate(() => gridData[0]) === BLUE) fail('360px: 휴대폰 막대의 되돌리기가 동작하지 않아요'); }
       errors.forEach(e => fail('360px: ' + e));
     } finally { await ctx.close(); }
   }
@@ -2290,7 +2331,7 @@ test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동�
   note('PC 동작·메뉴 키보드, 휴대폰 360px, 영어');
 });
 
-test('새 도구 막대(3단계) 화면 폭: 한·영 × 320·360·390·768·1280·1440px × 라이트·다크 × 작업창 펼침·접힘 × 메뉴 닫힘·저장·더보기에서 가로 넘침·잘린 버튼 없음', async (fail, note) => {
+test('새 도구 막대(3단계) 화면 폭: 한·영 × 320·360·390·768·1280·1440px × 라이트·다크 × 예전 접기 값 펼침·접힘 × 메뉴 닫힘·저장·더보기에서 가로 넘침·잘린 버튼 없음, 막대 버튼 10개가 모두 보임', async (fail, note) => {
   let views = 0;
   // 한 페이지를 열어 두고 폭만 바꿈 (터치 기기 흉내는 휴대폰·태블릿 폭과 PC 폭으로 나눠서, 바꿀 때 다시 열리지 않게)
   for (const p of ['/pattern/', '/en/pattern/']) for (const dark of [false, true]) for (const [mobile, sizes] of [[true, [[320, 640], [360, 740], [390, 844], [768, 1024]]], [false, [[1280, 800], [1440, 900]]]]) {
@@ -2310,11 +2351,13 @@ test('새 도구 막대(3단계) 화면 폭: 한·영 × 320·360·390·768·128
             const cut = [...document.querySelectorAll('#qbar button')].filter(e => e.offsetParent !== null && !inScroller(e) && !e.closest('.qb-menu[hidden]'))
               .filter(e => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.right > vw + 1 || b.left < -1 || e.scrollWidth > e.clientWidth + 1); })
               .map(e => e.id || e.dataset.click || e.dataset.pane || e.textContent.trim().slice(0, 12));
-            return { over: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - vw, cut };
+            const missing = ['qbPaint', 'qbFill', 'qbEraser', 'qbText', 'qbUndo', 'qbRedo', 'qbKnit', 'qbOpen', 'qbSave', 'qbMore'].filter(id => !document.getElementById(id).getClientRects().length);
+            return { over: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - vw, cut, missing };
           });
           const L = p + ' ' + w + 'px ' + (dark ? '다크' : '라이트') + (fold ? ' 접힘' : ' 펼침') + (menu ? ' ' + menu + ' 메뉴' : '');
           if (r.over > 1) fail(L + ': 가로로 ' + r.over + 'px 넘쳐요');
           if (r.cut.length) fail(L + ': 잘리거나 화면 밖으로 나간 버튼이 있어요 (' + r.cut.join(', ') + ')');
+          if (r.missing.length) fail(L + ': 새 도구 막대에 안 보이는 버튼이 있어요 (' + r.missing.join(', ') + ')');
           if (menu) { await page.keyboard.press('Escape'); await sleep(100); }
         }
       }

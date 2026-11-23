@@ -19,7 +19,7 @@
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/pattern.css?v=20">
+<link rel="stylesheet" href="../assets/pattern.css?v=21">
 </head>
 <body>
 <div class="app area-work">
@@ -61,6 +61,7 @@
     <button type="button" class="qb-btn qb-tool" id="qbFill" aria-pressed="false" aria-label="채우기" title="채우기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l6-6 7 7-6 6z"/><path d="M5 11h13"/><path d="M20 15c0 1.6 1 2.6 1 3.6a1 1 0 0 1-2 0c0-1 1-2 1-3.6z"/></svg><span>채우기</span></button>
     <button type="button" class="qb-btn qb-tool" id="qbEraser" aria-pressed="false" aria-label="지우개" title="지우개 (배경색으로 되돌림)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21h10"/><path d="M5.5 13.5 14 5l5 5-8.5 8.5H8z"/></svg><span>지우개</span></button>
     <button type="button" class="qb-btn" id="qbText" aria-label="글자" title="글자 넣기 (오른쪽 패널의 글자 탭)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/></svg><span>글자</span></button>
+    <span class="qb-break"></span>
     <span class="qb-sep qb-sep-colors"></span>
     <div class="qb-colors" id="qbColors" role="group" aria-label="칠할 색">
       <div class="palette qb-palette" id="qbPalette" data-dyn></div>
@@ -616,8 +617,8 @@
             <li>떠 있는 글자·장식·선택 영역은 <b>복사</b> 후 <b>붙여넣기</b>로 여러 개 넣을 수 있어요. 키보드: Ctrl+C · Ctrl+X · Ctrl+V · Delete · Esc · Enter · 방향키</li>
             <li>글자를 넣은 뒤 <b>글자 하나씩 옮기기</b>를 누르면 글자를 하나씩 골라 자유롭게 옮길 수 있어요. 물결 등으로 틀을 잡고 다듬을 때 좋아요.</li>
             <li>글자를 옮기는 중에 <b>↔ 가운데 · ↕ 가운데</b>를 누르면 격자 한가운데로 정렬돼요.</li>
-            <li><b>이미지로 저장</b>은 PNG 파일을 바로 내려받아요. 휴대폰에서는 갤러리가 아니라 다운로드 폴더에 저장될 수 있으니, 갤러리(사진 앱)에 넣으려면 옆의 <b>공유</b> 버튼을 눌러 저장하세요.</li>
-            <li>위쪽 작업창은 오른쪽 끝(휴대폰은 작업창 아래 가운데)의 화살표 버튼으로 접을 수 있어요. 접으면 도안이 맨 위까지 넓어지고, 오른쪽 위의 작은 화살표 손잡이를 누르면 다시 펼쳐져요. 키보드: Ctrl+\ (맥은 Cmd+\)</li>
+            <li><b>저장</b> 메뉴의 <b>이미지로 저장</b>은 PNG 파일을 바로 내려받아요. 휴대폰에서는 갤러리가 아니라 다운로드 폴더에 저장될 수 있으니, 갤러리(사진 앱)에 넣으려면 저장 메뉴의 <b>공유</b>를 눌러 저장하세요.</li>
+            <li>자주 쓰지 않는 기능(선택, 확대·축소, 작업 단, 뒤집기·회전, 복사·붙여넣기, 모두 지우기, 장식·색 바꾸기 등)은 위쪽 도구 막대의 <b>더보기</b>에 있어요.</li>
           </ul>
           <div class="credits">
             <div class="credits-title">사용한 폰트 · 라이선스</div>
@@ -732,6 +733,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="../assets/pattern.js?v=23"></script>
+<script src="../assets/pattern.js?v=24"></script>
 </body>
 </html>

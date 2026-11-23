@@ -20,7 +20,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/pattern.css?v=20">
+<link rel="stylesheet" href="/assets/pattern.css?v=21">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -81,6 +81,7 @@
     <button type="button" class="qb-btn qb-tool" id="qbFill" aria-pressed="false" aria-label="채우기" title="채우기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l6-6 7 7-6 6z"/><path d="M5 11h13"/><path d="M20 15c0 1.6 1 2.6 1 3.6a1 1 0 0 1-2 0c0-1 1-2 1-3.6z"/></svg><span>채우기</span></button>
     <button type="button" class="qb-btn qb-tool" id="qbEraser" aria-pressed="false" aria-label="지우개" title="지우개 (배경색으로 되돌림)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21h10"/><path d="M5.5 13.5 14 5l5 5-8.5 8.5H8z"/></svg><span>지우개</span></button>
     <button type="button" class="qb-btn" id="qbText" aria-label="글자" title="글자 넣기 (오른쪽 패널의 글자 탭)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/></svg><span>글자</span></button>
+    <span class="qb-break"></span>
     <span class="qb-sep qb-sep-colors"></span>
     <div class="qb-colors" id="qbColors" role="group" aria-label="칠할 색">
       <div class="palette qb-palette" id="qbPalette" data-dyn></div>
@@ -638,8 +639,8 @@
             <li><b>Copy</b> and <b>Paste</b> floating text, decorations or selections as many times as you like. Keys: Ctrl+C · Ctrl+X · Ctrl+V · Delete · Esc · Enter · arrows</li>
             <li>After adding text, tap <b>Move letters</b> to pick and move each letter freely — great for fine-tuning a wave layout.</li>
             <li>While moving text, tap <b>↔ Center · ↕ Center</b> to center it on the grid.</li>
-            <li><b>Save image</b> downloads a PNG file right away. On a phone it may go to your Downloads folder instead of your photo gallery. To add it to your gallery, tap <b>Share</b> next to it and save from there.</li>
-            <li>Use the arrow button at the right end of the toolbar (below it on phones) to collapse it so the pattern fills the screen. Tap the small arrow handle at the top right to bring it back. Keyboard: Ctrl+\ (Cmd+\ on Mac)</li>
+            <li><b>Save image</b> in the <b>Save</b> menu downloads a PNG file right away. On a phone it may go to your Downloads folder instead of your photo gallery. To add it to your gallery, tap <b>Share</b> in the Save menu and save from there.</li>
+            <li>Less-used tools (Select, zoom, current row, mirror and rotate, copy and paste, clear all, decor, recolor and more) are under <b>More</b> in the toolbar.</li>
           </ul>
           <div class="credits">
             <div class="credits-title">사용한 폰트 · 라이선스</div>
@@ -755,6 +756,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="/assets/pattern.js?v=23"></script>
+<script src="/assets/pattern.js?v=24"></script>
 </body>
 </html>
