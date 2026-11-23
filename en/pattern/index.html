@@ -20,7 +20,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/pattern.css?v=19">
+<link rel="stylesheet" href="/assets/pattern.css?v=20">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -73,6 +73,75 @@
       <button class="ab-primary" id="shareImgBtn" aria-label="공유" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg><span>공유</span></button>
     </div>
   </header>
+
+  <!-- 새 도구 막대 (3단계): 자주 쓰는 것만 한 줄 + 저장 메뉴 + 더보기 메뉴.
+       버튼은 기존 버튼(data-click = 기존 id)이나 기존 함수를 그대로 부르는 껍데기라 동작은 같음 (assets/pattern.js의 "새 도구 막대" 구역) -->
+  <div class="qbar" id="qbar" role="toolbar" aria-label="자주 쓰는 도구">
+    <button type="button" class="qb-btn qb-tool" id="qbPaint" aria-pressed="true" aria-label="칠하기" title="칠하기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/></svg><span>칠하기</span></button>
+    <button type="button" class="qb-btn qb-tool" id="qbFill" aria-pressed="false" aria-label="채우기" title="채우기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11l6-6 7 7-6 6z"/><path d="M5 11h13"/><path d="M20 15c0 1.6 1 2.6 1 3.6a1 1 0 0 1-2 0c0-1 1-2 1-3.6z"/></svg><span>채우기</span></button>
+    <button type="button" class="qb-btn qb-tool" id="qbEraser" aria-pressed="false" aria-label="지우개" title="지우개 (배경색으로 되돌림)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21h10"/><path d="M5.5 13.5 14 5l5 5-8.5 8.5H8z"/></svg><span>지우개</span></button>
+    <button type="button" class="qb-btn" id="qbText" aria-label="글자" title="글자 넣기 (오른쪽 패널의 글자 탭)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/></svg><span>글자</span></button>
+    <span class="qb-sep qb-sep-colors"></span>
+    <div class="qb-colors" id="qbColors" role="group" aria-label="칠할 색">
+      <div class="palette qb-palette" id="qbPalette" data-dyn></div>
+      <div class="recent-row" id="qbRecentRow" hidden><span class="recent-label">최근</span><span class="recent-chips" id="qbRecentChips" data-dyn></span></div>
+    </div>
+    <span class="qb-sep qb-sep-undo"></span>
+    <button type="button" class="qb-btn qb-icon qb-undo" id="qbUndo" aria-label="되돌리기" title="되돌리기 (Ctrl+Z)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+    <button type="button" class="qb-btn qb-icon qb-undo" id="qbRedo" aria-label="다시하기" title="다시하기 (Ctrl+Shift+Z / Ctrl+Y)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+    <span class="qb-push"></span>
+    <button type="button" class="qb-btn qb-knit" id="qbKnit" data-click="knitStartBtn" aria-label="작업 시작하기" title="다른 도구를 숨기고 도안과 작업 단만 크게 보여요"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4v16l13-8z"/></svg><span>작업 시작하기</span></button>
+    <button type="button" class="qb-btn" id="qbOpen" data-click="openFileBtn" aria-label="열기" title="도안 파일 열기 (Ctrl+O)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v1"/><path d="M3 7v11a1 1 0 0 0 1 1h14l3-8H7l-3 8"/></svg><span>열기</span></button>
+    <button type="button" class="qb-btn qb-primary qb-keep-label" id="qbSave" aria-haspopup="menu" aria-expanded="false" aria-controls="qbSaveMenu" aria-label="저장" title="저장"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M8 4v5h7V4"/><rect x="8" y="13" width="8" height="5"/></svg><span>저장</span><svg class="qb-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></button>
+    <button type="button" class="qb-btn qb-keep-label" id="qbMore" aria-haspopup="menu" aria-expanded="false" aria-controls="qbMoreMenu" aria-label="더보기" title="더보기"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg><span>더보기</span></button>
+
+    <div class="qb-menu qb-save-menu" id="qbSaveMenu" role="menu" aria-label="저장" hidden>
+      <button type="button" class="qb-mi" role="menuitem" data-click="saveFileBtn" aria-keyshortcuts="Control+S"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M8 4v5h7V4"/><rect x="8" y="13" width="8" height="5"/></svg><span class="qb-mt">도안 파일 저장</span><kbd class="qb-kbd" data-dyn>Ctrl+S</kbd></button>
+      <button type="button" class="qb-mi" role="menuitem" data-click="saveImgBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span class="qb-mt">이미지로 저장</span></button>
+      <button type="button" class="qb-mi" role="menuitem" data-click="shareImgBtn" id="qbShareItem" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg><span class="qb-mt">공유</span></button>
+    </div>
+
+    <div class="qb-menu qb-more-menu" id="qbMoreMenu" role="menu" aria-label="더보기" hidden>
+      <div class="qb-mg" role="group" aria-label="도구"><div class="qb-mh" aria-hidden="true">도구</div>
+        <button type="button" class="qb-mi" role="menuitem" data-click="toolSelectBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3"><rect x="4" y="4" width="16" height="16" rx="1"/></svg><span class="qb-mt">선택</span></button>
+      </div>
+      <div class="qb-mg" role="group" aria-label="화면 보기"><div class="qb-mh" aria-hidden="true">화면 보기</div>
+        <div class="qb-step">
+          <button type="button" class="qb-mi qb-sq" role="menuitem" data-click="zoomOutBtn" data-keep aria-label="축소">−</button>
+          <span class="qb-val" id="qbZoomVal" data-dyn>100%</span>
+          <button type="button" class="qb-mi qb-sq" role="menuitem" data-click="zoomInBtn" data-keep aria-label="확대">＋</button>
+          <button type="button" class="qb-mi qb-fit" role="menuitem" data-click="zoomResetBtn" data-keep>맞춤</button>
+        </div>
+        <button type="button" class="qb-mi" role="menuitem" data-click="filetBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/><path d="M9 9h6v6H9z" fill="currentColor"/></svg><span class="qb-mt">방안뜨기로 보기</span></button>
+      </div>
+      <div class="qb-mg" role="group" aria-label="작업 단"><div class="qb-mh" aria-hidden="true">작업 단</div>
+        <div class="qb-step">
+          <button type="button" class="qb-mi qb-sq" role="menuitem" data-click="rowMinusBtn" data-keep aria-label="아래 단">−</button>
+          <span class="qb-val" id="qbRowVal" data-dyn>1단</span>
+          <button type="button" class="qb-mi qb-sq" role="menuitem" data-click="rowPlusBtn" data-keep aria-label="위 단">＋</button>
+        </div>
+      </div>
+      <div class="qb-mg" role="group" aria-label="변형"><div class="qb-mh" aria-hidden="true">변형</div>
+        <button type="button" class="qb-mi" role="menuitemcheckbox" aria-checked="false" data-click="flipToggleBtn" id="qbFlipItem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 7 4 12l4 5z"/><path d="m16 7 4 5-4 5z"/></svg><span class="qb-mt">좌우 뒤집기</span></button>
+        <button type="button" class="qb-mi" role="menuitem" data-click="rot90Btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v5h-5"/></svg><span class="qb-mt">90° 회전</span></button>
+        <button type="button" class="qb-mi" role="menuitem" data-click="rot270Btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/></svg><span class="qb-mt">270° 회전</span></button>
+      </div>
+      <div class="qb-mg" role="group" aria-label="편집"><div class="qb-mh" aria-hidden="true">편집</div>
+        <button type="button" class="qb-mi" role="menuitem" data-click="copyBtn" aria-keyshortcuts="Control+C"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="1.5"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg><span class="qb-mt">복사</span><kbd class="qb-kbd" data-dyn>Ctrl+C</kbd></button>
+        <button type="button" class="qb-mi" role="menuitem" data-click="pasteBtn" aria-keyshortcuts="Control+V"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M8 5H6a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2"/></svg><span class="qb-mt">붙여넣기</span><kbd class="qb-kbd" data-dyn>Ctrl+V</kbd></button>
+        <button type="button" class="qb-mi danger" role="menuitem" data-click="clearGridBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg><span class="qb-mt">모두 지우기</span></button>
+      </div>
+      <div class="qb-mg" role="group" aria-label="꾸미기"><div class="qb-mh" aria-hidden="true">꾸미기</div>
+        <button type="button" class="qb-mi" role="menuitem" data-pane="decor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg><span class="qb-mt">장식</span></button>
+        <button type="button" class="qb-mi" role="menuitem" data-pane="replace"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4"/><path d="M3 8h14"/><path d="m17 20 4-4-4-4"/><path d="M21 16H7"/></svg><span class="qb-mt">색 바꾸기</span></button>
+      </div>
+      <div class="qb-mg" role="group" aria-label="그 밖에"><div class="qb-mh" aria-hidden="true">그 밖에</div>
+        <button type="button" class="qb-mi" role="menuitem" data-pane="grid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg><span class="qb-mt">격자 크기·배경색·게이지</span></button>
+        <button type="button" class="qb-mi" role="menuitem" data-click="copyLinkBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span class="qb-mt">링크 복사</span></button>
+        <button type="button" class="qb-mi" role="menuitem" data-pane="help"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 0 1 4.9.7c0 1.7-2.4 2.3-2.4 3.8"/><path d="M12 17h.01"/></svg><span class="qb-mt">도움말</span></button>
+      </div>
+    </div>
+  </div>
 
   <div class="ribbon" id="ribbon" role="toolbar" aria-label="도구 모음">
     <div class="rgroup grp-tools">
@@ -686,6 +755,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="/assets/pattern.js?v=22"></script>
+<script src="/assets/pattern.js?v=23"></script>
 </body>
 </html>

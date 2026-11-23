@@ -2052,6 +2052,280 @@ test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄
   note('320·360·390px × 라이트·다크, 단계 ' + steps + '번 (교체·추가·삭제·파일 열기·접기·회전·새로고침), PC 그대로');
 });
 
+test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동작, 저장 메뉴·더보기 메뉴(키보드·바깥 누르기·Esc·Tab), 글자 버튼, 접힌 상태의 칠할 색·최근 색, 방안뜨기에서 숨김, 휴대폰 360px, 영어', async (fail, note) => {
+  const vis = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); return !!e && !e.hidden && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden'; }, sel);
+  const expanded = (page, id) => page.evaluate(i => document.getElementById(i).getAttribute('aria-expanded'), id);
+  const focused = page => page.evaluate(() => { const a = document.activeElement; return a ? (a.id || (a.dataset && (a.dataset.click || a.dataset.pane)) || a.className) : ''; });
+  const press = async (page, key) => { await page.keyboard.press(key); await sleep(120); };
+  const downloads = async (page, ctx) => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'dotteugae-qb-'));
+    const cdp = await page.createCDPSession();
+    try { await cdp.send('Browser.setDownloadBehavior', { behavior: 'allow', downloadPath: dir, browserContextId: ctx.id }); }
+    catch (e) { await cdp.send('Page.setDownloadBehavior', { behavior: 'allow', downloadPath: dir }); }
+    return dir;
+  };
+  const waitFile = async (dir, ext, before) => {
+    for (let i = 0; i < 50; i++) { const f = fs.readdirSync(dir).find(n => n.endsWith(ext) && !before.includes(n)); if (f) { await sleep(300); return f; } await sleep(200); }
+    return null;
+  };
+  // 1) PC 한국어: 막대 버튼·메뉴 동작
+  {
+    const t = await openPage('/pattern/');
+    const dir = await downloads(t.page, t.ctx);
+    try {
+      const { page } = t;
+      if (!await vis(page, '#qbar')) fail('PC: 새 도구 막대가 보이지 않아요');
+      if (await vis(page, '#qbColors')) fail('PC: 작업창이 펼쳐져 있는데 막대에도 칠할 색 줄이 보여요');
+      // 칠하기·채우기·지우개 = 작업창 버튼·지우개 칸과 같은 상태
+      await clickId(page, 'qbFill');
+      let s = await page.evaluate(() => ({ tool, fillOn: toolFillBtn.classList.contains('active'), qb: document.getElementById('qbFill').getAttribute('aria-pressed') }));
+      if (s.tool !== 'fill' || !s.fillOn || s.qb !== 'true') fail('PC: 막대의 채우기가 작업창 채우기와 같은 상태가 아니에요 (' + JSON.stringify(s) + ')');
+      await clickId(page, 'qbEraser');
+      s = await page.evaluate(() => ({ c: activeColor, sel: !!document.querySelector('#palette .swatch.eraser.selected'), qb: document.getElementById('qbEraser').getAttribute('aria-pressed') }));
+      if (s.c !== null || !s.sel || s.qb !== 'true') fail('PC: 막대의 지우개가 팔레트 지우개 칸과 같은 동작이 아니에요 (' + JSON.stringify(s) + ')');
+      await clickId(page, 'qbPaint');
+      s = await page.evaluate(() => ({ tool, c: activeColor, paintOn: toolPaintBtn.classList.contains('active'), qb: document.getElementById('qbPaint').getAttribute('aria-pressed'), er: document.getElementById('qbEraser').getAttribute('aria-pressed') }));
+      if (s.tool !== 'paint' || !s.c || !s.paintOn || s.qb !== 'true' || s.er !== 'false') fail('PC: 지우개 다음에 칠하기를 누르면 칠하기·색으로 돌아와야 해요 (' + JSON.stringify(s) + ')');
+      // 되돌리기·다시하기
+      await pickColor(page, RED); await clickCell(page, 0, 0);
+      const und = await page.evaluate(() => [document.getElementById('qbUndo').disabled, document.getElementById('undoBtn').disabled, document.getElementById('qbRedo').disabled, document.getElementById('redoBtn').disabled]);
+      if (und[0] !== und[1] || und[2] !== und[3]) fail('PC: 막대의 되돌리기·다시하기 꺼짐 상태가 맨 위 버튼과 달라요 (' + und + ')');
+      await clickId(page, 'qbUndo');
+      if (await page.evaluate(() => !!gridData[0])) fail('PC: 막대의 되돌리기를 눌렀는데 칠한 칸이 그대로예요');
+      await clickId(page, 'qbRedo');
+      if (!(await page.evaluate(() => !!gridData[0]))) fail('PC: 막대의 다시하기를 눌렀는데 칸이 돌아오지 않았어요');
+      // 저장 메뉴: 마우스로 열기 → 항목 2개(PC는 공유 없음) → 바깥 누르면 닫힘
+      await page.click('#qbSave'); await sleep(150);
+      const items = await page.evaluate(() => [...document.querySelectorAll('#qbSaveMenu .qb-mi')].filter(i => i.getClientRects().length > 0).map(i => i.dataset.click)); // 화면에 실제로 보이는 항목만
+      if (!await vis(page, '#qbSaveMenu') || await expanded(page, 'qbSave') !== 'true') fail('PC: 저장 버튼을 눌렀는데 메뉴가 열리지 않았어요');
+      if (JSON.stringify(items) !== JSON.stringify(['saveFileBtn', 'saveImgBtn'])) fail('PC: 저장 메뉴 항목이 "도안 파일 저장·이미지로 저장"이 아니에요 (' + items + ')');
+      const kbd = await page.evaluate(() => document.querySelector('#qbSaveMenu .qb-kbd').textContent);
+      if (kbd !== 'Ctrl+S') fail('PC: 저장 메뉴에 단축키 Ctrl+S 표시가 없어요 (' + kbd + ')');
+      const sb = await page.evaluate(() => { const r = document.querySelector('.statusbar').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+      await page.mouse.click(sb.x, sb.y); await sleep(150);
+      if (await vis(page, '#qbSaveMenu') || await expanded(page, 'qbSave') !== 'false') fail('PC: 메뉴 바깥을 눌렀는데 저장 메뉴가 닫히지 않았어요');
+      // 키보드: Enter로 열면 첫 항목, ↓↑ 이동(처음·끝에서 돌아감), End, Esc면 닫히고 버튼으로
+      await page.focus('#qbSave'); await press(page, 'Enter');
+      if (await focused(page) !== 'saveFileBtn') fail('PC: Enter로 저장 메뉴를 열면 첫 항목에 있어야 하는데 "' + await focused(page) + '"이에요');
+      await press(page, 'ArrowDown');
+      if (await focused(page) !== 'saveImgBtn') fail('PC: 저장 메뉴에서 ↓를 눌렀는데 다음 항목으로 가지 않았어요');
+      await press(page, 'ArrowDown');
+      if (await focused(page) !== 'saveFileBtn') fail('PC: 저장 메뉴 마지막에서 ↓를 누르면 처음으로 돌아가야 해요');
+      await press(page, 'ArrowUp');
+      if (await focused(page) !== 'saveImgBtn') fail('PC: 저장 메뉴 처음에서 ↑를 누르면 마지막으로 가야 해요');
+      await press(page, 'Home');
+      if (await focused(page) !== 'saveFileBtn') fail('PC: 저장 메뉴에서 Home이 첫 항목으로 가지 않아요');
+      await press(page, 'Escape');
+      if (await vis(page, '#qbSaveMenu') || await focused(page) !== 'qbSave') fail('PC: Esc를 누르면 저장 메뉴가 닫히고 저장 버튼으로 돌아가야 해요');
+      await press(page, ' ');
+      if (!await vis(page, '#qbSaveMenu')) fail('PC: Space로 저장 메뉴가 열리지 않아요');
+      await press(page, 'Tab');
+      if (await vis(page, '#qbSaveMenu')) fail('PC: Tab으로 메뉴 밖으로 나가면 메뉴가 닫혀야 해요');
+      // 저장 메뉴 항목 = 기존 저장 동작: 도안 파일(JSON)과 PNG가 내려받아짐. Ctrl+S도 그대로
+      let before = fs.readdirSync(dir);
+      await page.click('#qbSave'); await sleep(120);
+      await page.click('#qbSaveMenu .qb-mi[data-click="saveFileBtn"]');
+      let f = await waitFile(dir, '.json', before);
+      if (!f) fail('PC: 저장 메뉴의 "도안 파일 저장"을 눌렀는데 도안 파일이 내려받아지지 않았어요');
+      else { const o = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); const g = decodePattern(o); if (o.app !== 'crochet-pattern-tool' || o.version !== 1 || g.data[0] !== RED) fail('PC: 메뉴로 저장한 도안 파일 내용이 달라요'); }
+      if (await vis(page, '#qbSaveMenu')) fail('PC: 저장 메뉴 항목을 누른 뒤에도 메뉴가 열려 있어요');
+      before = fs.readdirSync(dir);
+      await page.click('#qbSave'); await sleep(120);
+      await page.click('#qbSaveMenu .qb-mi[data-click="saveImgBtn"]');
+      f = await waitFile(dir, '.png', before);
+      if (!f) fail('PC: 저장 메뉴의 "이미지로 저장"을 눌렀는데 PNG가 내려받아지지 않았어요');
+      else if (fs.readFileSync(path.join(dir, f)).readUInt32BE(0) !== 0x89504E47) fail('PC: 메뉴로 저장한 이미지가 PNG가 아니에요');
+      // Ctrl+S는 그대로 같은 저장 함수를 부름 (브라우저가 같은 페이지의 연속 내려받기를 막으므로 파일 대신 호출 여부로 확인)
+      await page.mouse.click(sb.x, sb.y);
+      await page.evaluate(() => { window.__saveOrig = savePatternFile; window.__saves = 0; savePatternFile = function () { window.__saves++; }; });
+      await page.keyboard.down('Control'); await page.keyboard.press('KeyS'); await page.keyboard.up('Control'); await sleep(150);
+      if (await page.evaluate(() => { const n = window.__saves; savePatternFile = window.__saveOrig; return n; }) !== 1) fail('PC: Ctrl+S가 도안 파일 저장으로 동작하지 않아요');
+      // 열기 버튼 = 기존 열기 (파일 고르기 창)
+      const [chooser] = await Promise.all([page.waitForFileChooser({ timeout: 3000 }).catch(() => null), page.click('#qbOpen')]);
+      if (!chooser) fail('PC: 막대의 열기를 눌렀는데 파일 고르기 창이 뜨지 않았어요'); else await chooser.cancel().catch(() => {});
+      // 더보기 메뉴: 모든 항목이 기존 버튼(또는 패널 탭)과 이어져 있음
+      await page.click('#qbMore'); await sleep(150);
+      const mr = await page.evaluate(() => {
+        const m = document.getElementById('qbMoreMenu'), r = m.getBoundingClientRect();
+        const its = [...m.querySelectorAll('.qb-mi')];
+        return { shown: !m.hidden, inView: r.left >= 0 && r.right <= innerWidth && r.top >= 0, n: its.length,
+          broken: its.filter(i => i.dataset.click ? !document.getElementById(i.dataset.click) : !document.getElementById('pane-' + i.dataset.pane)).map(i => i.textContent.trim()),
+          clicks: its.map(i => i.dataset.click || 'pane:' + i.dataset.pane), groups: [...m.querySelectorAll('.qb-mg')].map(g => g.getAttribute('aria-label')),
+          copyOff: m.querySelector('[data-click="copyBtn"]').disabled, pasteOff: m.querySelector('[data-click="pasteBtn"]').disabled };
+      });
+      if (!mr.shown || !mr.inView) fail('PC: 더보기 메뉴가 열리지 않았거나 화면 밖으로 나가요');
+      if (mr.broken.length) fail('PC: 더보기 메뉴에 기존 버튼과 이어지지 않은 항목이 있어요 (' + mr.broken + ')');
+      ['toolSelectBtn', 'zoomOutBtn', 'zoomInBtn', 'zoomResetBtn', 'filetBtn', 'rowMinusBtn', 'rowPlusBtn', 'flipToggleBtn', 'rot90Btn', 'rot270Btn', 'copyBtn', 'pasteBtn', 'clearGridBtn', 'copyLinkBtn', 'pane:decor', 'pane:replace', 'pane:grid', 'pane:help']
+        .forEach(k => { if (!mr.clicks.includes(k)) fail('PC: 더보기 메뉴에 ' + k + ' 항목이 없어요'); });
+      if (!mr.copyOff || !mr.pasteOff) fail('PC: 떠 있는 것이 없는데 더보기의 복사·붙여넣기가 켜져 있어요 (기존 버튼과 다름)');
+      // 확대: 메뉴가 열린 채로 비율이 바뀜
+      await page.click('#qbMoreMenu [data-click="zoomInBtn"]'); await sleep(150);
+      s = await page.evaluate(() => ({ z: zoomLevel, val: document.getElementById('qbZoomVal').textContent, open: !document.getElementById('qbMoreMenu').hidden }));
+      if (s.z !== 1.25 || s.val !== '125%' || !s.open) fail('PC: 더보기의 확대가 기존 확대와 같지 않아요 (' + JSON.stringify(s) + ')');
+      await page.click('#qbMoreMenu [data-click="zoomResetBtn"]'); await sleep(150);
+      await page.click('#qbMoreMenu [data-click="rowPlusBtn"]'); await sleep(150);
+      s = await page.evaluate(() => ({ r: currentRow, val: document.getElementById('qbRowVal').textContent }));
+      if (s.r !== 2 || !/2/.test(s.val)) fail('PC: 더보기의 작업 단 ＋가 기존 버튼과 같지 않아요 (' + JSON.stringify(s) + ')');
+      // 좌우 뒤집기: 체크 표시가 기존 버튼 상태와 같음
+      await page.click('#qbMoreMenu [data-click="flipToggleBtn"]'); await sleep(150);
+      if (!(await page.evaluate(() => flipped && flipToggleBtn.classList.contains('active')))) fail('PC: 더보기의 좌우 뒤집기가 동작하지 않아요');
+      await page.click('#qbMore'); await sleep(120);
+      if (await page.evaluate(() => document.getElementById('qbFlipItem').getAttribute('aria-checked')) !== 'true') fail('PC: 뒤집은 뒤 더보기의 좌우 뒤집기에 켜짐 표시가 없어요');
+      await page.click('#qbMoreMenu [data-click="flipToggleBtn"]'); await sleep(120);
+      // 90° 회전
+      const g0 = await grid(page);
+      await page.click('#qbMore'); await sleep(120);
+      await page.click('#qbMoreMenu [data-click="rot90Btn"]'); await sleep(200);
+      let g1 = await grid(page);
+      if (g1.rows !== g0.cols || g1.cols !== g0.rows) fail('PC: 더보기의 90° 회전이 동작하지 않아요');
+      await clickId(page, 'qbUndo');
+      // 모두 지우기: 기존 버튼과 같이 바로 지우고, 되돌리기로 돌아옴
+      await page.click('#qbMore'); await sleep(120);
+      await page.click('#qbMoreMenu [data-click="clearGridBtn"]'); await sleep(200);
+      if ((await grid(page)).data.some(Boolean)) fail('PC: 더보기의 모두 지우기를 눌렀는데 칸이 남아 있어요');
+      await clickId(page, 'qbUndo');
+      if (!(await grid(page)).data.some(Boolean)) fail('PC: 모두 지우기 뒤 되돌리기로 돌아오지 않아요');
+      // 패널 탭 항목 (장식)
+      await page.click('#qbMore'); await sleep(120);
+      await page.click('#qbMoreMenu [data-pane="decor"]'); await sleep(200);
+      if (!(await page.evaluate(() => document.getElementById('pane-decor').classList.contains('active')))) fail('PC: 더보기의 장식을 눌렀는데 장식 탭이 열리지 않았어요');
+      // 키보드로 더보기: ↓로 열고 End → 마지막(도움말) → Enter
+      await page.focus('#qbMore'); await press(page, 'ArrowDown');
+      if (await focused(page) !== 'toolSelectBtn') fail('PC: ↓로 더보기를 열면 첫 항목(선택)에 있어야 해요 (' + await focused(page) + ')');
+      await press(page, 'End');
+      if (await focused(page) !== 'help') fail('PC: 더보기에서 End를 누르면 마지막 항목(도움말)이어야 해요');
+      await press(page, 'Enter'); await sleep(150);
+      if (!(await page.evaluate(() => document.getElementById('pane-help').classList.contains('active')))) fail('PC: 더보기에서 키보드로 도움말을 골랐는데 도움말 탭이 열리지 않았어요');
+      if (await vis(page, '#qbMoreMenu')) fail('PC: 더보기 항목을 고른 뒤에도 메뉴가 열려 있어요');
+      // 글자 버튼: 오른쪽 패널의 글자 탭 (새 창 없음)
+      await clickId(page, 'qbText');
+      s = await page.evaluate(() => ({ pane: document.getElementById('pane-text').classList.contains('active'), modal: !!document.querySelector('.hex-modal.show') }));
+      if (!s.pane || s.modal) fail('PC: 글자 버튼을 눌렀는데 오른쪽 패널의 글자 탭이 열리지 않았어요');
+      // 작업창을 접으면 막대에 칠할 색 줄 (팔레트와 같은 색, 누르면 칠할 색이 바뀜)
+      await clickId(page, 'ribbonFoldBtn');
+      if (!await vis(page, '#qbColors')) fail('PC: 작업창을 접었는데 막대에 칠할 색 줄이 보이지 않아요');
+      s = await page.evaluate(() => ({ qb: [...document.querySelectorAll('#qbPalette .swatch')].map(b => b.dataset.color), pal: PRESET_COLORS.map(c => c.toUpperCase()) }));
+      if (JSON.stringify(s.qb) !== JSON.stringify(s.pal)) fail('PC: 막대의 칠할 색이 팔레트와 달라요 (' + JSON.stringify(s) + ')');
+      await page.click('#qbPalette .swatch[data-color="' + BLUE + '"]'); await sleep(150);
+      s = await page.evaluate(() => ({ c: activeColor, sel: getComputedStyle(document.querySelector('#palette .swatch.selected')).backgroundColor }));
+      if (s.c !== BLUE || s.sel !== hexToRgb(BLUE)) fail('PC: 막대의 색을 눌렀는데 칠할 색이 바뀌지 않았어요 (' + JSON.stringify(s) + ')');
+      if (!await vis(page, '#qbRecentRow')) fail('PC: 색을 두 번 바꿨는데 막대에 최근 색 줄이 보이지 않아요');
+      await page.click('#qbRecentChips .recent-chip[data-color="' + RED + '"]'); await sleep(150);
+      if (await page.evaluate(() => activeColor) !== RED) fail('PC: 막대의 최근 색을 눌렀는데 그 색이 고르지 않았어요');
+      await clickCell(page, 1, 1);
+      if (await page.evaluate(() => gridData[cols + 1]) !== RED) fail('PC: 접힌 상태에서 막대로 고른 색으로 칠해지지 않아요');
+      // 방안뜨기 탭에서는 막대가 숨음 (보기 전용)
+      await clickId(page, 'tabFilet');
+      if (await vis(page, '#qbar')) fail('PC: 방안뜨기 탭인데 새 도구 막대가 보여요');
+      await clickId(page, 'tabDesign');
+      if (!await vis(page, '#qbar')) fail('PC: 도안 탭으로 돌아왔는데 새 도구 막대가 안 보여요');
+      t.errors.forEach(e => fail('PC: ' + e));
+    } finally { await t.close(); fs.rmSync(dir, { recursive: true, force: true }); }
+  }
+  // 2) 휴대폰(360px, 터치, 파일 공유 가능): 처음엔 작업창이 접혀 있고 막대에 칠할 색, 저장 메뉴에 공유, 글자 버튼은 패널까지 내려감
+  {
+    const ctx = await BROWSER.createBrowserContext();
+    const page = await ctx.newPage();
+    const errors = [];
+    page.on('pageerror', e => errors.push('자바스크립트 오류: ' + String(e.message || e).split('\n')[0]));
+    try {
+      await page.setViewport({ width: 360, height: 740, isMobile: true, hasTouch: true, deviceScaleFactor: 1 });
+      await page.evaluateOnNewDocument(() => {
+        try { localStorage.setItem('crochet-ribbon-hint-shown', '1'); } catch (e) {}
+        window.__shared = 0;
+        navigator.canShare = d => !!(d && d.files && d.files.length);
+        navigator.share = async () => { window.__shared++; };
+      });
+      await page.evaluateOnNewDocument(SKIP_START);
+      await page.goto(BASE + '/pattern/', { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(300);
+      const s = await page.evaluate(() => ({ folded: document.querySelector('.app').classList.contains('ribbon-folded'), coarse: matchMedia('(pointer: coarse)').matches }));
+      if (!s.folded) fail('360px: 처음 열었는데 작업창이 접혀 있지 않아요');
+      if (!await vis(page, '#qbColors')) fail('360px: 작업창이 접혀 있는데 막대에 칠할 색 줄이 없어요');
+      await page.tap('#qbPalette .swatch[data-color="' + RED + '"]'); await sleep(150);
+      if (await page.evaluate(() => activeColor) !== RED) fail('360px: 접힌 상태에서 막대의 칠할 색을 눌렀는데 바뀌지 않았어요');
+      if (!await vis(page, '#qbRecentRow')) fail('360px: 접힌 상태에서 최근 색 줄이 보이지 않아요');
+      if (s.coarse) {
+        await page.tap('#qbSave'); await sleep(150);
+        if (!await vis(page, '#qbShareItem')) fail('360px: 파일 공유가 되는 터치 기기인데 저장 메뉴에 공유가 없어요');
+        else { await page.tap('#qbShareItem'); if (!await waitFor(page, () => window.__shared > 0, 5000)) fail('360px: 저장 메뉴의 공유가 공유 시트로 넘기지 않았어요'); }
+      } else note('터치 흉내가 안 돼서 공유 항목은 건너뜀');
+      // 더보기 메뉴가 화면 안에 다 들어옴
+      await page.tap('#qbMore'); await sleep(150);
+      const m = await page.evaluate(() => { const r = document.getElementById('qbMoreMenu').getBoundingClientRect(); return { l: r.left, r: r.right, vw: document.documentElement.clientWidth }; });
+      if (m.l < 0 || m.r > m.vw) fail('360px: 더보기 메뉴가 화면 밖으로 나가요 (' + JSON.stringify(m) + ')');
+      await page.tap('#qbMore'); await sleep(120);
+      // 글자 버튼: 캔버스 아래의 패널로 내려가서 글자 탭
+      await page.tap('#qbText'); await sleep(900);
+      const tx = await page.evaluate(() => ({ pane: document.getElementById('pane-text').classList.contains('active'), top: Math.round(document.querySelector('.inspector').getBoundingClientRect().top) }));
+      if (!tx.pane) fail('360px: 글자 버튼을 눌렀는데 글자 탭이 열리지 않았어요');
+      if (tx.top > 200) fail('360px: 글자 버튼을 눌렀는데 패널이 화면에 보이지 않아요 (위에서 ' + tx.top + 'px)');
+      // 작업창을 펼치면 막대의 색 줄은 숨고(작업창에 같은 줄), 다시 접으면 보임
+      await page.evaluate(() => window.scrollTo(0, 0));
+      await page.evaluate(() => [...document.querySelectorAll('.ribbon-handle')].find(b => b.offsetParent !== null).click()); await sleep(250);
+      if (await vis(page, '#qbColors')) fail('360px: 작업창을 펼쳤는데 막대의 칠할 색 줄이 남아 있어요');
+      errors.forEach(e => fail('360px: ' + e));
+    } finally { await ctx.close(); }
+  }
+  // 3) 영어: 막대·메뉴 문구에 한국어가 남지 않음, 접근성 이름
+  {
+    const t = await openPage('/en/pattern/');
+    try {
+      const { page } = t;
+      await page.click('#qbSave'); await sleep(120);
+      const save = await page.evaluate(() => document.getElementById('qbSaveMenu').innerText);
+      await page.click('#qbMore'); await sleep(120);
+      const r = await page.evaluate(() => {
+        const bar = document.getElementById('qbar');
+        const attrs = [...bar.querySelectorAll('[aria-label],[title]')].map(e => (e.getAttribute('aria-label') || '') + ' ' + (e.getAttribute('title') || ''));
+        return { text: document.getElementById('qbMoreMenu').innerText + ' ' + [...bar.querySelectorAll('.qb-btn > span')].map(s => s.textContent).join(' '), attrs: attrs.join(' | '),
+          save: document.getElementById('qbSave').getAttribute('aria-label'), more: document.getElementById('qbMore').getAttribute('aria-label'), bar: bar.getAttribute('aria-label') };
+      });
+      const ko = (save + ' ' + r.text + ' ' + r.attrs).match(/[가-힣][가-힣 ·°]*/g);
+      if (ko) fail('영어: 새 도구 막대·메뉴에 한국어가 남아 있어요 (' + [...new Set(ko)].slice(0, 6).join(', ') + ')');
+      if (!/Save pattern file/.test(save) || !/Save image/.test(save)) fail('영어: 저장 메뉴 문구가 달라요 (' + save.replace(/\s+/g, ' ') + ')');
+      if (r.save !== 'Save' || r.more !== 'More' || r.bar !== 'Quick tools') fail('영어: 막대 접근성 이름이 달라요 (' + [r.save, r.more, r.bar] + ')');
+      t.errors.forEach(e => fail('영어: ' + e));
+    } finally { await t.close(); }
+  }
+  note('PC 동작·메뉴 키보드, 휴대폰 360px, 영어');
+});
+
+test('새 도구 막대(3단계) 화면 폭: 한·영 × 320·360·390·768·1280·1440px × 라이트·다크 × 작업창 펼침·접힘 × 메뉴 닫힘·저장·더보기에서 가로 넘침·잘린 버튼 없음', async (fail, note) => {
+  let views = 0;
+  // 한 페이지를 열어 두고 폭만 바꿈 (터치 기기 흉내는 휴대폰·태블릿 폭과 PC 폭으로 나눠서, 바꿀 때 다시 열리지 않게)
+  for (const p of ['/pattern/', '/en/pattern/']) for (const dark of [false, true]) for (const [mobile, sizes] of [[true, [[320, 640], [360, 740], [390, 844], [768, 1024]]], [false, [[1280, 800], [1440, 900]]]]) {
+    const t = await openPage(p, { width: sizes[0][0], height: sizes[0][1], mobile });
+    try {
+      const { page } = t;
+      if (dark) await page.evaluate(() => { document.documentElement.setAttribute('data-theme', 'dark'); });
+      for (const [w, h] of sizes) {
+      await page.setViewport({ width: w, height: h, isMobile: mobile, hasTouch: mobile, deviceScaleFactor: 1 }); await sleep(250);
+      for (const fold of [false, true]) {
+        await page.evaluate(f => setRibbonFolded(f), fold); await sleep(200);
+        for (const menu of [null, 'qbSave', 'qbMore']) {
+          if (menu) { await page.click('#' + menu); await sleep(150); }
+          const r = await page.evaluate(() => {
+            const vw = document.documentElement.clientWidth;
+            const inScroller = el => { for (let q = el.parentElement; q; q = q.parentElement) { const o = getComputedStyle(q).overflowX; if (o === 'auto' || o === 'scroll') return true; } return false; };
+            const cut = [...document.querySelectorAll('#qbar button')].filter(e => e.offsetParent !== null && !inScroller(e) && !e.closest('.qb-menu[hidden]'))
+              .filter(e => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.right > vw + 1 || b.left < -1 || e.scrollWidth > e.clientWidth + 1); })
+              .map(e => e.id || e.dataset.click || e.dataset.pane || e.textContent.trim().slice(0, 12));
+            return { over: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - vw, cut };
+          });
+          const L = p + ' ' + w + 'px ' + (dark ? '다크' : '라이트') + (fold ? ' 접힘' : ' 펼침') + (menu ? ' ' + menu + ' 메뉴' : '');
+          if (r.over > 1) fail(L + ': 가로로 ' + r.over + 'px 넘쳐요');
+          if (r.cut.length) fail(L + ': 잘리거나 화면 밖으로 나간 버튼이 있어요 (' + r.cut.join(', ') + ')');
+          if (menu) { await page.keyboard.press('Escape'); await sleep(100); }
+        }
+      }
+      views++;
+      }
+      t.errors.forEach(e => fail(p + (dark ? ' 다크' : ' 라이트') + ': ' + e));
+    } finally { await t.close(); }
+  }
+  note('폭·테마 ' + views + '곳 × 펼침·접힘 × 메뉴 3가지');
+});
+
 /* ---------- 실행 ---------- */
 (async () => {
   const started = Date.now();
