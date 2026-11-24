@@ -19,7 +19,7 @@
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/pattern.css?v=21">
+<link rel="stylesheet" href="../assets/pattern.css?v=22">
 </head>
 <body>
 <div class="app area-work">
@@ -384,7 +384,8 @@
             <div class="hint-text" id="gaugeSize" data-dyn></div>
             <div class="hint-text" style="margin-top:6px;">뜨개는 보통 한 코가 한 단보다 넓어서, 정사각형 격자에 그린 모양이 실물에서는 옆으로 퍼져 보여요. 내 게이지(10cm 안의 코 수·단 수)를 넣고 켜 두면 완성작과 같은 모양으로 보면서 그릴 수 있어요.</div>
           </div>
-          <div class="pane-sec">
+          <!-- 5a: 도안 파일 묶음은 새 도구 막대(열기·저장 메뉴)와 더보기(링크 복사)로 옮겨서 화면에서만 숨김. 버튼 id·함수는 새 막대가 누르므로 남겨 둠 -->
+          <div class="pane-sec file-sec">
             <div class="pane-title">도안 파일 <span class="hint">다시 열어서 이어 작업할 수 있어요</span></div>
             <div class="file-btns">
               <button class="file-btn" id="saveFileBtn2">저장</button>
@@ -617,6 +618,7 @@
             <li>떠 있는 글자·장식·선택 영역은 <b>복사</b> 후 <b>붙여넣기</b>로 여러 개 넣을 수 있어요. 키보드: Ctrl+C · Ctrl+X · Ctrl+V · Delete · Esc · Enter · 방향키</li>
             <li>글자를 넣은 뒤 <b>글자 하나씩 옮기기</b>를 누르면 글자를 하나씩 골라 자유롭게 옮길 수 있어요. 물결 등으로 틀을 잡고 다듬을 때 좋아요.</li>
             <li>글자를 옮기는 중에 <b>↔ 가운데 · ↕ 가운데</b>를 누르면 격자 한가운데로 정렬돼요.</li>
+            <li><b>저장</b> 메뉴의 <b>도안 파일 저장</b>은 격자 크기, 칠한 칸, 배경색, 내 팔레트를 .json 파일 하나에 담아요. 위쪽 도구 막대의 <b>열기</b>로 다시 열어 이어 작업할 수 있고, 파일을 캔버스에 끌어다 놓아도 열려요. 도안이 담긴 링크는 <b>더보기</b>의 <b>링크 복사</b>로 복사해요.</li>
             <li><b>저장</b> 메뉴의 <b>이미지로 저장</b>은 PNG 파일을 바로 내려받아요. 휴대폰에서는 갤러리가 아니라 다운로드 폴더에 저장될 수 있으니, 갤러리(사진 앱)에 넣으려면 저장 메뉴의 <b>공유</b>를 눌러 저장하세요.</li>
             <li>자주 쓰지 않는 기능(선택, 확대·축소, 작업 단, 뒤집기·회전, 복사·붙여넣기, 모두 지우기, 장식·색 바꾸기 등)은 위쪽 도구 막대의 <b>더보기</b>에 있어요.</li>
           </ul>
@@ -733,6 +735,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="../assets/pattern.js?v=24"></script>
+<script src="../assets/pattern.js?v=25"></script>
 </body>
 </html>

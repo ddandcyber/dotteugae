@@ -256,7 +256,7 @@ test('새로고침 뒤에도 도안 유지 (자동 저장)', async (fail) => {
   } finally { await t.close(); }
 });
 
-test('도안 파일 저장 → 모두 지우기 → 파일 열기, 예시 도안 파일 열기', async (fail) => {
+test('도안 파일 저장 → 모두 지우기 → 파일 열기, 예시 도안 파일 열기, 캔버스에 끌어다 놓기, 패널의 도안 파일 묶음은 숨김(버튼 id는 남음)', async (fail) => {
   const t = await openPage('/pattern/');
   const dl = fs.mkdtempSync(path.join(os.tmpdir(), 'dotteugae-dl-'));
   try {
@@ -292,6 +292,20 @@ test('도안 파일 저장 → 모두 지우기 → 파일 열기, 예시 도안
     if (g.rows !== ex.rows || g.cols !== ex.cols) fail(`예시 도안 파일(chocolate-box.json)을 열었는데 크기가 달라요 (${ex.cols}×${ex.rows} 이어야 하는데 ${g.cols}×${g.rows})`);
     else if (diffCells(g.data, ex.data)) fail(`예시 도안 파일(chocolate-box.json)을 열었는데 칸 ${diffCells(g.data, ex.data)}개가 달라요`);
     if (ex.bg && g.bg.toUpperCase() !== ex.bg) fail('예시 도안 파일의 배경색이 적용되지 않았어요');
+    // 5a: 오른쪽 패널의 "도안 파일" 묶음은 화면에 없어도, 캔버스에 파일을 끌어다 놓으면 열림 (처음에 저장한 파일)
+    const txt = fs.readFileSync(path.join(dl, file), 'utf8');
+    await page.evaluate((txt, name) => {
+      const dt = new DataTransfer(); dt.items.add(new File([txt], name, { type: 'application/json' }));
+      const st = document.querySelector('.stage');
+      st.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true, cancelable: true }));
+      st.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true, cancelable: true }));
+    }, txt, file);
+    await sleep(500);
+    const dropped = await grid(page);
+    if (diffCells(dropped.data, before.data) || dropped.rows !== before.rows || dropped.cols !== before.cols) fail('도안 파일을 캔버스에 끌어다 놓았는데 그 도안이 열리지 않았어요');
+    const fs5 = await page.evaluate(() => ({ shown: [...document.querySelectorAll('.file-sec')].some(e => e.getClientRects().length > 0), ids: ['saveFileBtn2', 'openFileBtn2', 'copyLinkBtn'].every(i => !!document.getElementById(i)) }));
+    if (fs5.shown) fail('오른쪽 패널의 "도안 파일" 묶음(저장·열기·링크 복사)이 아직 화면에 보여요 (5a에서 새 도구 막대·더보기로 옮김)');
+    if (!fs5.ids) fail('숨긴 "도안 파일" 묶음의 버튼(saveFileBtn2·openFileBtn2·copyLinkBtn)이 페이지에서 사라졌어요');
     t.errors.forEach(e => fail(e));
   } finally { await t.close(); fs.rmSync(dl, { recursive: true, force: true }); }
 });
@@ -400,7 +414,7 @@ test('글자 넣기, 영어로 바꿨다가 한국어로 돌아오기', async (f
 
 // (4단계에서 다시 씀) 예전: 작업창 접기·펼치기와 새로고침 뒤 유지. 지금은 옛 작업창·접기 버튼·손잡이가 화면에 없으므로
 // 그것들이 안 보이는지, 칠할 색이 막대에 항상 있는지, 예전에 저장된 접기 값(접힘·펼침)과 Ctrl+\가 있어도 화면이 같고 저장 이름이 그대로인지 확인
-test('옛 작업창 정리: 작업창·접기 버튼·손잡이·말풍선이 화면에 없음, 칠할 색은 막대에 항상, 예전 접기 저장값(접힘·펼침)·Ctrl+\\·새로고침 뒤에도 같은 화면 (PC·휴대폰)', async (fail) => {
+test('옛 작업창 정리: 작업창·접기 버튼·손잡이·말풍선이 화면에 없음, 칠할 색은 막대에 항상, 예전 접기 저장값(접힘·펼침)·새로고침 뒤에도 같은 화면, 없앤 단축키 Ctrl+\\는 아무 동작 없음 (PC·휴대폰)', async (fail) => {
   const state = page => page.evaluate(() => {
     const shown = s => [...document.querySelectorAll(s)].some(e => e.getClientRects().length > 0);
     const r = document.querySelector('.workspace').getBoundingClientRect();
@@ -427,10 +441,13 @@ test('옛 작업창 정리: 작업창·접기 버튼·손잡이·말풍선이 �
         if (!s.colors) fail(L + ': 새 도구 막대에 칠할 색이 보이지 않아요');
         if (base && (s.top !== base.top || s.pad !== base.pad || s.tabsPad !== base.tabsPad)) fail(L + ': 처음 방문과 화면 배치가 달라요 (' + JSON.stringify([base, s]) + ')');
         if (!base) base = s;
-        // Ctrl+\ (예전 접기 단축키)를 눌러도 화면이 그대로이고 오류가 없음
+        // Ctrl+\ (예전 접기 단축키, 5a에서 없앰)를 눌러도 아무 일 없음: 화면·접기 상태·저장값이 그대로이고 오류가 없음
+        const kb0 = await page.evaluate(() => ({ v: localStorage.getItem('crochet-ribbon-folded'), f: document.querySelector('.app').classList.contains('ribbon-folded') }));
         await page.keyboard.down('Control'); await page.keyboard.press('Backslash'); await page.keyboard.up('Control'); await sleep(300);
         s = await state(page);
         if (s.ribbon || s.handle || !s.colors || s.top !== base.top) fail(L + ': Ctrl+\\를 누른 뒤 화면이 바뀌었어요 (' + JSON.stringify(s) + ')');
+        const kb1 = await page.evaluate(() => ({ v: localStorage.getItem('crochet-ribbon-folded'), f: document.querySelector('.app').classList.contains('ribbon-folded') }));
+        if (kb1.v !== kb0.v || kb1.f !== kb0.f) fail(L + ': 없앤 단축키 Ctrl+\\가 아직 접기 상태나 저장값을 바꿔요 (' + JSON.stringify([kb0, kb1]) + ')');
         await page.reload({ waitUntil: 'networkidle0' }); await sleep(600);
         s = await state(page);
         if (s.ribbon || s.handle || !s.colors || s.top !== base.top) fail(L + ': 새로고침 뒤 화면이 바뀌었어요 (' + JSON.stringify(s) + ')');
@@ -1378,7 +1395,8 @@ test('버튼 툴팁에 단축키 표시: 한국어·영어·맥(⌘), 접근성 
     ['qbUndo', '되돌리기 (Ctrl+Z)', 'Undo (Ctrl+Z)', '되돌리기', 'Undo'],
     ['qbRedo', '다시하기 (Ctrl+Shift+Z / Ctrl+Y)', 'Redo (Ctrl+Shift+Z / Ctrl+Y)', '다시하기', 'Redo'],
     ['qbOpen', '도안 파일 열기 (Ctrl+O)', 'Open pattern file (Ctrl+O)', '열기', 'Open'],
-    ['ribbonFoldBtn', '작업창 접기 (Ctrl+\\)', 'Collapse toolbar (Ctrl+\\)', '작업창 접기', 'Collapse toolbar'],
+    // 5a: 예전 접기 단축키 Ctrl+\는 없앴으므로 (숨은) 접기 버튼 툴팁에 단축키가 없어야 함
+    ['ribbonFoldBtn', '작업창 접기', 'Collapse toolbar', '작업창 접기', 'Collapse toolbar'],
   ];
   const read = (page, ids) => page.evaluate(ids => ids.map(id => { const e = document.getElementById(id); return e ? { id, title: e.getAttribute('title'), aria: e.getAttribute('aria-label') } : { id, title: null, aria: null }; }), ids);
   const ids = TIPS.map(r => r[0]);
@@ -1395,6 +1413,8 @@ test('버튼 툴팁에 단축키 표시: 한국어·영어·맥(⌘), 접근성 
       });
       const bad = await page.evaluate(() => [...document.querySelectorAll('[title]')].filter(e => e.title.includes('⌘')).map(e => e.id || e.className));
       if (bad.length) fail(p + ': 맥이 아닌데 ⌘ 표기가 있어요 (' + bad.join(', ') + ')');
+      const bs = await page.evaluate(() => [...document.querySelectorAll('[title], #pane-help')].filter(e => /(Ctrl\+|⌘)\\/.test(e.id === 'pane-help' ? e.textContent : e.title)).map(e => e.id || e.className));
+      if (bs.length) fail(p + ': 없앤 단축키 Ctrl+\\ 안내가 툴팁이나 도움말에 남아 있어요 (' + bs.join(', ') + ')');
       t.errors.forEach(e => fail(p + ': ' + e));
     } finally { await t.close(); }
   }
@@ -1414,7 +1434,7 @@ test('버튼 툴팁에 단축키 표시: 한국어·영어·맥(⌘), 접근성 
       await page.evaluateOnNewDocument(SKIP_START);
       await page.goto(BASE + '/pattern/', { waitUntil: 'networkidle0', timeout: 30000 }); await sleep(250);
       const got = Object.fromEntries((await read(page, ids)).map(g => [g.id, g]));
-      const want = { undoBtn: '되돌리기 (⌘Z)', redoBtn: '다시하기 (⌘⇧Z / ⌘Y)', saveFileBtn: '도안 파일로 저장 (⌘S)', openFileBtn: '도안 파일 열기 (⌘O)', pasteBtn: '붙여넣기 (⌘V)', ribbonFoldBtn: '작업창 접기 (⌘\\)', stampCancelBtn: '취소 (Esc)' };
+      const want = { undoBtn: '되돌리기 (⌘Z)', redoBtn: '다시하기 (⌘⇧Z / ⌘Y)', saveFileBtn: '도안 파일로 저장 (⌘S)', openFileBtn: '도안 파일 열기 (⌘O)', pasteBtn: '붙여넣기 (⌘V)', ribbonFoldBtn: '작업창 접기', stampCancelBtn: '취소 (Esc)' };
       Object.keys(want).forEach(id => { if (got[id].title !== want[id]) fail('맥: ' + id + ' 툴팁이 "' + want[id] + '"이어야 하는데 "' + got[id].title + '"이에요'); });
       if (got.undoBtn.aria !== '되돌리기') fail('맥: 접근성 이름에 단축키가 섞였어요 (' + got.undoBtn.aria + ')');
       const left = await page.evaluate(() => [...document.querySelectorAll('[title]')].filter(e => /Ctrl\+/.test(e.title)).map(e => e.id || e.className));
@@ -2059,7 +2079,7 @@ test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄
         const input = await page.$('#openFileInput');
         await input.uploadFile(file12); await sleep(500); await check('파일 열기 뒤');
         for (let k = 0; k < 5; k++) await del(); await check('파일 연 뒤 삭제로 7개');
-        // 예전 작업창 접기 단축키(Ctrl+\) 두 번: 화면 배치가 그대로여야 함
+        // 예전 작업창 접기 단축키(Ctrl+\, 5a에서 없앰) 두 번: 아무 동작이 없으니 화면 배치가 그대로여야 함
         for (let k = 0; k < 2; k++) { await page.keyboard.down('Control'); await page.keyboard.press('Backslash'); await page.keyboard.up('Control'); await sleep(200); }
         await check('예전 접기 단축키 두 번 뒤');
         // 화면 돌리기(가로 → 세로)
@@ -2221,6 +2241,27 @@ test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동�
       if ((await grid(page)).data.some(Boolean)) fail('PC: 더보기의 모두 지우기를 눌렀는데 칸이 남아 있어요');
       await clickId(page, 'qbUndo');
       if (!(await grid(page)).data.some(Boolean)) fail('PC: 모두 지우기 뒤 되돌리기로 돌아오지 않아요');
+      // 5a: 더보기 > "격자 크기·배경색·게이지" → 격자 탭. 도안 파일 묶음은 안 보이고 나머지 설정은 그대로 보임
+      await page.click('#qbMore'); await sleep(120);
+      await page.click('#qbMoreMenu [data-pane="grid"]'); await sleep(200);
+      s = await page.evaluate(() => {
+        const vis = sel => { const e = document.querySelector(sel); return !!e && e.getClientRects().length > 0; };
+        return { active: document.getElementById('pane-grid').classList.contains('active'), rows: vis('#rowsInput'), bg: vis('#bgPalette'), gauge: vis('#gaugePreset'), margin: vis('#marginDirSelect'), fileSec: vis('.file-sec'), open: !document.getElementById('qbMoreMenu').hidden };
+      });
+      if (!s.active) fail('PC: 더보기의 "격자 크기·배경색·게이지"를 눌렀는데 격자 탭이 열리지 않았어요');
+      if (!s.rows || !s.bg || !s.gauge || !s.margin) fail('PC: 격자 탭의 격자 크기·배경색·게이지·여백 중 안 보이는 것이 있어요 (' + JSON.stringify(s) + ')');
+      if (s.fileSec) fail('PC: 격자 탭에 "도안 파일" 묶음이 아직 보여요');
+      if (s.open) fail('PC: "격자 크기·배경색·게이지"를 고른 뒤에도 더보기 메뉴가 열려 있어요');
+      // 5a: 더보기 > 링크 복사 = 숨은 copyLinkBtn과 같은 동작 (지금 도안이 담긴 #p= 링크)
+      await page.evaluate(() => { window.__clip = null; Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async v => { window.__clip = v; } } }); });
+      await page.click('#qbMore'); await sleep(120);
+      await page.click('#qbMoreMenu [data-click="copyLinkBtn"]'); await sleep(300);
+      {
+        const clip = await page.evaluate(() => window.__clip);
+        const m = clip && clip.match(/#p=([A-Za-z0-9_-]+)$/);
+        if (!m) fail('PC: 더보기의 링크 복사가 도안 링크(#p=…)를 복사하지 않았어요 (' + clip + ')');
+        else { const lg = decodePattern(fromHash(m[1])), cur = await grid(page); if (lg.rows !== cur.rows || lg.cols !== cur.cols || diffCells(lg.data, cur.data)) fail('PC: 더보기에서 복사한 링크의 도안이 화면의 도안과 달라요'); }
+      }
       // 패널 탭 항목 (장식)
       await page.click('#qbMore'); await sleep(120);
       await page.click('#qbMoreMenu [data-pane="decor"]'); await sleep(200);

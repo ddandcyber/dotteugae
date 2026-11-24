@@ -1279,3 +1279,9 @@
   @media (max-width: 899px){
     .app.ribbon-folded .stage .canvas-wrap{ padding-top:12px; }
   }
+
+  /* ===== 5a: 오른쪽 패널 격자 탭의 "도안 파일" 묶음 정리 =====
+     저장·열기·링크 복사는 새 도구 막대(열기, 저장 메뉴 > 도안 파일 저장)와 더보기(링크 복사)에 같은 버튼이 있어서 화면에서 숨김.
+     HTML·id(saveFileBtn2·openFileBtn2·copyLinkBtn)·함수는 그대로 (더보기의 링크 복사가 copyLinkBtn을 그대로 누름).
+     파일 설명 문구는 도움말 탭으로 옮김 */
+  .pane-sec.file-sec{ display:none !important; }

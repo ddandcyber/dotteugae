@@ -20,7 +20,7 @@
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/pattern.css?v=21">
+<link rel="stylesheet" href="/assets/pattern.css?v=22">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -404,7 +404,8 @@
             <div class="hint-text" id="gaugeSize" data-dyn></div>
             <div class="hint-text" style="margin-top:6px;">뜨개는 보통 한 코가 한 단보다 넓어서, 정사각형 격자에 그린 모양이 실물에서는 옆으로 퍼져 보여요. 내 게이지(10cm 안의 코 수·단 수)를 넣고 켜 두면 완성작과 같은 모양으로 보면서 그릴 수 있어요.</div>
           </div>
-          <div class="pane-sec">
+          <!-- 5a: 도안 파일 묶음은 새 도구 막대(열기·저장 메뉴)와 더보기(링크 복사)로 옮겨서 화면에서만 숨김. 버튼 id·함수는 새 막대가 누르므로 남겨 둠 -->
+          <div class="pane-sec file-sec">
             <div class="pane-title">도안 파일 <span class="hint">다시 열어서 이어 작업할 수 있어요</span></div>
             <div class="file-btns">
               <button class="file-btn" id="saveFileBtn2">저장</button>
@@ -639,6 +640,7 @@
             <li><b>Copy</b> and <b>Paste</b> floating text, decorations or selections as many times as you like. Keys: Ctrl+C · Ctrl+X · Ctrl+V · Delete · Esc · Enter · arrows</li>
             <li>After adding text, tap <b>Move letters</b> to pick and move each letter freely — great for fine-tuning a wave layout.</li>
             <li>While moving text, tap <b>↔ Center · ↕ Center</b> to center it on the grid.</li>
+            <li><b>Save pattern file</b> in the <b>Save</b> menu puts the grid size, painted cells, background and your palette into one .json file. Open it again with <b>Open</b> in the toolbar to keep working, or drop the file onto the canvas. To copy a link that holds the pattern, use <b>Copy link</b> under <b>More</b>.</li>
             <li><b>Save image</b> in the <b>Save</b> menu downloads a PNG file right away. On a phone it may go to your Downloads folder instead of your photo gallery. To add it to your gallery, tap <b>Share</b> in the Save menu and save from there.</li>
             <li>Less-used tools (Select, zoom, current row, mirror and rotate, copy and paste, clear all, decor, recolor and more) are under <b>More</b> in the toolbar.</li>
           </ul>
@@ -756,6 +758,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="/assets/pattern.js?v=24"></script>
+<script src="/assets/pattern.js?v=25"></script>
 </body>
 </html>
