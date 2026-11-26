@@ -178,7 +178,8 @@ const clickId = async (page, id) => {
 /* ---------- 점검 항목 ---------- */
 const RED = '#D32F2F', BLUE = '#1976D2', BLACK = '#222222';
 const TESTS = [];
-const test = (title, fn) => TESTS.push({ title, fn });
+// 제한 시간은 보통 2분. 오래 걸리는 항목만 test(이름, 함수, { limitMin: 4 })처럼 따로 정함
+const test = (title, fn, opt = {}) => TESTS.push({ title, fn, limitMin: opt.limitMin || 2 });
 
 test('칠하기 → 되돌리기 → 다시하기', async (fail) => {
   const t = await openPage('/pattern/');
@@ -2106,7 +2107,7 @@ test('칠할 색 팔레트 줄 수가 바뀔 때(색 7→12→7→5): 최근 줄
     } finally { await t.close(); }
   }
   note('320·360·390px × 라이트·다크, 단계 ' + steps + '번 (교체·추가·삭제·파일 열기·예전 접기 단축키·회전·새로고침), PC 그대로');
-});
+}, { limitMin: 4 }); // 단계가 많아 느린 컴퓨터에서 2분에 거의 닿아서 4분
 
 test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동작, 저장 메뉴·더보기 메뉴(키보드·바깥 누르기·Esc·Tab), 글자 버튼, 막대의 칠할 색·최근 색, 휴대폰 막대의 되돌리기·다시하기·작업 시작하기, 방안뜨기에서 숨김, 휴대폰 360px, 영어', async (fail, note) => {
   const vis = (page, sel) => page.evaluate(s => { const e = document.querySelector(s); return !!e && !e.hidden && e.getClientRects().length > 0 && getComputedStyle(e).visibility !== 'hidden'; }, sel);
@@ -2425,12 +2426,12 @@ test('새 도구 막대(3단계) 화면 폭: 한·영 × 320·360·390·768·128
   const only = (process.env.CHECK_ONLY || '').split(',').map(s => parseInt(s, 10)).filter(Boolean);
   for (let k = 0; k < TESTS.length; k++) {
     if (only.length && !only.includes(k + 1)) continue;
-    const { title, fn } = TESTS[k];
+    const { title, fn, limitMin } = TESTS[k];
     const reasons = [], notes = [];
     try {
       await Promise.race([
         fn(r => reasons.push(r), n => notes.push(n)),
-        sleep(120000).then(() => { throw new Error('2분 안에 끝나지 않았어요'); }),
+        sleep(limitMin * 60000).then(() => { throw new Error(limitMin + '분 안에 끝나지 않았어요'); }),
       ]);
     } catch (e) {
       reasons.push('점검 도중 멈췄어요: ' + String(e.message || e).split('\n')[0]);
