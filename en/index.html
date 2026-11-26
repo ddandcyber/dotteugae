@@ -22,7 +22,7 @@
 <link rel="preload" href="/assets/fonts/noto-sans-kr/NotoSansKR-119.woff2" as="font" type="font/woff2" crossorigin>
 <!-- /첫 화면 글꼴 -->
 <link rel="stylesheet" href="/assets/fonts/noto-sans-kr.css">
-<link rel="stylesheet" href="/assets/site.css?v=3">
+<link rel="stylesheet" href="/assets/site.css?v=4">
 <script>
   // 저장된 화면 모드(밝게/어둡게)를 그리기 전에 적용 (도구 페이지와 같은 설정을 공유)
   try{ var tp = localStorage.getItem('crochet-ui-theme'); if(tp === 'dark' || tp === 'light') document.documentElement.setAttribute('data-theme', tp); }catch(e){}
@@ -146,6 +146,7 @@
       <h2>Guides</h2>
       <p class="muted" style="margin-top:-4px;">These guides are currently in Korean.</p>
       <div class="guide-list">
+        <a class="card guide-item" href="/guides/knitting-direction/" hreflang="ko"><h3>Same chart, different direction</h3><p>The same chart worked once starting horizontally and once starting vertically: which way was easier, and which way looked better.</p></a>
         <a class="card guide-item" href="/guides/reading-charts/" hreflang="ko"><h3>How to read a crochet chart</h3><p>Where do you start, and which way do you go? The reading order for working back and forth in rows and in the round.</p></a>
         <a class="card guide-item" href="/guides/lettering-size/" hreflang="ko"><h3>Sizing a lettering chart</h3><p>Measure your gauge, work out how many stitches and rows you need for the size you want, and check that your text will fit.</p></a>
       </div>

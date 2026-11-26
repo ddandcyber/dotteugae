@@ -229,6 +229,11 @@ h3{ font-size:17px; margin:28px 0 8px; }
 .article .formula{ font-family:var(--mono); background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 14px; margin:10px 0; }
 .article .todo{ background:rgba(223,165,60,0.14); border-left:4px solid var(--mustard); padding:10px 14px; border-radius:8px; color:var(--ink-soft); font-size:14px; }
 .article .cta{ margin-top:36px; padding:20px 22px; }
+/* 가이드 글의 그림·사진: 세로로 긴 사진은 화면 높이를 넘지 않게 가운데에 */
+.guide-fig{ margin:20px 0 28px; }
+.guide-fig img{ display:block; width:100%; height:auto; border-radius:12px; border:1px solid var(--line); background:var(--paper-2); }
+.guide-fig.photo img{ width:auto; max-width:100%; max-height:min(640px, 80vh); margin:0 auto; }
+.guide-fig figcaption{ margin-top:8px; text-align:center; font-size:14px; color:var(--ink-faint); }
 .crumb{ font-size:13.5px; color:var(--ink-faint); margin-bottom:10px; }
 .crumb a{ color:var(--ink-faint); }
 

@@ -8,7 +8,7 @@
 | `/pattern/` | `pattern/index.html` | 도안 만들기 (스타일은 `assets/pattern.css`, 스크립트는 `assets/pattern.js`) |
 | `/counter/` | `counter/index.html` | 코수 세기 |
 | `/examples/` | `examples/index.html` | 예시 도안 (`examples/img/`에 미리보기 PNG와 도안 파일 JSON) |
-| `/guides/` | `guides/index.html` 외 2편 | 가이드 |
+| `/guides/` | `guides/index.html` 외 3편 | 가이드 |
 | `/about/` `/privacy/` `/credits/` | 각 폴더 `index.html` | 소개·문의, 개인정보처리방침, 폰트 출처 |
 | `/en/` | `en/index.html` | 영어 홈 |
 | `/en/pattern/` | `en/pattern/index.html` | 영어 도안 만들기 (`assets/pattern.css`, `assets/pattern.js`를 한국어판과 같이 씀) |

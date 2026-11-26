@@ -487,7 +487,7 @@ test('휴대폰(320·360·390)·태블릿(1280)·PC(1440) 화면: 가로 넘침,
 test('모든 페이지 열림, 깨진 링크·없는 이미지', async (fail, note) => {
   const pages = [
     ['/', '홈'], ['/pattern/', '도안 만들기'], ['/counter/', '코수 세기'], ['/examples/', '예시'],
-    ['/guides/', '가이드'], ['/guides/reading-charts/', '가이드: 도안 읽기'], ['/guides/lettering-size/', '가이드: 글자 크기'],
+    ['/guides/', '가이드'], ['/guides/reading-charts/', '가이드: 도안 읽기'], ['/guides/lettering-size/', '가이드: 글자 크기'], ['/guides/knitting-direction/', '가이드: 뜨는 방향'],
     ['/about/', '소개'], ['/privacy/', '개인정보처리방침'], ['/credits/', '폰트 출처'],
     ['/en/', '영어 홈'], ['/en/pattern/', '영어 도안 만들기'],
   ];
@@ -1678,7 +1678,7 @@ test('미리보기 글자 막대: 영어·한국어, 320·360·390px 라이트·
 });
 
 test('소개 페이지 가로 넘침: 홈·영어 홈·예시·가이드·소개·개인정보·폰트 출처·코수 세기, 320·360·390·768·1440px 라이트·다크', async (fail, note) => {
-  const PAGES = ['/', '/en/', '/examples/', '/guides/', '/guides/reading-charts/', '/guides/lettering-size/', '/about/', '/privacy/', '/credits/', '/counter/'];
+  const PAGES = ['/', '/en/', '/examples/', '/guides/', '/guides/reading-charts/', '/guides/lettering-size/', '/guides/knitting-direction/', '/about/', '/privacy/', '/credits/', '/counter/'];
   const WIDTHS = [320, 360, 390, 768, 1440];
   const openSite = async (p, w, scheme, mobile, extra) => {
     const ctx = await BROWSER.createBrowserContext();
@@ -1707,7 +1707,7 @@ test('소개 페이지 가로 넘침: 홈·영어 홈·예시·가이드·소개
 });
 
 test('소개 페이지 디자인 값: 제목이 낱말 중간에서 안 끊김, 타이포·여백·카드·버튼 값, 호버는 마우스에서만(터치·움직임 줄이기에서는 없음)', async (fail, note) => {
-  const PAGES = ['/', '/en/', '/examples/', '/guides/', '/guides/reading-charts/', '/guides/lettering-size/', '/about/', '/privacy/', '/credits/', '/counter/'];
+  const PAGES = ['/', '/en/', '/examples/', '/guides/', '/guides/reading-charts/', '/guides/lettering-size/', '/guides/knitting-direction/', '/about/', '/privacy/', '/credits/', '/counter/'];
   const WIDTHS = [320, 360, 390, 768, 1440];
   const openSite = async (p, w, scheme, mobile, extra) => {
     const ctx = await BROWSER.createBrowserContext();
@@ -1932,7 +1932,7 @@ test('홈 새 구조: 구역 순서(히어로→예시 갤러리→강점 카드
 });
 
 test('소개 페이지 글꼴: 제목·로고 글꼴만 preload(모두 실제로 쓰임, 경로·crossorigin 맞음), 바깥 요청 없음, 대체 글꼴 크기 보정', async (fail, note) => {
-  const PAGES = ['/', '/en/', '/examples/', '/guides/', '/guides/reading-charts/', '/guides/lettering-size/', '/about/', '/privacy/', '/credits/', '/counter/', '/404.html'];
+  const PAGES = ['/', '/en/', '/examples/', '/guides/', '/guides/reading-charts/', '/guides/lettering-size/', '/guides/knitting-direction/', '/about/', '/privacy/', '/credits/', '/counter/', '/404.html'];
   // 본고딕 묶음 파일 → unicode-range 첫 구간 (브라우저의 FontFace와 맞춰 보려고)
   const fcss = fs.readFileSync(path.join(ROOT, 'assets/fonts/noto-sans-kr.css'), 'utf8');
   const rangeOf = {};
