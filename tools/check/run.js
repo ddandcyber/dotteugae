@@ -488,7 +488,7 @@ test('휴대폰(320·360·390)·태블릿(1280)·PC(1440) 화면: 가로 넘침,
 test('모든 페이지 열림, 깨진 링크·없는 이미지', async (fail, note) => {
   const pages = [
     ['/', '홈'], ['/pattern/', '도안 만들기'], ['/counter/', '코수 세기'], ['/examples/', '예시'],
-    ['/guides/', '가이드'], ['/guides/reading-charts/', '가이드: 도안 읽기'], ['/guides/lettering-size/', '가이드: 글자 크기'], ['/guides/knitting-direction/', '가이드: 뜨는 방향'], ['/guides/patchwork-practice/', '가이드: 연습장'],
+    ['/guides/', '가이드'], ['/guides/reading-charts/', '가이드: 도안 읽기'], ['/guides/lettering-size/', '가이드: 글자 크기'], ['/guides/knitting-direction/', '가이드: 뜨는 방향'], ['/guides/patchwork-practice/', '가이드: 편물 이어붙이기'],
     ['/about/', '소개'], ['/privacy/', '개인정보처리방침'], ['/credits/', '폰트 출처'],
     ['/en/', '영어 홈'], ['/en/pattern/', '영어 도안 만들기'],
   ];
