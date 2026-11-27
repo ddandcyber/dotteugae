@@ -8,8 +8,8 @@
 | `/pattern/` | `pattern/index.html` | 도안 만들기 (스타일은 `assets/pattern.css`, 스크립트는 `assets/pattern.js`) |
 | `/counter/` | `counter/index.html` | 코수 세기 |
 | `/examples/` | `examples/index.html` | 예시 도안 (`examples/img/`에 미리보기 PNG와 도안 파일 JSON) |
-| `/examples/bird/` | `examples/bird/index.html` | 예시 도안 개별 페이지: 나뭇가지 위의 새 (핀 이미지 `examples/pins/bird.png`) |
-| `/examples/lantern/` | `examples/lantern/index.html` | 예시 도안 개별 페이지: 등불과 까마귀 (핀 이미지 `examples/pins/lantern.png`) |
+| `/examples/bird/` | `examples/bird/index.html` | 예시 도안 개별 페이지: 나뭇가지 위의 새 (핀 이미지 `examples/pins/bird-2.png`) |
+| `/examples/lantern/` | `examples/lantern/index.html` | 예시 도안 개별 페이지: 등불과 까마귀 (핀 이미지 `examples/pins/lantern-2.png`) |
 | `/guides/` | `guides/index.html` 외 4편 | 가이드 |
 | `/about/` `/privacy/` `/credits/` | 각 폴더 `index.html` | 소개·문의, 개인정보처리방침, 폰트 출처 |
 | `/en/` | `en/index.html` | 영어 홈 |
