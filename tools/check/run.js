@@ -78,6 +78,16 @@ function findBrowser() {
   ].filter(Boolean);
   return list.find(p => fs.existsSync(p));
 }
+const AD_HOST = 'pagead2.googlesyndication.com';
+const isAdScript = u => { try { return new URL(u).hostname === AD_HOST; } catch (e) { return false; } };
+async function stubAdScript(page) {
+  const cdp = await page.createCDPSession();
+  cdp.on('Fetch.requestPaused', e => cdp.send('Fetch.fulfillRequest', {
+    requestId: e.requestId, responseCode: 200, body: '',
+    responseHeaders: [{ name: 'Content-Type', value: 'text/javascript' }, { name: 'Access-Control-Allow-Origin', value: '*' }],
+  }).catch(() => {}));
+  await cdp.send('Fetch.enable', { patterns: [{ urlPattern: '*://' + AD_HOST + '/*' }] });
+}
 async function startBrowser() {
   const exe = findBrowser();
   if (!exe) throw new Error('Edge나 Chrome을 찾지 못했어요. CHECK_BROWSER 환경 변수에 브라우저 실행 파일 위치를 넣어 주세요.');
@@ -91,6 +101,15 @@ async function startBrowser() {
   const port = fs.readFileSync(portFile, 'utf8').split('\n')[0].trim();
   const browser = await puppeteer.connect({ browserURL: 'http://127.0.0.1:' + port, defaultViewport: null });
   const version = await browser.version();
+  // 애드센스 광고 코드(pagead2.googlesyndication.com)만 예외: 점검 중에는 실제로 받지 않고 빈 스크립트로 대신 줌.
+  // 이 주소만 가로채므로(Fetch 패턴) 다른 요청은 그대로이고, 다른 바깥 요청은 23번 등에서 계속 실패로 잡힘.
+  const newContext = browser.createBrowserContext.bind(browser);
+  browser.createBrowserContext = async (...a) => {
+    const ctx = await newContext(...a);
+    const newPage = ctx.newPage.bind(ctx);
+    ctx.newPage = async (...b) => { const page = await newPage(...b); await stubAdScript(page); return page; };
+    return ctx;
+  };
   const stop = async () => {
     try { await browser.disconnect(); } catch (e) {}
     try { proc.kill(); } catch (e) {}
@@ -1943,7 +1962,7 @@ test('소개 페이지 글꼴: 제목·로고 글꼴만 preload(모두 실제로
     const ctx = await BROWSER.createBrowserContext();
     const page = await ctx.newPage();
     const outside = [], bad = [], warn = [];
-    page.on('request', r => { const u = r.url(); if (/^https?:/.test(u) && !u.startsWith(BASE)) outside.push(u); });
+    page.on('request', r => { const u = r.url(); if (/^https?:/.test(u) && !u.startsWith(BASE) && !isAdScript(u)) outside.push(u); }); // 광고 코드 주소만 예외
     page.on('requestfinished', r => { if (/\.woff2/.test(r.url()) && r.response() && r.response().status() >= 400) bad.push(r.url()); });
     page.on('requestfailed', r => { if (/\.woff2/.test(r.url())) bad.push(r.url()); });
     page.on('console', m => { if (/preload/i.test(m.text())) warn.push(m.text().slice(0, 140)); });
