@@ -1223,6 +1223,12 @@
   .qb-mi:disabled{ opacity:0.4; cursor:default; }
   .qb-mi.danger, .qb-mi.danger svg{ color:var(--berry); }
   .qb-mi[aria-checked="true"], .qb-mi[aria-checked="true"] svg{ background:var(--stamp-bg); color:var(--teal); }
+  /* 저장 메뉴의 체크 항목(이미지에 사이트 주소 넣기): 배경 강조 대신 상자 안 체크 표시 */
+  .qb-msep{ height:1px; margin:4px 6px; background:var(--line); flex-shrink:0; }
+  .qb-mi.qb-check[aria-checked="true"]{ background:transparent; color:var(--ink); }
+  .qb-mi.qb-check[aria-checked="true"]:hover, .qb-mi.qb-check:focus-visible{ background:var(--paper-2); }
+  .qb-mi.qb-check[aria-checked="true"] svg{ background:transparent; color:var(--teal); }
+  .qb-mi.qb-check[aria-checked="false"] .qb-tick{ display:none; }
   .qb-mt{ flex:1; min-width:0; }
   .qb-kbd{ margin-left:var(--s2); font-family:var(--mono); font-size:var(--fs-xs); font-weight:500; color:var(--ink-faint); white-space:nowrap; }
   .qb-step{ display:flex; flex-wrap:wrap; align-items:center; gap:4px; padding:2px 4px; }

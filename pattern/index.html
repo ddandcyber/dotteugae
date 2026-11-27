@@ -19,7 +19,7 @@
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/pattern.css?v=22">
+<link rel="stylesheet" href="../assets/pattern.css?v=23">
 </head>
 <body>
 <div class="app area-work">
@@ -80,6 +80,8 @@
       <button type="button" class="qb-mi" role="menuitem" data-click="saveFileBtn" aria-keyshortcuts="Control+S"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v12a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1z"/><path d="M8 4v5h7V4"/><rect x="8" y="13" width="8" height="5"/></svg><span class="qb-mt">도안 파일 저장</span><kbd class="qb-kbd" data-dyn>Ctrl+S</kbd></button>
       <button type="button" class="qb-mi" role="menuitem" data-click="saveImgBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="1.5"/><path d="m21 15-5-5L5 21"/></svg><span class="qb-mt">이미지로 저장</span></button>
       <button type="button" class="qb-mi" role="menuitem" data-click="shareImgBtn" id="qbShareItem" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V4"/><path d="m8 8 4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg><span class="qb-mt">공유</span></button>
+      <div class="qb-msep" role="separator"></div>
+      <button type="button" class="qb-mi qb-check" role="menuitemcheckbox" aria-checked="true" id="qbUrlItem" data-keep><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path class="qb-tick" d="m8 12.5 2.8 2.8L16.5 9"/></svg><span class="qb-mt">이미지에 사이트 주소 넣기</span></button>
     </div>
 
     <div class="qb-menu qb-more-menu" id="qbMoreMenu" role="menu" aria-label="더보기" hidden>
@@ -735,6 +737,6 @@
   <div class="toast" id="toast" data-dyn></div>
   <div class="ribbon-hint" id="ribbonHint" role="status" aria-live="polite" data-dyn></div>
 
-<script src="../assets/pattern.js?v=25"></script>
+<script src="../assets/pattern.js?v=26"></script>
 </body>
 </html>

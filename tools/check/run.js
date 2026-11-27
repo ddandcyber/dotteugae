@@ -851,11 +851,14 @@ test('방안뜨기 탭: 계산 공식, 탭 전환·설정·기호도·PNG, 편�
           const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
           const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
           const x = c.getContext('2d'); x.drawImage(img, 0, 0);
-          const w = c.width, h = c.height, at = (a, b) => [...x.getImageData(a, b, 1, 1).data].slice(0, 3);
+          const w = c.width, at = (a, b) => [...x.getImageData(a, b, 1, 1).data].slice(0, 3);
+          const band = filetLastImage && filetLastImage.band ? filetLastImage.band.h : 0; // 사이트 주소 띠(기본 켜짐)는 그림 아래에 붙으므로 빼고 봄
+          const h = c.height - band;
           const darkIn = (y0, hh) => { const d = x.getImageData(0, y0, w, hh).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] < 80 && d[i + 1] < 80 && d[i + 2] < 80) n++; return n; };
-          return { w, h, corners: [at(1, 1), at(w - 2, 1), at(1, h - 2), at(w - 2, h - 2)], darkTop: darkIn(0, Math.min(h, 170)), darkBottom: darkIn(Math.max(0, h - 150), Math.min(h, 150)), meta: filetLastImage };
+          return { w, h, band, bandColor: band ? at(1, c.height - 2) : null, corners: [at(1, 1), at(w - 2, 1), at(1, h - 2), at(w - 2, h - 2)], darkTop: darkIn(0, Math.min(h, 170)), darkBottom: darkIn(Math.max(0, h - 150), Math.min(h, 150)), meta: filetLastImage };
         }, buf.toString('base64'));
         if (!png.corners.every(c => c.join() === '255,255,255')) fail(`저장한 이미지의 바탕이 흰색이 아니에요 (네 모서리 ${JSON.stringify(png.corners)})`);
+        if (!png.band || png.bandColor.join() !== '226,238,232') fail(`방안뜨기 이미지 저장에 사이트 주소 띠(기본 켜짐)가 없어요 (띠 ${png.band}px, 색 ${png.bandColor})`);
         if (png.darkTop < 200) fail(`저장한 이미지 맨 위에 시작 안내 글자가 보이지 않아요 (검은 점 ${png.darkTop}개)`);
         if (png.darkBottom < 80) fail(`저장한 이미지 아래쪽에 범례가 보이지 않아요 (검은 점 ${png.darkBottom}개)`);
         const head = (png.meta && png.meta.head || []).join(' / ');
@@ -2172,9 +2175,9 @@ test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동�
       if (!(await page.evaluate(() => !!gridData[0]))) fail('PC: 막대의 다시하기를 눌렀는데 칸이 돌아오지 않았어요');
       // 저장 메뉴: 마우스로 열기 → 항목 2개(PC는 공유 없음) → 바깥 누르면 닫힘
       await page.click('#qbSave'); await sleep(150);
-      const items = await page.evaluate(() => [...document.querySelectorAll('#qbSaveMenu .qb-mi')].filter(i => i.getClientRects().length > 0).map(i => i.dataset.click)); // 화면에 실제로 보이는 항목만
+      const items = await page.evaluate(() => [...document.querySelectorAll('#qbSaveMenu .qb-mi')].filter(i => i.getClientRects().length > 0).map(i => i.dataset.click || i.id)); // 화면에 실제로 보이는 항목만
       if (!await vis(page, '#qbSaveMenu') || await expanded(page, 'qbSave') !== 'true') fail('PC: 저장 버튼을 눌렀는데 메뉴가 열리지 않았어요');
-      if (JSON.stringify(items) !== JSON.stringify(['saveFileBtn', 'saveImgBtn'])) fail('PC: 저장 메뉴 항목이 "도안 파일 저장·이미지로 저장"이 아니에요 (' + items + ')');
+      if (JSON.stringify(items) !== JSON.stringify(['saveFileBtn', 'saveImgBtn', 'qbUrlItem'])) fail('PC: 저장 메뉴 항목이 "도안 파일 저장·이미지로 저장·이미지에 사이트 주소 넣기"가 아니에요 (' + items + ')');
       const kbd = await page.evaluate(() => document.querySelector('#qbSaveMenu .qb-kbd').textContent);
       if (kbd !== 'Ctrl+S') fail('PC: 저장 메뉴에 단축키 Ctrl+S 표시가 없어요 (' + kbd + ')');
       const sb = await page.evaluate(() => { const r = document.querySelector('.statusbar').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
@@ -2186,9 +2189,11 @@ test('새 도구 막대(3단계): 막대 버튼이 기존 버튼과 같은 동�
       await press(page, 'ArrowDown');
       if (await focused(page) !== 'saveImgBtn') fail('PC: 저장 메뉴에서 ↓를 눌렀는데 다음 항목으로 가지 않았어요');
       await press(page, 'ArrowDown');
+      if (await focused(page) !== 'qbUrlItem') fail('PC: 저장 메뉴에서 ↓를 두 번 누르면 "이미지에 사이트 주소 넣기"로 가야 해요');
+      await press(page, 'ArrowDown');
       if (await focused(page) !== 'saveFileBtn') fail('PC: 저장 메뉴 마지막에서 ↓를 누르면 처음으로 돌아가야 해요');
       await press(page, 'ArrowUp');
-      if (await focused(page) !== 'saveImgBtn') fail('PC: 저장 메뉴 처음에서 ↑를 누르면 마지막으로 가야 해요');
+      if (await focused(page) !== 'qbUrlItem') fail('PC: 저장 메뉴 처음에서 ↑를 누르면 마지막으로 가야 해요');
       await press(page, 'Home');
       if (await focused(page) !== 'saveFileBtn') fail('PC: 저장 메뉴에서 Home이 첫 항목으로 가지 않아요');
       await press(page, 'Escape');
@@ -2429,6 +2434,157 @@ test('새 도구 막대(3단계) 화면 폭: 한·영 × 320·360·390·768·128
   }
   note('폭·테마 ' + views + '곳 × 펼침·접힘 × 메뉴 3가지');
 });
+
+test('이미지에 사이트 주소 띠: 저장 메뉴 체크(기본 켜짐·새로고침 유지·키보드), 켜면 아래 띠·도안 영역 픽셀 그대로, 끄면 기존 크기, 함수 기본값은 띠 없음, 방안뜨기 PNG, 한·영 문구, 휴대폰', async (fail, note) => {
+  // 저장 버튼이 내려받는 PNG를 파일 대신 페이지 안에서 받아 크기를 기록 (연속 내려받기가 막히지 않게)
+  const HOOK = () => {
+    window.__saved = [];
+    const orig = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function () {
+      if (this.download && /\.png$/.test(this.download) && this.href.startsWith('blob:')) {
+        const name = this.download;
+        fetch(this.href).then(r => r.blob()).then(b => createImageBitmap(b)).then(im => window.__saved.push({ name, w: im.width, h: im.height }));
+        return;
+      }
+      return orig.call(this);
+    };
+  };
+  const lastSaved = async (page, n) => { for (let i = 0; i < 40; i++) { const s = await page.evaluate(() => window.__saved); if (s.length >= n) return s[n - 1]; await sleep(150); } return null; };
+  const press = async (page, key) => { await page.keyboard.press(key); await sleep(120); };
+  const item = page => page.evaluate(() => { const i = document.getElementById('qbUrlItem'); const m = document.getElementById('qbSaveMenu'); return { checked: i.getAttribute('aria-checked'), role: i.getAttribute('role'), label: i.textContent.trim(), open: !m.hidden, store: localStorage.getItem('crochet-export-url'), on: exportUrlOn() }; });
+  // 도안 영역 비교: 띠 없음(기본값)과 띠 있음을 같은 화면에서 그려서 위쪽 픽셀이 모두 같은지
+  const compare = page => page.evaluate(() => {
+    const a = renderExport(), bandNone = exportLastBand, b = renderExport({ url: true }), band = exportLastBand;
+    const da = a.getContext('2d').getImageData(0, 0, a.width, a.height).data, db = b.getContext('2d').getImageData(0, 0, b.width, a.height).data;
+    let diff = 0; for (let i = 0; i < da.length; i++) if (da[i] !== db[i]) diff++;
+    const bx = b.getContext('2d'), H = a.height, W = b.width;
+    const px = (x, y) => [...bx.getImageData(x, y, 1, 1).data].slice(0, 3).join();
+    // 띠 안의 글자 색: 왼쪽 절반에 진한 초록(주소), 오른쪽 절반에 연한 초록(설명)
+    const count = (x0, x1, test) => { const d = bx.getImageData(x0, H, x1 - x0, b.height - H).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (test(d[i], d[i + 1], d[i + 2])) n++; return n; };
+    const dark = (r, g, bl) => r < 90 && g > 70 && g < 130 && bl < 110 && g > r + 25;
+    const soft = (r, g, bl) => r < 150 && g < 180 && g > r + 15 && !(r === 226 && g === 238);
+    return { aw: a.width, ah: a.height, bw: b.width, bh: b.height, diff, band, bandNone, bg: [px(1, H + 1), px(W - 2, b.height - 2)],
+      darkL: count(0, Math.floor(W / 2), dark), darkR: count(Math.ceil(W / 2), W, dark), softR: count(Math.ceil(W / 2), W, soft), expectH: Math.max(28, Math.round(W * 0.055)) };
+  });
+  let views = 0;
+  // 1) PC 한국어: 기본 켜짐 → 이미지로 저장하면 띠, 끄면 기존 크기, 새로고침 뒤에도 끈 그대로, 키보드로 다시 켬
+  {
+    const t = await openPage('/pattern/');
+    try {
+      const { page } = t;
+      await page.evaluate(HOOK);
+      // 색이 여럿인 도안 (맨 아래 줄·오른쪽 끝 칸까지 칠해서 띠와 맞닿는 곳도 비교)
+      await page.evaluate((R, B) => { pushUndo(); for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) if ((i + j) % 3 === 0) gridData[i * cols + j] = (i % 2 ? R : B); gridData[rows * cols - 1] = R; drawGrid(); saveState(); }, RED, BLUE);
+      let s = await item(page);
+      if (s.checked !== 'true' || !s.on || s.store !== null) fail('처음 온 사람인데 "이미지에 사이트 주소 넣기"가 켜져 있지 않아요 (' + JSON.stringify(s) + ')');
+      if (s.role !== 'menuitemcheckbox' || s.label !== '이미지에 사이트 주소 넣기') fail('체크 항목의 역할·문구가 달라요 (' + s.role + ', ' + s.label + ')');
+      const r = await compare(page);
+      if (r.bandNone) fail('renderExport()를 옵션 없이 부르면 띠가 없어야 해요');
+      if (r.bw !== r.aw || r.bh !== r.ah + r.expectH) fail(`띠를 켜면 폭은 같고 높이만 띠(${r.expectH}px)만큼 늘어야 해요 (끔 ${r.aw}×${r.ah}, 켬 ${r.bw}×${r.bh})`);
+      if (r.diff) fail(`띠를 켰을 때 도안 영역 픽셀이 끈 것과 달라요 (${r.diff}곳)`);
+      if (!r.bg.every(c => c === '226,238,232')) fail('띠 바탕색이 #E2EEE8이 아니에요 (' + r.bg + ')');
+      if (!r.band || r.band.url !== 'crochetalpha.com' || r.band.desc !== '무료 코바늘 도안 만들기') fail('띠 문구가 달라요 (' + JSON.stringify(r.band) + ')');
+      if (r.darkL < 40 || r.darkR > r.darkL / 4) fail(`띠 왼쪽에 진한 초록 주소 글씨가 보이지 않아요 (왼쪽 ${r.darkL}, 오른쪽 ${r.darkR})`);
+      if (r.softR < 20) fail(`띠 오른쪽에 설명 글씨가 보이지 않아요 (${r.softR})`);
+      if (r.band && (r.band.pad !== 16 || r.band.urlPx !== Math.round(r.band.h * 0.42))) fail('띠 좌우 여백이 그림 여백(16px)과 다르거나 글씨가 띠 높이에 비례하지 않아요 (' + JSON.stringify(r.band) + ')');
+      // 저장 메뉴의 "이미지로 저장" = 켬
+      await page.click('#qbSave'); await sleep(150);
+      await page.click('#qbSaveMenu .qb-mi[data-click="saveImgBtn"]'); await sleep(200);
+      let f = await lastSaved(page, 1);
+      if (!f || f.w !== r.bw || f.h !== r.bh) fail('켠 상태에서 이미지로 저장한 PNG에 띠가 없어요 (' + JSON.stringify(f) + ', 기대 ' + r.bw + '×' + r.bh + ')');
+      // 마우스로 끄기: 메뉴는 열린 채, 저장값 '0'
+      await page.click('#qbSave'); await sleep(150);
+      await page.click('#qbUrlItem'); await sleep(150);
+      s = await item(page);
+      if (s.checked !== 'false' || s.on || s.store !== '0') fail('체크 항목을 눌렀는데 꺼지지 않았어요 (' + JSON.stringify(s) + ')');
+      if (!s.open) fail('체크 항목을 누르면 저장 메뉴가 열린 채로 있어야 해요');
+      await page.click('#qbSaveMenu .qb-mi[data-click="saveImgBtn"]'); await sleep(200);
+      f = await lastSaved(page, 2);
+      if (!f || f.w !== r.aw || f.h !== r.ah) fail('끈 상태에서 저장한 PNG가 기존 크기가 아니에요 (' + JSON.stringify(f) + ', 기대 ' + r.aw + '×' + r.ah + ')');
+      // 새로고침 뒤에도 꺼짐
+      await page.reload({ waitUntil: 'networkidle0' }); await sleep(300);
+      await page.evaluate(HOOK);
+      s = await item(page);
+      if (s.on || s.store !== '0') fail('새로고침 뒤에 끈 선택이 사라졌어요 (' + JSON.stringify(s) + ')');
+      await page.click('#qbSave'); await sleep(150);
+      if ((await item(page)).checked !== 'false') fail('새로고침 뒤 저장 메뉴의 체크가 꺼짐으로 보이지 않아요');
+      const sb = await page.evaluate(() => { const r = document.querySelector('.statusbar').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+      await page.mouse.click(sb.x, sb.y); await sleep(150); // 메뉴 바깥(아래 상태 막대)을 눌러 닫음
+      // 키보드: Enter로 열고 ↑(마지막 = 체크 항목) → Enter로 켬, 메뉴는 열린 채, 포커스 그대로 → Esc로 닫힘
+      await page.focus('#qbSave'); await press(page, 'Enter'); await press(page, 'ArrowUp');
+      if (await page.evaluate(() => document.activeElement.id) !== 'qbUrlItem') fail('키보드로 저장 메뉴의 체크 항목에 갈 수 없어요');
+      await press(page, 'Enter');
+      s = await item(page);
+      if (s.checked !== 'true' || s.store !== '1' || !s.open || await page.evaluate(() => document.activeElement.id) !== 'qbUrlItem') fail('키보드 Enter로 체크 항목을 켜지 못했거나 메뉴·포커스가 바뀌었어요 (' + JSON.stringify(s) + ')');
+      await press(page, ' ');
+      if ((await item(page)).checked !== 'false') fail('키보드 Space로 체크 항목이 꺼지지 않아요');
+      await press(page, ' ');
+      await press(page, 'Escape');
+      if (!(await page.evaluate(() => document.getElementById('qbSaveMenu').hidden && document.activeElement.id === 'qbSave'))) fail('체크 항목에서 Esc를 누르면 메뉴가 닫히고 저장 버튼으로 돌아가야 해요');
+      // 방안뜨기 PNG: 함수 기본값은 띠 없음, 켜면 아래 띠, 위쪽 그림 픽셀은 같음
+      await clickId(page, 'filetBtn'); await sleep(400);
+      const fr = await page.evaluate(() => new Promise(res => makeFiletImage(async a => {
+        const ma = filetLastImage;
+        makeFiletImage(async b => {
+          const mb = filetLastImage;
+          const ia = await createImageBitmap(a), ib = await createImageBitmap(b);
+          const draw = im => { const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0); return x; };
+          const xa = draw(ia), xb = draw(ib);
+          const da = xa.getImageData(0, 0, ia.width, ia.height).data, db = xb.getImageData(0, 0, ib.width, ia.height).data;
+          let diff = 0; for (let i = 0; i < da.length; i++) if (da[i] !== db[i]) diff++;
+          res({ a: [ia.width, ia.height], b: [ib.width, ib.height], bandA: ma.band, band: mb.band, diff, bg: [...xb.getImageData(1, ib.height - 2, 1, 1).data].slice(0, 3).join() });
+        }, { url: true });
+      })));
+      if (fr.bandA) fail('makeFiletImage를 옵션 없이 부르면 띠가 없어야 해요');
+      if (!fr.band || fr.b[0] !== fr.a[0] || fr.b[1] !== fr.a[1] + fr.band.h || fr.band.h !== Math.max(28, Math.round(fr.a[0] * 0.055))) fail('방안뜨기 PNG에 띠를 켜면 아래로 띠만큼만 늘어야 해요 (' + JSON.stringify(fr) + ')');
+      if (fr.diff) fail(`방안뜨기 PNG의 그림 영역이 띠를 켰을 때 달라져요 (${fr.diff}곳)`);
+      if (fr.bg !== '226,238,232' || !fr.band || fr.band.url !== 'crochetalpha.com' || fr.band.desc !== '무료 코바늘 도안 만들기') fail('방안뜨기 PNG 띠 색·문구가 달라요 (' + JSON.stringify(fr.band) + ', ' + fr.bg + ')');
+      // 방안뜨기 탭의 이미지 저장 버튼도 저장 메뉴의 선택을 따름 (지금 켜짐)
+      const n0 = (await page.evaluate(() => window.__saved.length));
+      await clickId(page, 'filetSaveImgBtn');
+      f = await lastSaved(page, n0 + 1);
+      if (!f || f.h !== fr.b[1]) fail('방안뜨기 탭의 이미지 저장이 사이트 주소 선택(켜짐)을 따르지 않아요 (' + JSON.stringify(f) + ')');
+      t.errors.forEach(e => fail('한국어: ' + e));
+    } finally { await t.close(); }
+  }
+  // 2) 영어: 라벨·띠 문구, 끄면 영어 페이지도 기존 크기
+  {
+    const t = await openPage('/en/pattern/');
+    try {
+      const { page } = t;
+      await page.click('#qbSave'); await sleep(150);
+      const s = await item(page);
+      if (s.label !== 'Add site address to image' || s.checked !== 'true') fail('영어 페이지 체크 항목 문구·기본값이 달라요 (' + s.label + ', ' + s.checked + ')');
+      const r = await compare(page);
+      if (!r.band || r.band.url !== 'crochetalpha.com' || r.band.desc !== 'free crochet chart maker') fail('영어 페이지 띠 문구가 달라요 (' + JSON.stringify(r.band) + ')');
+      if (r.diff || r.bh !== r.ah + r.expectH) fail('영어 페이지에서 띠를 켰을 때 도안 영역이 바뀌거나 높이가 달라요');
+      t.errors.forEach(e => fail('영어: ' + e));
+    } finally { await t.close(); }
+  }
+  // 3) 휴대폰·좁은 화면: 메뉴가 화면 안, 체크 항목 글자가 잘리지 않음, 가로 넘침 없음 (한·영 × 라이트·다크)
+  for (const p of ['/pattern/', '/en/pattern/']) for (const w of [320, 360, 412]) for (const scheme of ['light', 'dark']) {
+    const t = await openPage(p, { width: w, height: 760, mobile: true });
+    try {
+      const { page } = t;
+      await page.emulateMediaFeatures([{ name: 'prefers-color-scheme', value: scheme }]); await sleep(100);
+      await page.click('#qbSave'); await sleep(200);
+      const m = await page.evaluate(() => {
+        const menu = document.getElementById('qbSaveMenu'), r = menu.getBoundingClientRect(), it = document.getElementById('qbUrlItem'), ir = it.getBoundingClientRect(), mt = it.querySelector('.qb-mt');
+        return { open: !menu.hidden, inView: r.left >= 0 && r.right <= document.documentElement.clientWidth && ir.bottom <= innerHeight, cut: mt.scrollWidth > mt.clientWidth + 1 || it.scrollWidth > it.clientWidth + 1, h: Math.round(ir.height), over: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      const L = p + ' ' + w + 'px ' + (scheme === 'dark' ? '어두운' : '밝은') + ' 화면: ';
+      if (!m.open || !m.inView) fail(L + '저장 메뉴(체크 항목 포함)가 화면 밖으로 나가요');
+      if (m.cut) fail(L + '"이미지에 사이트 주소 넣기" 글자가 잘려요');
+      if (m.h < 44) fail(L + '체크 항목이 손가락으로 누르기에 낮아요 (' + m.h + 'px)');
+      if (m.over > 1) fail(L + '가로로 ' + m.over + 'px 넘쳐요');
+      await page.tap('#qbUrlItem'); await sleep(150);
+      if ((await item(page)).checked !== 'false') fail(L + '체크 항목을 눌러도 꺼지지 않아요');
+      views++;
+      t.errors.forEach(e => fail(L + e));
+    } finally { await t.close(); }
+  }
+  note('PC 한·영, 방안뜨기, 휴대폰 ' + views + '가지 화면');
+}, { limitMin: 4 });
 
 /* ---------- 실행 ---------- */
 (async () => {
